@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 const categories = [
   {
@@ -55,6 +56,7 @@ const HomeCategoryGrid = () => {
             key={category.id}
             className={`relative overflow-hidden rounded-xl shadow cursor-pointer hover:opacity-90 transition duration-300 group ${category.colSpan || ""}`}
           >
+          <Link to={`/collection/${category.name.replace(/\s+/g,"+")}/id=${category.id}`}>
             <img
               src={category.image}
               alt={category.name}
@@ -65,6 +67,7 @@ const HomeCategoryGrid = () => {
               <h3 className="text-lg font-semibold">{category.name}</h3>
               <p className="text-sm">{category.subText}</p>
             </div>
+          </Link>
           </div>
         ))}
       </div>

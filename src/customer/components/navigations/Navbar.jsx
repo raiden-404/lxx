@@ -13,6 +13,7 @@ import {
   Transition,
 } from '@headlessui/react'
 import { Bars3Icon, MagnifyingGlassIcon, ShoppingBagIcon, XMarkIcon } from '@heroicons/react/24/outline'
+import { Link } from 'react-router-dom'
 
 const navigation = {
   categories: [
@@ -146,7 +147,7 @@ export default function Navbar() {
   const [activeCategory, setActiveCategory] = useState(null);
 
   return (
-    <div className="bg-white fixed z-30 w-full top-0 left-0">
+    <div className="bg-white sticky z-30 w-full top-0 left-0">
       {/* Mobile menu */}
       <Dialog open={mobileMenuOpen} onClose={setMobileMenuOpen} className="relative z-40 lg:hidden">
         {/* ... (mobile menu content remains exactly the same) */}
@@ -269,9 +270,11 @@ export default function Navbar() {
         </div>
       </Dialog>
 
-      <header className="relative bg-white">
+
+      {/* Monitor Screen */}
+      <header className="relativebg-white">
         <nav aria-label="Top" className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-6">
-          <div className="border-b border-gray-200">
+          <div>
             <div className="flex h-16 items-center">
               <button
                 type="button"
@@ -283,13 +286,13 @@ export default function Navbar() {
 
               {/* Logo */}
               <div className="ml-4 flex lg:ml-0 lg:mr-4">
-                <a href="#">
+                <Link to="/">
                   <img
                     alt=""
                     src="/public/image/ChatGPT Image Jul 15, 2025, 06_08_10 PM.png"
                     className="h-8 w-auto scale-[180%]"
                   />
-                </a>
+                </Link>
               </div>
 
               {/* Flyout menus with hover functionality */}
@@ -396,12 +399,9 @@ export default function Navbar() {
               <div className="ml-auto flex items-center">
                 <div className="hidden lg:flex lg:flex-1 lg:items-center lg:justify-end lg:space-x-6">
                   <a href="#" className="text-sm font-medium text-gray-700 hover:text-gray-800">
-                    Sign in
+                    Log in
                   </a>
                   <span className="h-6 w-px bg-gray-200" />
-                  <a href="#" className="text-sm font-medium text-gray-700 hover:text-gray-800">
-                    Create account
-                  </a>
                 </div>
 
                 <div className="hidden lg:ml-8 lg:flex">
@@ -422,12 +422,12 @@ export default function Navbar() {
                 </div>
 
                 <div className="ml-4 flow-root lg:ml-6">
-                  <a href="#" className="group -m-2 flex items-center p-2">
+                  <Link to="/cart" className="group -m-2 flex items-center p-2">
                     <ShoppingBagIcon
                       className="size-6 shrink-0 text-gray-400 group-hover:text-gray-500"
                     />
                     <span className="ml-2 text-sm font-medium text-gray-700 group-hover:text-gray-800">0</span>
-                  </a>
+                  </Link>
                 </div>
               </div>
             </div>

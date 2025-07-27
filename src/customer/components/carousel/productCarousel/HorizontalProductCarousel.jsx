@@ -1,8 +1,9 @@
-import React, { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/solid";
 import { useSwipeable } from "react-swipeable";
-import HomeCard from "../../categories/HomeCard";
 import { categoryCardData } from "../../../../dummydata/CardData";
+import HomeCard from "../../categories/HomeCard";
+import { Link } from "react-router-dom";
 
 const HorizontalProductCarousel = () => {
   const containerRef = useRef(null);
@@ -84,7 +85,9 @@ const HorizontalProductCarousel = () => {
         >
           {categoryCardData.map((obj) => (
             <div key={obj.id} className="snap-start">
-              <HomeCard cardData={obj} />
+              <Link to={`/category/${obj.title.replace(/\s/g,"+")}/id=${obj.id}`}>
+                <HomeCard cardData={obj} />
+              </Link>
             </div>
           ))}
         </div>

@@ -14,7 +14,6 @@ const HomePage = () => {
         <HomeCategoryGrid />
         <HorizontalProductCarousel />
       </div>
-      <HomeFooter />
     </div>
   );
 };
