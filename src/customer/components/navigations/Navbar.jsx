@@ -259,10 +259,10 @@ export default function Navbar() {
               <a href="#" className="-m-2 flex items-center p-2">
                 <img
                   alt=""
-                  src="https://tailwindcss.com/plus-assets/img/flags/flag-canada.svg"
+                  src="https://static-assets-web.flixcart.com/batman-returns/batman-returns/p/images/Store-9eeae2.svg"
                   className="block h-auto w-5 shrink-0"
                 />
-                <span className="ml-3 block text-base font-medium text-gray-900">CAD</span>
+                <span className="ml-3 block text-base font-medium text-gray-900">Become a Seller</span>
                 <span className="sr-only">, change currency</span>
               </a>
             </div>
@@ -289,7 +289,7 @@ export default function Navbar() {
                 <Link to="/">
                   <img
                     alt=""
-                    src="/public/image/ChatGPT Image Jul 15, 2025, 06_08_10 PM.png"
+                    src="/public/image/lx-logo.png"
                     className="h-8 w-auto scale-[180%]"
                   />
                 </Link>
@@ -398,9 +398,9 @@ export default function Navbar() {
 
               <div className="ml-auto flex items-center">
                 <div className="hidden lg:flex lg:flex-1 lg:items-center lg:justify-end lg:space-x-6">
-                  <a href="#" className="text-sm font-medium text-gray-700 hover:text-gray-800">
+                  <Link to={"/login"} className="text-sm font-medium text-gray-700 hover:text-gray-800">
                     Log in
-                  </a>
+                  </Link>
                   <span className="h-6 w-px bg-gray-200" />
                 </div>
 
@@ -408,10 +408,10 @@ export default function Navbar() {
                   <a href="#" className="flex items-center text-gray-700 hover:text-gray-800">
                     <img
                       alt=""
-                      src="https://tailwindcss.com/plus-assets/img/flags/flag-canada.svg"
+                      src="https://static-assets-web.flixcart.com/batman-returns/batman-returns/p/images/Store-9eeae2.svg"
                       className="block h-auto w-5 shrink-0"
                     />
-                    <span className="ml-3 block text-sm font-medium">CAD</span>
+                    <span className="ml-3 block text-sm font-medium">Become a Seller</span>
                   </a>
                 </div>
 

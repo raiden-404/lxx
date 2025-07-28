@@ -138,7 +138,6 @@ const OrderSummary = ({ subtotal }) => {
 // --- Main Cart Page Component ---
 const CartPage = () => {
   const [cartItems, setCartItems] = useState(initialCartItems);
-
   const handleQuantityChange = (itemId, newQuantity) => {
     if (newQuantity < 1) {
       handleRemoveItem(itemId); // Remove item if quantity becomes 0
@@ -160,13 +159,6 @@ const CartPage = () => {
   return (
     <div className="bg-gray-100 min-h-screen font-sans">
       <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
-        <div className="flex items-center gap-4 mb-6">
-           <a href="#" className="text-indigo-600 hover:text-indigo-800 flex items-center gap-1">
-             <ChevronLeft className="w-5 h-5" />
-             Back to Shop
-           </a>
-        </div>
-
         <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-8">Your Cart</h1>
 
         {cartItems.length === 0 ? (
