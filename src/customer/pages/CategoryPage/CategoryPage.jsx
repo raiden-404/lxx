@@ -6,7 +6,7 @@ import { productData } from "../../../dummydata/BannerData";
 // --- Main App Component ---
 const CategoryPage = () => {
   const [selectedCategory, setSelectedCategory] = useState("tshirts");
-
+  
   return (
     <div className="bg-gray-100 min-h-screen font-sans">
       {/* Changed to flex-row to keep sidebar and main content side-by-side on all screen sizes */}

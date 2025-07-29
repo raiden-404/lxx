@@ -1,4 +1,3 @@
-import React from "react";
 import { Link } from "react-router-dom";
 
 const categories = [
@@ -9,6 +8,10 @@ const categories = [
     image:
       "https://img.freepik.com/free-psd/valentines-love-podium-with-hearts-gifts-isolated-3d-render_47987-12203.jpg?semt=ais_items_boosted&w=740",
     colSpan: "md:col-span-2",
+    category : {
+        name : "T-Shirts",
+        key : "t-shirt"
+      }
   },
   {
     id: 2,
@@ -16,6 +19,10 @@ const categories = [
     subText: "Different Products",
     image:
       "https://images.meesho.com/images/products/468555631/jsumm_512.webp",
+    category : {
+        name : "Shirts",
+        key : "shirts"
+      }
   },
   {
     id: 3,
@@ -23,6 +30,10 @@ const categories = [
     subText: "Your Kids Love this",
     image:
       "https://img.freepik.com/free-vector/hand-drawn-notebook-label-collection_23-2149834116.jpg",
+    category : {
+        name : "Shoes",
+        key : "shoes"
+      }
   },
   {
     id: 4,
@@ -30,6 +41,10 @@ const categories = [
     subText: "Best Love Gifts",
     image:
       "https://www.onlinedelivery.in/images/detailed/36/Bringing_the_garden_to_you__1__7ubi-q5.png",
+    category : {
+        name : "Love",
+        key : "love"
+      }
   },
   {
     id: 5,
@@ -37,6 +52,10 @@ const categories = [
     subText: "All love for your Kitchen",
     image:
       "https://images.woodenstreet.de/image/cache/data/Purezento/white-and-blue-handpainted-ceramic-tea-cup-set-of-4/P-2-810x702.jpg",
+    category : {
+        name : "Mugs",
+        key : "mugs"
+      }
   },
 ];
 
@@ -56,7 +75,7 @@ const HomeCategoryGrid = () => {
             key={category.id}
             className={`relative overflow-hidden rounded-xl shadow cursor-pointer hover:opacity-90 transition duration-300 group ${category.colSpan || ""}`}
           >
-          <Link to={`/collection/${category.name.replace(/\s+/g,"+")}/id=${category.id}`}>
+          <Link to={`/collection/${category.name.replace(/\s+/g,"+")}/id=${category.id}/${category.category.name.replace(/\s+/g,"+")}/${category.category.key}`}>
             <img
               src={category.image}
               alt={category.name}

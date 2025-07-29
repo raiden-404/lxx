@@ -6,6 +6,8 @@ import CartPage from "../customer/pages/CartPage/CartPage"
 import ProductListPage from "../customer/pages/ProductPage/ProductListPage"
 import CategoryPage from "../customer/pages/CategoryPage/CategoryPage";
 import LoginPage from "../customer/pages/LoginPage/LoginPage";
+import SearchBar from "../customer/components/navigations/SearchBar";
+import Jwt from "../customer/pages/Jwt";
 
 const Router = createBrowserRouter([
     {
@@ -17,7 +19,7 @@ const Router = createBrowserRouter([
                 element : <HomePage />
             },
             {
-                path : "/collection/:name/:id",
+                path : "/collection/:collection/:collectionId/:category/:categoryId",
                 element : <CategoryPage />
             },
             {
@@ -25,7 +27,7 @@ const Router = createBrowserRouter([
                 element : <ProductPage />
             },
             {
-                path : "/category/:name/:id",
+                path : "/category/:category/:categoryId",
                 element : <ProductListPage />
             },
             {
@@ -33,8 +35,16 @@ const Router = createBrowserRouter([
                 element : <CartPage />
             },
             {
-                path : "login",
+                path : "/login",
                 element : <LoginPage />
+            },
+            {
+                path : "/login-success",
+                element : <CartPage />
+            },
+            {
+                path : "verify/redirect",
+                element : <Jwt />
             }
         ]
     }

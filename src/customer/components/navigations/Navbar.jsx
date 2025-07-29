@@ -14,6 +14,7 @@ import {
 } from '@headlessui/react'
 import { Bars3Icon, MagnifyingGlassIcon, ShoppingBagIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import { Link } from 'react-router-dom'
+import SearchBar from './SearchBar'
 
 const navigation = {
   categories: [
@@ -145,6 +146,7 @@ const navigation = {
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState(null);
+  const [showSearch, setShowSearch] = useState(false);
 
   return (
     <div className="bg-white sticky z-30 w-full top-0 left-0">
@@ -272,13 +274,13 @@ export default function Navbar() {
 
 
       {/* Monitor Screen */}
-      <header className="relativebg-white">
+      <header className="relative bg-white">
         <nav aria-label="Top" className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-6">
           <div>
             <div className="flex h-16 items-center">
               <button
                 type="button"
-                onClick={() => setMobileMenuOpen(true)}
+                onClick={() => (setMobileMenuOpen(true),setShowSearch(false))}
                 className="relative rounded-md bg-white p-2 text-gray-400 lg:hidden"
               >
                 <Bars3Icon className="size-6" />
@@ -286,10 +288,10 @@ export default function Navbar() {
 
               {/* Logo */}
               <div className="ml-4 flex lg:ml-0 lg:mr-4">
-                <Link to="/">
+                <Link to="/" onClick={() => setShowSearch(false)}>
                   <img
                     alt=""
-                    src="/public/image/lx-logo.png"
+                    src="https://storage.googleapis.com/lx_images/frontend_statics/image/lx-logo.png"
                     className="h-8 w-auto scale-[180%]"
                   />
                 </Link>
@@ -398,31 +400,31 @@ export default function Navbar() {
 
               <div className="ml-auto flex items-center">
                 <div className="hidden lg:flex lg:flex-1 lg:items-center lg:justify-end lg:space-x-6">
-                  <Link to={"/login"} className="text-sm font-medium text-gray-700 hover:text-gray-800">
+                  <Link to={"/login"} onClick={() => setShowSearch(false)} className="text-sm font-medium text-gray-700 hover:text-gray-800">
                     Log in
                   </Link>
                   <span className="h-6 w-px bg-gray-200" />
                 </div>
 
                 <div className="hidden lg:ml-8 lg:flex">
-                  <a href="#" className="flex items-center text-gray-700 hover:text-gray-800">
+                  <Link to="/seller" onClick={() => setShowSearch(false)} className="flex items-center text-gray-700 hover:text-gray-800">
                     <img
                       alt=""
                       src="https://static-assets-web.flixcart.com/batman-returns/batman-returns/p/images/Store-9eeae2.svg"
                       className="block h-auto w-5 shrink-0"
                     />
                     <span className="ml-3 block text-sm font-medium">Become a Seller</span>
-                  </a>
+                  </Link>
                 </div>
 
                 <div className="flex lg:ml-6">
-                  <a href="#" className="p-2 text-gray-400 hover:text-gray-500">
+                  <a onClick={() => setShowSearch(!showSearch)} className="p-2 text-gray-400 hover:text-gray-500">
                     <MagnifyingGlassIcon className="size-6" />
                   </a>
                 </div>
 
                 <div className="ml-4 flow-root lg:ml-6">
-                  <Link to="/cart" className="group -m-2 flex items-center p-2">
+                  <Link to="/cart" onClick={() => setShowSearch(false)} className="group -m-2 flex items-center p-2">
                     <ShoppingBagIcon
                       className="size-6 shrink-0 text-gray-400 group-hover:text-gray-500"
                     />
@@ -433,6 +435,9 @@ export default function Navbar() {
             </div>
           </div>
         </nav>
+        {
+          showSearch ? <SearchBar setShowSearch={setShowSearch} /> : <></>
+        }
       </header>
     </div>
   )
