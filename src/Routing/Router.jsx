@@ -6,8 +6,8 @@ import CartPage from "../customer/pages/CartPage/CartPage"
 import ProductListPage from "../customer/pages/ProductPage/ProductListPage"
 import CategoryPage from "../customer/pages/CategoryPage/CategoryPage";
 import LoginPage from "../customer/pages/LoginPage/LoginPage";
-import SearchBar from "../customer/components/navigations/SearchBar";
 import Jwt from "../customer/pages/Jwt";
+import TokenCheck from "../customer/pages/TokenCheck";
 
 const Router = createBrowserRouter([
     {
@@ -45,6 +45,10 @@ const Router = createBrowserRouter([
             {
                 path : "verify/redirect",
                 element : <Jwt />
+            },
+            {
+                path : "checktoken",
+                element : <TokenCheck />
             }
         ]
     }

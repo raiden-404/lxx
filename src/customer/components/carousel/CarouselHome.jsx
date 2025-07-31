@@ -1,10 +1,30 @@
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 import { Carousel } from 'react-responsive-carousel';
-import { homeMainBanner } from "../../../dummydata/BannerData";
+import { useEffect, useState } from "react";
 
 const CarouselHome = () => {
+
+    //store all the data of banners
+    const [banners, setBanners] = useState(null);
+
+    //to fetch data in last
+    useEffect(() => {
+        fetchData();//call the method to fetch data in useEffect
+    },[]);//ensure it runs only once
+
+    //This function used to fetch Home Banner data from backend
+    const fetchData = async () => {
+            const response = await fetch("http://localhost:8080/public/get-home-banners");
+            const result = await response.json();
+            setBanners(result);
+            console.log(banners);
+        }
+
     return (
         <div className="w-full h-[500px] overflow-hidden relative">
+            {
+                banners == null ? <></> : 
+            
             <Carousel 
                 dynamicHeight={false}
                 emulateTouch={true}
@@ -16,8 +36,8 @@ const CarouselHome = () => {
                 showStatus={false}
                 labels={{leftArrow: 'previous slide / item', rightArrow: 'next slide / item', item: 'slide item'}}
             >
-                {
-                    homeMainBanner.map((banner) => (<div className="relative">
+                { 
+                    banners.map((banner) => (<div className="relative">
                     <img 
                         src={banner.image} 
                         alt="Fashion Sale" 
@@ -32,12 +52,13 @@ const CarouselHome = () => {
                     ></div>
                     <div className="absolute left-6 bottom-8 z-20 text-white max-w-[60%]">
                         <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-2">{banner.title}</h2>
-                        <p className="text-lg md:text-xl">{banner.discription}</p>
+                        <p className="text-lg md:text-xl">{banner.description}</p>
                     </div>
                 </div>))
                 }
                 
             </Carousel>
+}
         </div>
     );
 };

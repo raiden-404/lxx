@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Mail, Phone, LoaderCircle, ArrowLeft } from "lucide-react";
+import Cookies from "js-cookies";
 
 // You can replace this with your actual logo
 const Logo = () => (
@@ -124,9 +125,8 @@ const LoginPage = () => {
         setError("Invalid OTP. Please try again.");
     } else {
         // TODO: Redirect to dashboard or update app state
-      console.log("Login successful!");
-      console.log("Token = "+ result);
-      window.location.href="http://localhost:3000"  
+        Cookies.set("jwtToken",result);
+        window.location.href="http://localhost:3000"  
     }
     setIsLoading(false);
   };

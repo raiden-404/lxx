@@ -1,4 +1,7 @@
-import React, { useState } from 'react';
+
+
+import { useSelector, useDispatch } from "react-redux";
+import { changeQuantity, removeItem } from "../../../features/cart/cartSlice";
 
 // --- Icon Components (Self-contained SVGs) ---
 const Trash2 = ({ className }) => (
@@ -58,18 +61,7 @@ const ShoppingCart = ({ className }) => (
 );
 
 
-// --- Mock Data for Cart ---
-const initialCartItems = [
-  { id: 1, title: 'Zenith Wireless Headphones', price: 7999.00, image: 'https://placehold.co/300x300/f0f0f0/333?text=Headphones', quantity: 1, color: 'Black' },
-  { id: 2, title: 'Aura Smartwatch', price: 14999.00, image: 'https://placehold.co/300x300/e8e8e8/333?text=Smartwatch', quantity: 1, color: 'Silver' },
-  { id: 3, title: 'Nebula Portable Speaker', price: 5999.00, image: 'https://placehold.co/300x300/e0e0e0/333?text=Speaker', quantity: 2, color: 'Gray' },
-  { id: 4, title: 'Nebula Portable Speaker', price: 5999.00, image: 'https://placehold.co/300x300/e0e0e0/333?text=Speaker', quantity: 2, color: 'Gray' },
-  { id: 5, title: 'Nebula Portable Speaker', price: 5999.00, image: 'https://placehold.co/300x300/e0e0e0/333?text=Speaker', quantity: 2, color: 'Gray' },
-  { id: 6, title: 'Nebula Portable Speaker', price: 5999.00, image: 'https://placehold.co/300x300/e0e0e0/333?text=Speaker', quantity: 2, color: 'Gray' },
-  { id: 7, title: 'Nebula Portable Speaker', price: 5999.00, image: 'https://placehold.co/300x300/e0e0e0/333?text=Speaker', quantity: 2, color: 'Gray' },
-  { id: 8, title: 'Nebula Portable Speaker', price: 5999.00, image: 'https://placehold.co/300x300/e0e0e0/333?text=Speaker', quantity: 2, color: 'Gray' },
-  { id: 9, title: 'Nebula Portable Speaker', price: 5999.00, image: 'https://placehold.co/300x300/e0e0e0/333?text=Speaker', quantity: 2, color: 'Gray' },
-];
+
 
 // --- Reusable Components ---
 const CartItem = ({ item, onQuantityChange, onRemove }) => {
@@ -137,21 +129,23 @@ const OrderSummary = ({ subtotal }) => {
 
 // --- Main Cart Page Component ---
 const CartPage = () => {
-  const [cartItems, setCartItems] = useState(initialCartItems);
+
+  const cartItems = useSelector((state) => state.cart.items);
+
+  const dispatch = useDispatch();
+
   const handleQuantityChange = (itemId, newQuantity) => {
     if (newQuantity < 1) {
-      handleRemoveItem(itemId); // Remove item if quantity becomes 0
+      dispatch(removeItem(itemId)); // Remove item if quantity becomes 0
       return;
     }
-    setCartItems(
-      cartItems.map(item =>
-        item.id === itemId ? { ...item, quantity: newQuantity } : item
-      )
-    );
+    
+    dispatch(changeQuantity({id:itemId, newQuantity}));
+
   };
 
   const handleRemoveItem = (itemId) => {
-    setCartItems(cartItems.filter(item => item.id !== itemId));
+    dispatch(removeItem(itemId));
   };
 
   const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);

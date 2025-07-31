@@ -1,32 +1,3 @@
-export const homeMainBanner = [
-    {
-        id: "1",
-        image: "https://img.freepik.com/free-psd/horizontal-banner-online-fashion-sale_23-2148585404.jpg?semt=ais_hybrid&w=740",
-        title: "Summer Collection",
-        discription: "Up to 50% off on selected items",
-    },
-    {
-        id: "2",
-        image: "https://pixelixe.com/blog/images/250/e-commerce-banner-strategy.jpg",
-        title: "New Arrivals",
-        discription: "Discover our latest products"
-    },
-    {
-        id: "3",
-        image: "https://previews.123rf.com/images/varijanta/varijanta1601/varijanta160100046/51310252-thin-line-flat-design-banner-of-online-shopping-e-commerce-m-commerce-modern-vector-illustration.jpg",
-        title: "Flash Sale",
-        discription: "Limited time offers - Shop now!"
-    },
-    {
-        id: "4",
-        image: "https://i.ytimg.com/vi/f64GdOxJjPE/maxresdefault.jpg",
-        title: "Exclusive Deals",
-        discription: "Special offers for our members"
-    },
-    
-]
-
-
 export const productData = [
     {
         productId: "101",
