@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Mail, Phone, LoaderCircle, ArrowLeft } from "lucide-react";
-import Cookies from "js-cookies";
+import Cookies from "js-cookie";
 
 // You can replace this with your actual logo
 const Logo = () => (

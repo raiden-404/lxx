@@ -28,7 +28,7 @@ const CarouselHome = () => {
             <Carousel 
                 dynamicHeight={false}
                 emulateTouch={true}
-                interval={2000}
+                interval={3000}
                 autoPlay={true}
                 infiniteLoop={true}
                 stopOnHover={false}

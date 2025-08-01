@@ -8,6 +8,8 @@ import CategoryPage from "../customer/pages/CategoryPage/CategoryPage";
 import LoginPage from "../customer/pages/LoginPage/LoginPage";
 import Jwt from "../customer/pages/Jwt";
 import TokenCheck from "../customer/pages/TokenCheck";
+import AddProduct from "../customer/pages/Admin/AddProduct/AddProduct";
+import AdminLayout from "../Layouts/AdminLayout";
 
 const Router = createBrowserRouter([
     {
@@ -49,6 +51,16 @@ const Router = createBrowserRouter([
             {
                 path : "checktoken",
                 element : <TokenCheck />
+            }
+        ]
+    },
+    {
+        path : "/seller",
+        element : <AdminLayout />,
+        children : [
+            {
+                index: true,
+                element : <AddProduct />
             }
         ]
     }
