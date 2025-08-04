@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import {
   Dialog,
   DialogBackdrop,
@@ -20,6 +20,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { Link } from "react-router-dom";
 import SearchBar from "./SearchBar";
+import Cookies from "js-cookie";
 
 const navigation = {
   categories: [
@@ -139,6 +140,34 @@ export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState(null);
   const [showSearch, setShowSearch] = useState(false);
+  const [user, setUser] = useState("Log in");
+
+  useEffect(() => {
+    //Check is user token is present(is logged in) if yes then retrieve its data
+    const jwtToken = Cookies.get("jwtToken");
+    if(jwtToken) {
+      const apiUri = "http://localhost:8080/profile/get-data";
+      try{
+      const fetchUser = async () => {
+        //Use fetch function - pass method type, header
+        //Get promise and store
+        const response = await fetch(apiUri,{
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${jwtToken}`,
+          },
+        });
+        //Change response into json
+        const result = await response.json();
+        setUser(result);
+      }
+      //Call the fetchUser function
+      fetchUser();
+    } catch (error) {
+      console.error("Failed to fetch user data",error);
+    }
+  }
+  },[]);
 
   return (
     <div className="bg-white sticky z-30 w-full top-0 left-0">
@@ -441,7 +470,7 @@ export default function Navbar() {
                     onClick={() => setShowSearch(false)}
                     className="text-sm font-medium text-gray-700 hover:text-gray-800"
                   >
-                    Log in
+                    {user}
                   </Link>
                   <span className="h-6 w-px bg-gray-200" />
                 </div>

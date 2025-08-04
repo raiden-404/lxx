@@ -21,7 +21,7 @@ const Router = createBrowserRouter([
                 element : <HomePage />
             },
             {
-                path : "/collection/:collection/:collectionId/all",
+                path : "/collection/:collection/:category",
                 element : <CategoryPage />
             },
             {

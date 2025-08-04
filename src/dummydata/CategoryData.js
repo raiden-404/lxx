@@ -1,4 +1,5 @@
 export const categories = [
+  { key: 'all', name: 'All', imageUrl: 'https://placehold.co/100x100/c4b5fd/4c1d95?text=Tees' },
   { key: 'tshirts', name: 'T-Shirts', imageUrl: 'https://placehold.co/100x100/c4b5fd/4c1d95?text=Tees' },
   { key: 'shirts', name: 'Shirts', imageUrl: 'https://placehold.co/100x100/A5B4FC/312E81?text=Shirts' },
   { key: 'shoes', name: 'Shoes', imageUrl: 'https://placehold.co/100x100/F9A8D4/831843?text=Shoes' },

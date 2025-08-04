@@ -14,7 +14,6 @@ const HomeCategoryGrid = () => {
     const response = await fetch(apiUri);
     const result = await response.json();
     setCategories(result);
-    console.log(result)
   }
 
   return (
@@ -29,7 +28,7 @@ const HomeCategoryGrid = () => {
             key={category.id}
             className={`relative overflow-hidden rounded-xl shadow cursor-pointer hover:opacity-90 transition duration-300 group ${category.value === 'new-arrivals' ? 'md:col-span-2' : ''}`}
           >
-          <Link to={`/collection/${category.value.replace(/\s+/g,"+")}/${category.id}/all`}>
+          <Link to={`/collection/${category.value.replace(/\s+/g,"+")}/All`}>
             <img
               src={category.image}
               alt={category.name}

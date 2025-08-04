@@ -1,12 +1,42 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import CategorySidebar from "../../components/Sidebar/CategorySidebar";
 import ProductCard from "../../components/Product/ProductCard";
-import { productData } from "../../../dummydata/BannerData";
+import { useParams } from "react-router-dom";
 
 // --- Main App Component ---
 const CategoryPage = () => {
-  const [selectedCategory, setSelectedCategory] = useState("tshirts");
-  
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const {collection, category} = useParams();
+  const [productData ,setProductData] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+    //basic end point uri
+    const baseUri = "http://localhost:8080/public/get-products-by-slug-category";
+
+    //Data need to send
+    const params = {
+      category: category,
+      slug: collection,
+    };
+
+    //Use querry uri to send variables to fetch data based on that
+    const queryUri = new URLSearchParams(params).toString();
+
+    //Generate full URL by combining baseUri and Query Uri
+    const fullUri = `${baseUri}?${queryUri}`;
+
+    //fetch data
+    const response = await fetch(fullUri);
+
+    const result = await response.json();
+    
+    setProductData(result);
+
+  }
+    fetchData();
+  },[collection,category]);
+
   return (
     <div className="bg-gray-100 min-h-screen font-sans">
       {/* Changed to flex-row to keep sidebar and main content side-by-side on all screen sizes */}
@@ -26,7 +56,7 @@ const CategoryPage = () => {
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
               {productData.map((product) => (
-                <ProductCard key={product.productId} product={product} />
+                <ProductCard key={product.id} product={product} />
               ))}
             </div>
           </section>
