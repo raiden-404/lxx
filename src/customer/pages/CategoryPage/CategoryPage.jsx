@@ -37,11 +37,15 @@ const CategoryPage = () => {
     fetchData();
   },[collection,category]);
 
+  useEffect(() => {
+    console.log(productData);
+  });
+
   return (
     <div className="bg-gray-100 min-h-screen font-sans">
       {/* Changed to flex-row to keep sidebar and main content side-by-side on all screen sizes */}
-      <div className="flex flex-row space-x-4 items-start">
-        <div className="h-[calc(100vh-9.2rem)] rounded-tr-xl rounded-br-xl top-20 sticky flex items-start overflow-scroll">
+      <div className="flex flex-row items-start max-[400px]:flex-col">
+        <div className="h-[calc(100vh-9.2rem)] rounded-tr-xl rounded-br-xl top-20 max-[400px]:top-16 sticky flex items-start overflow-scroll max-[400px]:w-full max-[400px]:h-auto">
           <CategorySidebar
             selectedCategory={selectedCategory}
             setSelectedCategory={setSelectedCategory}

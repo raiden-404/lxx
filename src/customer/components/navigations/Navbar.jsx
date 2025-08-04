@@ -158,7 +158,7 @@ export default function Navbar() {
           },
         });
         //Change response into json
-        const result = await response.json();
+        const result = await response.text();
         setUser(result);
       }
       //Call the fetchUser function
@@ -168,6 +168,10 @@ export default function Navbar() {
     }
   }
   },[]);
+
+  useEffect(() => {
+    console.log(user);
+  })
 
   return (
     <div className="bg-white sticky z-30 w-full top-0 left-0">

@@ -5,7 +5,8 @@ import { useEffect, useState } from "react";
 const CategorySidebar = ({ selectedCategory, setSelectedCategory }) => {
   const {collection, category} = useParams();
   setSelectedCategory(category);
-  const [categories, setCategories] = useState([{categoryName : "All", categorySlug : collection, imageUrl : "https://img.freepik.com/premium-vector/lx-letter-linked-logo-business-company-identity-initial-letter-lx-logo-vector-template_754537-800.jpg"}]);
+  const [categories, setCategories] = useState([]);
+  const allData = {categoryName : "All", categorySlug : collection, imageUrl : "https://img.freepik.com/premium-vector/lx-letter-linked-logo-business-company-identity-initial-letter-lx-logo-vector-template_754537-800.jpg"};
   useEffect(() => {
     //Calling fetch funtion here
     fetchData();
@@ -35,15 +36,18 @@ const CategorySidebar = ({ selectedCategory, setSelectedCategory }) => {
 
     //Change into result
     const result = await response.json();
-    setCategories(prevItem => [...prevItem, ...result]);
+
+    const finalResult = [allData, ...result];
+
+    setCategories(finalResult);
   }
 
   return (
     // Use responsive widths: narrow on mobile, wider on larger screens.
-    <aside className="w-20 sm:w-24 md:w-28 lg:w-40 flex-shrink-0 bg-white shadow-md pt-3 h-fit">
+    <div className="w-auto flex-shrink-0 bg-white shadow-md pt-3 max-[400px]:pt-1 h-fit max-[400px]:w-auto max-[400px]:h-auto max-[400px]:gap-4">
       <h2 className="text-lg font-bold my-4 text-gray-800 text-center sr-only lg:not-sr-only">Categories</h2>
       <nav>
-        <ul className="space-y-2 p-2">
+        <ul className="space-y-2 max-[400px]:space-y-0 max-[400px]:flex max-[400px]:flex-row max-[400px]:gap-2 p-2 px-4">
           {categories.map((categ) => {
             const isSelected = selectedCategory === categ.categoryName;
             return (
@@ -51,7 +55,7 @@ const CategorySidebar = ({ selectedCategory, setSelectedCategory }) => {
               <li key={categ.categoryName}>
                 <button
                   onClick={() => setSelectedCategory(categ.categoryName)}
-                  className={`w-full flex flex-col items-center p-2 rounded-lg transition-all duration-200 ease-in-out ${
+                  className={`w-full max-[400px]:w-auto h-full flex flex-col items-center p-2 rounded-lg transition-all duration-200 ease-in-out ${
                     isSelected
                       ? 'bg-pink-200'
                       : 'hover:bg-pink-100'
@@ -68,7 +72,7 @@ const CategorySidebar = ({ selectedCategory, setSelectedCategory }) => {
           })}
         </ul>
       </nav>
-    </aside>
+    </div>
   );
 };
 export default CategorySidebar;
