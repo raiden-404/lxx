@@ -9,7 +9,7 @@ const Jwt = () => {
   
   useEffect(() => {
     if(token) {
-        Cookies.set("jwtToken",token);
+        Cookies.set("jwtToken",token,{expires: 7});
     }
     setTimeout(()=> {
         navigate("/");

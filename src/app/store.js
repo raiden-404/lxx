@@ -1,5 +1,6 @@
 import { configureStore } from "@reduxjs/toolkit";
 import cartReducer from "../features/cart/cartSlice"
+import userReducer from "../features/user/userSlice"
 
 export default configureStore({
     reducer: {
@@ -7,5 +8,6 @@ export default configureStore({
         // The key 'cart' determines that our cart state will be accessible as `state.cart`
         // The value `cartReducer` is the function that will manage this part of the state.
         cart: cartReducer,
+        user: userReducer,
     },
 });

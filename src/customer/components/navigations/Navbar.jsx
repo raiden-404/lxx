@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useState } from "react";
 import {
   Dialog,
   DialogBackdrop,
@@ -20,7 +20,8 @@ import {
 } from "@heroicons/react/24/outline";
 import { Link } from "react-router-dom";
 import SearchBar from "./SearchBar";
-import Cookies from "js-cookie";
+import { useSelector } from "react-redux";
+import { ChevronDown } from "lucide-react";
 
 const navigation = {
   categories: [
@@ -140,38 +141,8 @@ export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState(null);
   const [showSearch, setShowSearch] = useState(false);
-  const [user, setUser] = useState("Log in");
-
-  useEffect(() => {
-    //Check is user token is present(is logged in) if yes then retrieve its data
-    const jwtToken = Cookies.get("jwtToken");
-    if(jwtToken) {
-      const apiUri = "http://localhost:8080/profile/get-data";
-      try{
-      const fetchUser = async () => {
-        //Use fetch function - pass method type, header
-        //Get promise and store
-        const response = await fetch(apiUri,{
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${jwtToken}`,
-          },
-        });
-        //Change response into json
-        const result = await response.text();
-        setUser(result);
-      }
-      //Call the fetchUser function
-      fetchUser();
-    } catch (error) {
-      console.error("Failed to fetch user data",error);
-    }
-  }
-  },[]);
-
-  useEffect(() => {
-    console.log(user);
-  })
+  const user = useSelector((state) => state.user.items);
+  console.log(user);
 
   return (
     <div className="bg-white sticky z-30 w-full top-0 left-0">
@@ -468,13 +439,19 @@ export default function Navbar() {
               </div>
 
               <div className="ml-auto flex items-center">
-                <div className="hidden lg:flex lg:flex-1 lg:items-center lg:justify-end lg:space-x-6">
+                {/* User-login Button */}
+                <div className="hidden lg:flex lg:flex-1 lg:items-center lg:justify-end ">
                   <Link
                     to={"/login"}
                     onClick={() => setShowSearch(false)}
-                    className="text-sm font-medium text-gray-700 hover:text-gray-800"
+                    className="text-sm font-medium text-gray-700 hover:text-gray-800 me-3"
                   >
-                    {user}
+                    {user == null ? "Login" :
+                     <div className="flex max-w-64 items-center rounded-3xl p-1 gap-2 hover:border-2 border-2 border-white hover:border-gray-300 hover:bg-gray-100">
+                        <div className="overflow-hidden h-7 w-7 rounded-full"><img src={user.picture} alt="" /></div>
+                        <div><Link to="/profile">{user.fullName}</Link></div>
+                        <div className="pe-1"><Link><ChevronDown size={20} /></Link></div>
+                      </div>}
                   </Link>
                   <span className="h-6 w-px bg-gray-200" />
                 </div>

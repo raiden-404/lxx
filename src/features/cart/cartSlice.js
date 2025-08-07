@@ -18,7 +18,7 @@ export const cartSlice = createSlice({
     
     //reducers: these are the functions and only way to update the state
     reducers: {
-        //when can define functions any where else and use here or directly declare here
+        //we can define functions any where else and use here or directly declare here
         //these function is used to handle data change in that slice
         //like we use for cart then there are some operation we have to done like
         //update item and it's quantity or remove any item

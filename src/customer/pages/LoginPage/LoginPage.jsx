@@ -5,11 +5,11 @@ import Cookies from "js-cookie";
 // You can replace this with your actual logo
 const Logo = () => (
   <svg
-    height="32"
-    viewBox="0 0 24 24"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    className="text-pink-600"
+  height="32"
+  viewBox="0 0 24 24"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+  className="text-pink-600"
   >
     <path
       d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
@@ -17,34 +17,34 @@ const Logo = () => (
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
-    />
+      />
   </svg>
 );
 
 // Google Icon Component
 const GoogleIcon = () => (
   <svg
-    className="w-5 h-5"
-    viewBox="0 0 48 48"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
+  className="w-5 h-5"
+  viewBox="0 0 48 48"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
   >
     <path
       d="M47.532 24.552c0-1.656-.144-3.264-.42-4.8H24.012v9.024h13.188c-.564 2.904-2.16 5.4-4.668 7.032v5.856h7.536c4.416-4.08 6.96-10.044 6.96-17.112z"
       fill="#4285F4"
-    />
+      />
     <path
       d="M24.012 48c6.48 0 11.928-2.136 15.9-5.724l-7.536-5.856c-2.16 1.452-4.92 2.316-8.364 2.316-6.42 0-11.856-4.32-13.788-10.152h-7.764v6.036C6.156 41.208 14.46 48 24.012 48z"
       fill="#34A853"
-    />
+      />
     <path
       d="M10.224 28.704c-.384-.948-.6-2.004-.6-3.108s.216-2.16.6-3.108V16.452H2.46C.936 19.428 0 22.956 0 25.6c0 2.64.936 6.168 2.46 9.144l7.764-6.036z"
       fill="#FBBC05"
-    />
+      />
     <path
       d="M24.012 9.48c3.492 0 6.564 1.2 9.024 3.6l6.708-6.708C35.928 2.22 30.492 0 24.012 0 14.46 0 6.156 6.792 2.46 16.452l7.764 6.036C12.156 13.8 17.592 9.48 24.012 9.48z"
       fill="#EA4335"
-    />
+      />
   </svg>
 );
 
@@ -55,12 +55,12 @@ const LoginPage = () => {
   const [otp, setOtp] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-
+  
   const handleSendOtp = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
-
+    
     // Basic validation
     if (loginMethod === "phone" && !/^\d{10}$/.test(identifier)) {
       setError("Please enter a valid 10-digit phone number.");
@@ -94,9 +94,9 @@ const LoginPage = () => {
       const result = await response.text();
       console.log(result);
     }
-
+    
     await new Promise((resolve) => setTimeout(resolve, 1500));
-
+    
     setIsLoading(false);
     setStep("otp");
   };
@@ -105,7 +105,7 @@ const LoginPage = () => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
-
+    
     //Api call - send number and otp and set received jwt token
     const response = await fetch("http://localhost:8080/login/num/otp", {
       method: "POST",
@@ -123,13 +123,19 @@ const LoginPage = () => {
 
     if (result == "Invalid OTP") {
         setError("Invalid OTP. Please try again.");
-    } else {
-        // TODO: Redirect to dashboard or update app state
-        Cookies.set("jwtToken",result);
-        window.location.href="http://localhost:3000"  
-    }
-    setIsLoading(false);
-  };
+      } else {
+        
+        //As Token recevied then store the token in cookies
+        //Then fetch user detail from that token
+        
+        //Store token into cookie
+        Cookies.set("jwtToken",result,{expires: 7});
+
+        //Navigate to Home page for better userExperience
+        window.location.href="/";
+      }
+      setIsLoading(false);
+    };
 
   const toggleLoginMethod = () => {
     setIdentifier("");

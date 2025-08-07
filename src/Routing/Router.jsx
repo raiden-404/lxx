@@ -10,6 +10,7 @@ import Jwt from "../customer/pages/Jwt";
 import TokenCheck from "../customer/pages/TokenCheck";
 import AddProduct from "../customer/pages/Admin/AddProduct/AddProduct";
 import AdminLayout from "../Layouts/AdminLayout";
+import Logout from "../customer/pages/Logout";
 
 const Router = createBrowserRouter([
     {
@@ -51,6 +52,10 @@ const Router = createBrowserRouter([
             {
                 path : "checktoken",
                 element : <TokenCheck />
+            },
+            {
+                path: "logout",
+                element: <Logout />
             }
         ]
     },
