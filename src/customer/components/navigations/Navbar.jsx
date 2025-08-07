@@ -449,8 +449,8 @@ export default function Navbar() {
                     {user == null ? "Login" :
                      <div className="flex max-w-64 items-center rounded-3xl p-1 gap-2 hover:border-2 border-2 border-white hover:border-gray-300 hover:bg-gray-100">
                         <div className="overflow-hidden h-7 w-7 rounded-full"><img src={user.picture} alt="" /></div>
-                        <div><Link to="/profile">{user.fullName}</Link></div>
-                        <div className="pe-1"><Link><ChevronDown size={20} /></Link></div>
+                        <div>{user.fullName}</div>
+                        <div className="pe-1"><ChevronDown size={20} /></div>
                       </div>}
                   </Link>
                   <span className="h-6 w-px bg-gray-200" />

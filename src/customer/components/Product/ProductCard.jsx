@@ -1,7 +1,8 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 const ProductCard = (props) => {
-  const { imageUrl, title, discount, averageRating, reviewCount, sellingPrice } = props.product;
+  const { id, imageUrl, title, discount, averageRating, reviewCount, sellingPrice } = props.product;
   const [quantity, setQuantity] = useState(0);
 
   const preciseRating = Number(averageRating);
@@ -10,7 +11,6 @@ const ProductCard = (props) => {
   const displayHasHalfStar = displayRating % 1 !== 0;
 
   // Generate a unique ID for the linear gradient to prevent conflicts if multiple cards are rendered
-  const gradientId = `half-gradient-${title.replace(/\s+/g, '-').toLowerCase()}`;
 
   return (
     // Updated responsive width classes:
@@ -21,6 +21,7 @@ const ProductCard = (props) => {
     // - xl:max-w-xs for extra-large breakpoints and up
     // - mx-auto centers the card when its width is less than 100% of its container.
     <div className="rounded-lg border mb-2 border-gray-200 hover:bg-gray-100 bg-white p-3 shadow-sm w-full sm:max-w-xs md:max-w-sm lg:max-w-xs xl:max-w-xs mx-auto">
+      <Link to={`/product/${id}`}>
       <div className="h-56 w-full">
         <a href="#">
           {/* Image is already responsive with w-full and h-full */}
@@ -91,10 +92,10 @@ const ProductCard = (props) => {
                 <svg key={i} className={`h-4 w-4 ${starType === "full" ? "text-yellow-400" : starType === "half"
                   ? "text-yellow-400" : "text-gray-300"}`} aria-hidden="true"
                   xmlns="http://www.w3.org/2000/svg" fill={starType === "full" ? "currentColor" : starType === "half"
-                    ? `url(#${gradientId})` : "none"} viewBox="0 0 24 24">
+                    ? `url(#${id})` : "none"} viewBox="0 0 24 24">
                   {starType === "half" && (
                     <defs>
-                      <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="0%">
+                      <linearGradient id={id} x1="0%" y1="0%" x2="100%" y2="0%">
                         <stop offset="50%" stopColor="currentColor" />
                         <stop offset="50%" stopColor="transparent" />
                       </linearGradient>
@@ -142,6 +143,7 @@ const ProductCard = (props) => {
           )}
         </div>
       </div>
+      </Link>
     </div>
   );
 };
