@@ -6,11 +6,11 @@ import CartPage from "../customer/pages/CartPage/CartPage"
 import ProductListPage from "../customer/pages/ProductPage/ProductListPage"
 import CategoryPage from "../customer/pages/CategoryPage/CategoryPage";
 import LoginPage from "../customer/pages/LoginPage/LoginPage";
-import Jwt from "../customer/pages/Jwt";
-import TokenCheck from "../customer/pages/TokenCheck";
 import AddProduct from "../customer/pages/Admin/AddProduct/AddProduct";
 import AdminLayout from "../Layouts/AdminLayout";
-import Logout from "../customer/pages/Logout";
+import Jwt from "../reusables/Jwt";
+import Logout from "../reusables/Logout";
+import TokenCheck from "../reusables/TokenCheck";
 
 const Router = createBrowserRouter([
     {

@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import Cookies from "js-cookie";
 import { useDispatch } from "react-redux";
 import { updateUser } from "../features/user/userSlice";
+import ScrollToTop from "../reusables/ScrollToTop";
 
 const UserLayout = () => {
 
@@ -38,6 +39,7 @@ const UserLayout = () => {
 
     return (
         <div>
+            <ScrollToTop />
             <Navbar />
             <Outlet />
         </div>

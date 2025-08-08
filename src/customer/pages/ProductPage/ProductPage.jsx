@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import Markdown from "react-markdown";
+import ProductCard from "../../components/Product/ProductCard";
 
 // --- Icon Components (Self-contained SVGs) ---
 const Star = ({ className, fill = "none", ...props }) => (
@@ -85,69 +86,6 @@ const reviews = [
   },
 ];
 
-const relatedProducts = [
-  {
-    id: 1,
-    title: "Aura Smartwatch",
-    price: 14999,
-    image: "https://placehold.co/300x300/e8e8e8/333?text=Smartwatch",
-    rating: "4.8",
-    reviewCount: "210",
-    discount: "15",
-    tags: { freeDelivery: true, bestSeller: true, bestPrice: false },
-  },
-  {
-    id: 2,
-    title: "Nebula Portable Speaker",
-    price: 5999,
-    image: "https://placehold.co/300x300/e0e0e0/333?text=Speaker",
-    rating: "4.6",
-    reviewCount: "155",
-    discount: "20",
-    tags: { freeDelivery: true, bestSeller: false, bestPrice: true },
-  },
-  {
-    id: 3,
-    title: "Vortex Gaming Mouse",
-    price: 4499,
-    image: "https://placehold.co/300x300/d8d8d8/333?text=Mouse",
-    rating: "4.9",
-    reviewCount: "302",
-    discount: "10",
-    tags: { freeDelivery: false, bestSeller: true, bestPrice: false },
-  },
-  {
-    id: 4,
-    title: "Nova Laptop Stand",
-    price: 3999,
-    image: "https://placehold.co/300x300/d0d0d0/333?text=Laptop+Stand",
-    rating: "4.7",
-    reviewCount: "180",
-    discount: "25",
-    tags: { freeDelivery: true, bestSeller: false, bestPrice: true },
-  },
-  {
-    id: 5,
-    title: "Nova Laptop Stand",
-    price: 3999,
-    image: "https://placehold.co/300x300/d0d0d0/333?text=Laptop+Stand",
-    rating: "4.7",
-    reviewCount: "180",
-    discount: "25",
-    tags: { freeDelivery: true, bestSeller: false, bestPrice: true },
-  },
-  {
-    id: 6,
-    title: "Nova Laptop Stand",
-    price: 3999,
-    image: "https://placehold.co/300x300/d0d0d0/333?text=Laptop+Stand",
-    rating: "4.7",
-    reviewCount: "180",
-    discount: "25",
-    tags: { freeDelivery: true, bestSeller: false, bestPrice: true },
-  },
-];
-
 // --- Reusable Components ---
 const StarRating = ({ rating }) => {
   const fullStars = Math.floor(rating);
@@ -185,6 +123,10 @@ const StarRating = ({ rating }) => {
 const ProductImageGallery = ({ images }) => {
   const [mainImage, setMainImage] = useState(images[0].imageUrl);
   const fileInputRef = useRef(null);
+
+  useEffect(() => {
+    setMainImage(images[0].imageUrl);
+  },[images]);
 
   const handleImageUpload = (event) => {
     const file = event.target.files[0];
@@ -267,187 +209,21 @@ const ReviewCard = ({ review }) => (
   </div>
 );
 
-const ProductCard = ({ product }) => {
-  const { image, title, discount, rating, reviewCount, tags, price } = product;
-  const [quantity, setQuantity] = useState(0);
-  const fullStars = Math.floor(Number(rating));
-
-  return (
-    <div className="w-full rounded-lg border border-gray-200 bg-white p-4 sm:p-6 shadow-sm hover:shadow-lg transition-shadow duration-300 flex flex-col">
-      <div className="h-48 sm:h-56 w-full mb-4">
-        <a href="#">
-          <img
-            className="mx-auto h-full object-contain"
-            src={image}
-            alt={title}
-          />
-        </a>
-      </div>
-      <div className="pt-2 flex flex-col flex-grow">
-        <div className="mb-4 flex items-center justify-between gap-4">
-          <span className="me-2 rounded bg-pink-100 px-2.5 py-0.5 text-xs font-medium text-pink-800">
-            Up to {discount}% off
-          </span>
-          <div className="flex items-center gap-1">
-            <button
-              type="button"
-              className="rounded-lg p-2 text-gray-500 hover:bg-gray-200"
-            >
-              <span className="sr-only">Quick look</span>
-              <svg
-                className="h-5 w-5"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  d="M21 12c0 1.2-4.03 6-9 6s-9-4.8-9-6c0-1.2 4.03-6 9-6s9 4.8 9 6Z"
-                />
-                <path
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
-                />
-              </svg>
-            </button>
-            <button
-              type="button"
-              className="rounded-lg p-2 text-gray-500 hover:bg-gray-200"
-            >
-              <span className="sr-only">Add to Favorites</span>
-              <svg
-                className="h-5 w-5"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M12 6C6.5 1 1 8 5.8 13l6.2 7 6.2-7C23 8 17.5 1 12 6Z"
-                />
-              </svg>
-            </button>
-          </div>
-        </div>
-        <a
-          href="#"
-          className="text-lg font-semibold leading-tight text-gray-900 hover:underline flex-grow"
-        >
-          {title}
-        </a>
-        <div className="mt-2 flex items-center gap-2">
-          <div className="flex items-center">
-            {[...Array(5)].map((_, i) => (
-              <Star
-                key={i}
-                className={`h-4 w-4 ${
-                  i < fullStars ? "text-yellow-400" : "text-gray-300"
-                }`}
-                fill="currentColor"
-              />
-            ))}
-          </div>
-          <p className="text-sm font-medium text-gray-900">{rating}</p>
-          <p className="text-sm font-medium text-gray-500">({reviewCount})</p>
-        </div>
-        <ul className="mt-2 flex items-center gap-4 flex-wrap">
-          {tags.freeDelivery && (
-            <li className="flex items-center gap-2">
-              <svg
-                className="h-4 w-4 text-gray-500"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M13 7h6l2 4m-8-4v8m0-8V6a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v9h2m8 0H9m4 0h2m4 0h2v-4m0 0h-5m3.5 5.5a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0Zm-10 0a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0Z"
-                />
-              </svg>
-              <p className="text-sm font-medium text-gray-500">Fast Delivery</p>
-            </li>
-          )}
-          {tags.bestSeller && (
-            <li className="flex items-center gap-2">
-              <svg
-                className="h-4 w-4 text-gray-500"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M11.3 6.5a2 2 0 1 1-4 0 2 2 0 0 1 4 0Zm9.4 11.5h-2.3a1 1 0 0 1-1-1.2 1 1 0 0 0-1-1.2h-2.3a1 1 0 0 0-1 1.2 1 1 0 0 1-1 1.2h-2.3a1 1 0 0 1-1-1.2 1 1 0 0 0-1-1.2H5.3a1 1 0 0 0-1 1.2 1 1 0 0 1-1 1.2H1a1 1 0 0 1 0-2h1.3a1 1 0 0 0 1-1.2 1 1 0 0 1 1-1.2h2.3a1 1 0 0 1 1 1.2 1 1 0 0 0 1 1.2h2.3a1 1 0 0 0 1-1.2 1 1 0 0 1 1-1.2h2.3a1 1 0 0 1 1 1.2 1 1 0 0 0 1 1.2H23a1 1 0 0 1 0 2Z"
-                />
-              </svg>
-              <p className="text-sm font-medium text-gray-500">Best Seller</p>
-            </li>
-          )}
-        </ul>
-        <div className="mt-4 flex items-center justify-between gap-4">
-          <p className="text-xl sm:text-2xl font-extrabold text-gray-900">
-            ₹{price.toLocaleString()}
-          </p>
-          {quantity === 0 ? (
-            <button
-              onClick={() => setQuantity(1)}
-              type="button"
-              className="inline-flex items-center rounded-lg bg-indigo-600 px-3 py-2 sm:px-5 sm:py-2.5 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-300"
-            >
-              <ShoppingCart className="-ms-2 me-2 h-5 w-5 hidden sm:inline" />
-              Add to cart
-            </button>
-          ) : (
-            <div className="flex items-center rounded-lg border border-gray-300 overflow-hidden">
-              <button
-                onClick={() => setQuantity((q) => Math.max(0, q - 1))}
-                className="px-3 py-2 text-gray-600 hover:bg-gray-100 font-bold"
-              >
-                -
-              </button>
-              <span className="px-4 py-2 bg-white text-black">{quantity}</span>
-              <button
-                onClick={() => setQuantity((q) => q + 1)}
-                className="px-3 py-2 text-gray-600 hover:bg-gray-100 font-bold"
-              >
-                +
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-};
-
 // --- Main Page Component ---
 export default function ProductPage() {
   //Product id from url
   const { id } = useParams();
   const [rating, setRating] = useState(0);
   const [product, setProduct] = useState(null);
+  const [relatedProducts, setRelatedProducts] = useState(null);
 
   useEffect(() => {
     fetchProduct();
-  }, []);
-
+  }, [id]);
+  
+  useEffect(() =>{
+    fetchRelatedProduct();
+  },[product])
   //Function to Fetch Data using id
   const fetchProduct = async () => {
     //Base URL of product details data fetch
@@ -469,6 +245,29 @@ export default function ProductPage() {
 
     setProduct(result);
   };
+
+
+
+  //Function to fetch Related Products
+  const fetchRelatedProduct = async () => {
+    const baseUri="http://localhost:8080/public/related-products";
+    const slug = product.categories[0].slug;
+    const params = {
+      slug : slug,
+      exclude_id : id,
+    }
+
+    const queryUri = new URLSearchParams(params).toString();
+
+    //Full uri combination of BaseURi and QueryUri
+    const fullUri = `${baseUri}?${queryUri}`;
+
+    const response = await fetch(fullUri);
+    const result = await response.json();
+    setRelatedProducts(result);
+  }
+  
+
   useEffect(() => {
     console.log(product);
   });
@@ -589,6 +388,7 @@ export default function ProductPage() {
               </form>
             </div>
           </section>
+            {relatedProducts == null ? <></> : 
           <section>
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 sm:mb-8">
               Related Products
@@ -599,6 +399,7 @@ export default function ProductPage() {
               ))}
             </div>
           </section>
+          }
         </div>
       )}
     </div>
