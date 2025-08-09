@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import {
   Dialog,
   DialogBackdrop,
@@ -23,126 +23,37 @@ import SearchBar from "./SearchBar";
 import { useSelector } from "react-redux";
 import { ChevronDown } from "lucide-react";
 
-const navigation = {
-  categories: [
-    {
-      id: "greeting",
-      name: "Greeting",
-      featured: [
-        {
-          name: "Fancy Greeting Cards",
-          href: "#",
-          imageSrc:
-            "https://artastherapyy.com/cdn/shop/files/Pinterest_Aesthetic_Greeting_Card.jpg?v=1752142467",
-          imageAlt: "Fancy greeting cards in a colorful display.",
-        },
-        {
-          name: "Mouse Pads",
-          href: "#",
-          imageSrc:
-            "https://i.ebayimg.com/images/g/K64AAOSw1XBmeb12/s-l400.jpg",
-          imageAlt: "Colorful and funky stickers and labels.",
-        },
-      ],
-      sections: [
-        {
-          id: "cards",
-          name: "Greeting Cards",
-          items: [
-            { name: "Fancy Greeting Cards", href: "#" },
-            { name: "Attractive Greeting Cards", href: "#" },
-            { name: "Graceful Greeting Cards", href: "#" },
-            { name: "Classic Greeting Cards", href: "#" },
-            { name: "Modern Greeting Cards", href: "#" },
-          ],
-        },
-        {
-          id: "labels",
-          name: "Labels & Stickers",
-          items: [
-            { name: "Smarty Labels & Stickers", href: "#" },
-            { name: "Funky Labels & Stickers", href: "#" },
-            { name: "Classic Labels & Stickers", href: "#" },
-            { name: "Fuzzy Labels & Stickers", href: "#" },
-            { name: "Trendy Labels & Stickers", href: "#" },
-          ],
-        },
-        {
-          id: "accessories",
-          name: "Accessories",
-          items: [{ name: "Mouse Pad", href: "#" }],
-        },
-      ],
-    },
-    {
-      id: "gifts-decor",
-      name: "Gifting",
-      featured: [
-        {
-          name: "Photo Frames Collection",
-          href: "#",
-          imageSrc:
-            "https://cdn.shopify.com/s/files/1/0632/2526/6422/files/photo-frames-chance-and-change-photo-frame-collage-set-of-ten-1_b1b38438-4758-40e2-ab21-e2ea9a744fd8.jpg?v=1744116165",
-          imageAlt: "Assorted stylish photo frames.",
-        },
-        {
-          name: "Personalized Gift Boxes",
-          href: "#",
-          imageSrc:
-            "https://i.pinimg.com/1200x/75/fd/d2/75fdd2be4240e3164e9ca6d923a7eb25.jpg",
-          imageAlt: "Wrapped personalized gifts.",
-        },
-      ],
-      sections: [
-        {
-          id: "photo-frames",
-          name: "Photo Frames",
-          items: [
-            { name: "Classic Photo Frames", href: "#" },
-            { name: "Fancy Photo Frames", href: "#" },
-            { name: "Amazing Photo Frames", href: "#" },
-            { name: "Graceful Photo Frames", href: "#" },
-            { name: "Attractive Photo Frames", href: "#" },
-            { name: "Wonderful Photo Frames", href: "#" },
-          ],
-        },
-        {
-          id: "personalized-gifts",
-          name: "Personalized Gifts",
-          items: [
-            { name: "Personalized Gifts", href: "#" },
-            { name: "Fancy Personalized Gifts", href: "#" },
-            { name: "Useful Personalized Gifts", href: "#" },
-            { name: "Attractive Personalized Gifts", href: "#" },
-            { name: "Classy Personalized Gifts", href: "#" },
-            { name: "Amazing Personalized Gifts", href: "#" },
-          ],
-        },
-        {
-          id: "wall-decor",
-          name: "Paintings & Posters",
-          items: [
-            { name: "Trendy Paintings & Posters", href: "#" },
-            { name: "Fashionable Paintings & Posters", href: "#" },
-          ],
-        },
-      ],
-    },
-  ],
-  pages: [
+// Options after navigation
+const pages = [
     { name: "Company", href: "#" },
     { name: "Stores", href: "#" },
-  ],
-};
+  ]
 
 // ... (navigation data remains the same)
 
-export default function Navbar() {
+const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState(null);
   const [showSearch, setShowSearch] = useState(false);
   const user = useSelector((state) => state.user.items);
-  console.log(user);
+  const [navigation, setNavigation] = useState(null);
+
+  useEffect(() => {
+    fetchNavigation();
+  },[]);
+
+  useEffect(() => {
+    console.log(navigation);
+  },[navigation]);
+
+  const fetchNavigation = async () => {
+    const uri = "http://localhost:8080/public/get-navbar-lists";
+    const response = await fetch(uri);
+    const result = await response.json();
+    setNavigation(result);
+  }
+
+
 
   return (
     <div className="bg-white sticky z-30 w-full top-0 left-0">
@@ -175,35 +86,37 @@ export default function Navbar() {
             </div>
 
             {/* Links */}
+            {navigation == null ? <></> : 
             <TabGroup className="mt-2">
               <div className="border-b border-gray-200">
                 <TabList className="-mb-px flex space-x-8 px-4">
-                  {navigation.categories.map((category) => (
+                  {navigation.map((nav) => (
                     <Tab
-                      key={category.name}
+                      key={nav.id}
                       className="flex-1 border-b-2 border-transparent px-1 py-4 text-base font-medium whitespace-nowrap text-gray-900 data-selected:border-indigo-600 data-selected:text-indigo-600"
                     >
-                      {category.name}
+                      {nav.name}
                     </Tab>
                   ))}
                 </TabList>
               </div>
               <TabPanels as={Fragment}>
-                {navigation.categories.map((category) => (
+                {navigation.map((nav) => (
                   <TabPanel
-                    key={category.name}
+                    key={nav.id}
                     className="space-y-10 px-4 pt-10 pb-8"
                   >
                     <div className="grid grid-cols-2 gap-x-4">
-                      {category.featured.map((item) => (
-                        <div key={item.name} className="group relative text-sm">
+                      {nav.featured.map((item) => (
+                        <Link to={`/collection/${item.value}/All`} onClick={() => setMobileMenuOpen(false)}>
+                        <div key={item.id} className="group relative text-sm">
                           <img
-                            alt={item.imageAlt}
-                            src={item.imageSrc}
+                            alt={item.altText}
+                            src={item.image}
                             className="aspect-square w-full rounded-lg bg-gray-100 object-cover group-hover:opacity-75"
                           />
-                          <a
-                            href={item.href}
+                          <p
+                            href="#"
                             className="mt-6 block font-medium text-gray-900"
                           >
                             <span
@@ -211,34 +124,36 @@ export default function Navbar() {
                               className="absolute inset-0 z-10"
                             />
                             {item.name}
-                          </a>
+                          </p>
                           <p aria-hidden="true" className="mt-1">
                             Shop now
                           </p>
                         </div>
+                        </Link>
                       ))}
                     </div>
-                    {category.sections.map((section) => (
-                      <div key={section.name}>
+                    {nav.slugs.map((slug) => (
+                      <div key={slug.id}>
                         <p
-                          id={`${category.id}-${section.id}-heading-mobile`}
+                          id={`${nav.id}-${slug.id}-heading-mobile`}
                           className="font-medium text-gray-900"
                         >
-                          {section.name}
+                          {slug.name}
                         </p>
                         <ul
                           role="list"
-                          aria-labelledby={`${category.id}-${section.id}-heading-mobile`}
+                          aria-labelledby={`${nav.id}-${slug.id}-heading-mobile`}
                           className="mt-6 flex flex-col space-y-6"
                         >
-                          {section.items.map((item) => (
-                            <li key={item.name} className="flow-root">
-                              <a
-                                href={item.href}
+                          {slug.items.map((item) => (
+                            <li key={item.id} className="flow-root">
+                              <Link
+                                to={`/collection/${slug.value}/${item.name}`}
+                                onClick={() => setMobileMenuOpen(false)}
                                 className="-m-2 block p-2 text-gray-500"
                               >
                                 {item.name}
-                              </a>
+                              </Link>
                             </li>
                           ))}
                         </ul>
@@ -248,9 +163,9 @@ export default function Navbar() {
                 ))}
               </TabPanels>
             </TabGroup>
-
+}
             <div className="space-y-6 border-t border-gray-200 px-4 py-6">
-              {navigation.pages.map((page) => (
+              {pages.map((page) => (
                 <div key={page.name} className="flow-root">
                   <a
                     href={page.href}
@@ -327,26 +242,28 @@ export default function Navbar() {
 
               {/* Flyout menus with hover functionality */}
               <div className="hidden lg:ml-8 lg:block lg:self-stretch">
+                {/* Navigation */}
+                {navigation == null ? <></> : 
                 <div className="flex h-full space-x-8">
-                  {navigation.categories.map((category) => (
+                  {navigation.map((nav) => (
                     <div
-                      key={category.name}
+                      key={nav.id}
                       className="flex"
-                      onMouseEnter={() => setActiveCategory(category.id)}
+                      onMouseEnter={() => setActiveCategory(nav.id)}
                       onMouseLeave={() => setActiveCategory(null)}
                     >
                       <div className="relative flex">
                         <button
                           className={`group relative flex items-center justify-center text-sm font-medium ${
-                            activeCategory === category.id
+                            activeCategory === nav.id
                               ? "text-indigo-600"
                               : "text-gray-700 hover:text-gray-800"
                           }`}
                         >
-                          {category.name}
+                          {nav.name}
                           <span
                             className={`absolute inset-x-0 -bottom-px z-30 h-0.5 transition-all duration-200 ${
-                              activeCategory === category.id
+                              activeCategory === nav.id
                                 ? "bg-indigo-600"
                                 : "bg-transparent group-hover:bg-gray-300"
                             }`}
@@ -355,7 +272,7 @@ export default function Navbar() {
                       </div>
 
                       <Transition
-                        show={activeCategory === category.id}
+                        show={activeCategory === nav.id}
                         as={Fragment}
                         enter="transition ease-out duration-200"
                         enterFrom="opacity-0"
@@ -366,7 +283,7 @@ export default function Navbar() {
                       >
                         <div
                           className="absolute inset-x-0 top-full z-20 w-full bg-white text-sm text-gray-500 shadow-lg"
-                          onMouseEnter={() => setActiveCategory(category.id)}
+                          onMouseEnter={() => setActiveCategory(nav.id)}
                           onMouseLeave={() => setActiveCategory(null)}
                         >
                           <div
@@ -377,41 +294,44 @@ export default function Navbar() {
                             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                               <div className="grid grid-cols-2 gap-x-8 gap-y-10 py-16">
                                 <div className="col-start-2 grid grid-cols-2 gap-x-8">
-                                  {category.featured.map((item) => (
+                                  {nav.featured.map((item) => (
+                                  <Link to={`/collection/${item.value}/All`} onClick={() => setActiveCategory(null)}>
                                     <div
-                                      key={item.name}
+                                      key={item.id}
                                       className="group relative text-base sm:text-sm"
                                     >
                                       <img
-                                        alt={item.imageAlt}
-                                        src={item.imageSrc}
+                                        alt={item.altText}
+                                        src={item.image}
                                         className="aspect-square w-full rounded-lg bg-gray-100 object-cover group-hover:opacity-75"
                                       />
-                                      <a
-                                        href={item.href}
+                                      <p
                                         className="mt-6 block font-medium text-gray-900"
                                       >
                                         {item.name}
-                                      </a>
+                                      </p>
                                       <p className="mt-1">Shop now</p>
                                     </div>
+                                    </Link>
+                                  
                                   ))}
                                 </div>
                                 <div className="row-start-1 grid grid-cols-3 gap-x-8 gap-y-10 text-sm">
-                                  {category.sections.map((section) => (
-                                    <div key={section.name}>
+                                  {nav.slugs.map((slug) => (
+                                    <div key={slug.id}>
                                       <p className="font-medium text-gray-900">
-                                        {section.name}
+                                        {slug.name}
                                       </p>
                                       <ul className="mt-6 space-y-6 sm:mt-4 sm:space-y-4">
-                                        {section.items.map((item) => (
-                                          <li key={item.name} className="flex">
-                                            <a
-                                              href={item.href}
+                                        {slug.items.map((item) => (
+                                          <li key={item.id} className="flex">
+                                            <Link
+                                              to={`/collection/${slug.value}/${item.name}`}
+                                              onClick={() => setActiveCategory(null)}
                                               className="hover:text-gray-800"
                                             >
                                               {item.name}
-                                            </a>
+                                            </Link>
                                           </li>
                                         ))}
                                       </ul>
@@ -426,7 +346,7 @@ export default function Navbar() {
                     </div>
                   ))}
 
-                  {navigation.pages.map((page) => (
+                  {pages.map((page) => (
                     <a
                       key={page.name}
                       href={page.href}
@@ -436,6 +356,7 @@ export default function Navbar() {
                     </a>
                   ))}
                 </div>
+}
               </div>
 
               <div className="ml-auto flex items-center">
@@ -448,7 +369,7 @@ export default function Navbar() {
                   >
                     {user == null ? "Login" :
                      <div className="flex max-w-64 items-center rounded-3xl p-1 gap-2 hover:border-2 border-2 border-white hover:border-gray-300 hover:bg-gray-100">
-                        <div className="overflow-hidden h-7 w-7 rounded-full"><img src={user.picture} alt="" /></div>
+                        <div className="overflow-hidden h-7 w-7 rounded-full"><img src={user.picture} alt={user.picture} /></div>
                         <div>{user.fullName}</div>
                         <div className="pe-1"><ChevronDown size={20} /></div>
                       </div>}
@@ -503,3 +424,4 @@ export default function Navbar() {
     </div>
   );
 }
+export default Navbar;
