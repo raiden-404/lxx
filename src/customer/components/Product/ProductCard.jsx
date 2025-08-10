@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 const ProductCard = (props) => {
   const { id, imageUrl, title, discount, averageRating, reviewCount, sellingPrice } = props.product;
-  const [quantity, setQuantity] = useState(0);
+  const [quantity, setQuantity] = useState(props.inCartQuantity);
 
   const preciseRating = Number(averageRating);
   const displayRating = Math.round(preciseRating * 2) / 2; // Rounds to nearest .5

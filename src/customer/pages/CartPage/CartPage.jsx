@@ -1,7 +1,9 @@
-
-
 import { useSelector, useDispatch } from "react-redux";
-import { changeQuantity, removeItem } from "../../../features/cart/cartSlice";
+import {
+  addItem,
+  deleteItem,
+  removeItem,
+} from "../../../features/cart/cartSlice";
 
 // --- Icon Components (Self-contained SVGs) ---
 const Trash2 = ({ className }) => (
@@ -60,33 +62,53 @@ const ShoppingCart = ({ className }) => (
   </svg>
 );
 
-
-
-
 // --- Reusable Components ---
-const CartItem = ({ item, onQuantityChange, onRemove }) => {
+const CartItem = ({ item, onItemAdd, onItemRemove, onItemDelete }) => {
   return (
     <div className="flex items-center justify-between py-6 border-b border-gray-200">
       <div className="flex items-center gap-4">
         <div className="w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0 bg-gray-100 rounded-md">
-          <img src={item.image} alt={item.title} className="w-full h-full object-cover rounded-md" />
+          <img
+            src={item.productImage}
+            alt={item.productName}
+            className="w-full h-full object-cover rounded-md"
+          />
         </div>
         <div>
-          <h3 className="font-semibold text-gray-800 text-base sm:text-lg">{item.title}</h3>
-          <p className="text-sm text-gray-500">Color: {item.color}</p>
-          <p className="sm:hidden text-lg font-bold text-gray-900 mt-1">₹{item.price.toFixed(2)}</p>
+          <h3 className="font-semibold text-gray-800 text-base sm:text-lg">
+            {item.productName}
+          </h3>
+          <p className="text-sm text-gray-500">Brand: Lx Brand</p>
+          <p className="sm:hidden text-lg font-bold text-gray-900 mt-1">
+            ₹{item.productSellPrice.toFixed(2)}
+          </p>
         </div>
       </div>
       <div className="flex items-center gap-4 sm:gap-6">
         <div className="hidden sm:block text-lg font-bold text-gray-900">
-          ₹{item.price.toFixed(2)}
+          ₹{item.productMrp.toFixed(2)}
         </div>
         <div className="flex items-center border border-gray-300 rounded-lg">
-          <button onClick={() => onQuantityChange(item.id, item.quantity - 1)} className="px-3 py-1 text-gray-600 hover:bg-gray-100 rounded-l-lg">-</button>
-          <span className="px-4 py-1 font-semibold text-sm">{item.quantity}</span>
-          <button onClick={() => onQuantityChange(item.id, item.quantity + 1)} className="px-3 py-1 text-gray-600 hover:bg-gray-100 rounded-r-lg">+</button>
+          <button
+            onClick={() => onItemRemove(item.productId, 1)}
+            className="px-3 py-1 text-gray-600 hover:bg-gray-100 rounded-l-lg"
+          >
+            -
+          </button>
+          <span className="px-4 py-1 font-semibold text-sm">
+            {item.quantity}
+          </span>
+          <button
+            onClick={() => onItemAdd(item.productId, 1)}
+            className="px-3 py-1 text-gray-600 hover:bg-gray-100 rounded-r-lg"
+          >
+            +
+          </button>
         </div>
-        <button onClick={() => onRemove(item.id)} className="text-gray-500 hover:text-red-600 transition-colors">
+        <button
+          onClick={() => onItemDelete(item.productId)}
+          className="text-gray-500 hover:text-red-600 transition-colors"
+        >
           <Trash2 className="w-5 h-5" />
         </button>
       </div>
@@ -94,31 +116,34 @@ const CartItem = ({ item, onQuantityChange, onRemove }) => {
   );
 };
 
-const OrderSummary = ({ subtotal }) => {
-  const shipping = subtotal > 10000 ? 0.00 : 99.00;
-  const tax = subtotal * 0.18; // 18% GST
-  const total = subtotal + shipping + tax;
+const OrderSummary = ({cartItems}) => {
+  
+  // const cartItems = useSelector(state => state.cart.items);
 
   return (
     <div className="w-full lg:w-1/3 bg-white p-6 rounded-lg shadow-md lg:sticky lg:top-8">
-      <h2 className="text-2xl font-bold text-gray-800 border-b pb-4 mb-4">Order Summary</h2>
+      <h2 className="text-2xl font-bold text-gray-800 border-b pb-4 mb-4">
+        Order Summary
+      </h2>
       <div className="space-y-3 text-gray-600">
         <div className="flex justify-between">
           <span>Subtotal</span>
-          <span className="font-semibold">₹{subtotal.toFixed(2)}</span>
+          <span className="font-semibold">₹{cartItems.subTotal.toFixed(2)}</span>
         </div>
         <div className="flex justify-between">
           <span>Shipping</span>
-          <span className="font-semibold">{shipping === 0 ? 'FREE' : `₹${shipping.toFixed(2)}`}</span>
+          <span className="font-semibold">
+            {cartItems.shipping === 0 ? "FREE" : `₹${cartItems.shipping.toFixed(2)}`}
+          </span>
         </div>
         <div className="flex justify-between">
           <span>Tax (18% GST)</span>
-          <span className="font-semibold">₹{tax.toFixed(2)}</span>
+          <span className="font-semibold">₹{cartItems.tax.toFixed(2)}</span>
         </div>
       </div>
       <div className="flex justify-between font-bold text-xl text-gray-900 border-t mt-4 pt-4">
         <span>Total</span>
-        <span>₹{total.toFixed(2)}</span>
+        <span>₹{cartItems.total.toFixed(2)}</span>
       </div>
       <button className="w-full mt-6 bg-indigo-600 text-white font-semibold py-3 rounded-lg hover:bg-indigo-700 transition-all duration-300 transform hover:scale-105">
         Proceed to Checkout
@@ -129,61 +154,63 @@ const OrderSummary = ({ subtotal }) => {
 
 // --- Main Cart Page Component ---
 const CartPage = () => {
-
   const cartItems = useSelector((state) => state.cart.items);
-
+  
   const dispatch = useDispatch();
-
-  const handleQuantityChange = (itemId, newQuantity) => {
-    if (newQuantity < 1) {
-      dispatch(removeItem(itemId)); // Remove item if quantity becomes 0
-      return;
-    }
-    
-    dispatch(changeQuantity({id:itemId, newQuantity}));
-
+  const onItemAdd = (id, quantity) => {
+    dispatch(addItem({ id, quantity }));
   };
 
-  const handleRemoveItem = (itemId) => {
-    dispatch(removeItem(itemId));
+  const onItemRemove = (id, quantity) => {
+    dispatch(removeItem({ id, quantity }));
   };
 
-  const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const onItemDelete = (id) => {
+    dispatch(deleteItem({ id }));
+  };
 
   return (
     <div className="bg-gray-100 min-h-screen font-sans">
       <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-8">Your Cart</h1>
+        <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-8">
+          Your Cart
+        </h1>
 
-        {cartItems.length === 0 ? (
+        {cartItems === null ? (
           <div className="text-center py-20 bg-white rounded-lg shadow-md">
             <ShoppingCart className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-            <h2 className="text-2xl font-semibold text-gray-700 mb-2">Your cart is empty</h2>
-            <p className="text-gray-500">Looks like you haven't added anything to your cart yet.</p>
+            <h2 className="text-2xl font-semibold text-gray-700 mb-2">
+              Your cart is empty
+            </h2>
+            <p className="text-gray-500">
+              Looks like you haven't added anything to your cart yet.
+            </p>
           </div>
         ) : (
           <div className="flex flex-col lg:flex-row gap-8">
             <div className="w-full lg:w-2/3 bg-white p-6 rounded-lg shadow-md">
               <h2 className="text-2xl font-bold text-gray-800 border-b pb-4 mb-4">
-                {cartItems.length} {cartItems.length === 1 ? 'Item' : 'Items'}
+                {cartItems.items.length}{" "}
+                {cartItems.items.length === 1 ? "Item" : "Items"}
               </h2>
               <div>
-                {cartItems.map(item => (
+                {cartItems.items.map((item) => (
                   <CartItem
-                    key={item.id}
+                    key={item.productId}
                     item={item}
-                    onQuantityChange={handleQuantityChange}
-                    onRemove={handleRemoveItem}
+                    onItemAdd={onItemAdd}
+                    onItemRemove={onItemRemove}
+                    onItemDelete={onItemDelete}
                   />
                 ))}
               </div>
             </div>
-            <OrderSummary subtotal={subtotal} />
+            {cartItems === null? <></> : <OrderSummary cartItems={cartItems} /> }
           </div>
         )}
       </div>
     </div>
   );
-}
+};
 
 export default CartPage;

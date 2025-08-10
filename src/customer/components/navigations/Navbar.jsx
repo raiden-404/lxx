@@ -36,6 +36,7 @@ const Navbar = () => {
   const [activeCategory, setActiveCategory] = useState(null);
   const [showSearch, setShowSearch] = useState(false);
   const user = useSelector((state) => state.user.items);
+  const cart = useSelector(state => state.cart.items);
   const [navigation, setNavigation] = useState(null);
 
   useEffect(() => {
@@ -43,7 +44,6 @@ const Navbar = () => {
   },[]);
 
   useEffect(() => {
-    console.log(navigation);
   },[navigation]);
 
   const fetchNavigation = async () => {
@@ -376,7 +376,7 @@ const Navbar = () => {
                   </Link>
                   <span className="h-6 w-px bg-gray-200" />
                 </div>
-
+                {/* Seller Option */}
                 <div className="hidden lg:ml-8 lg:flex">
                   <Link
                     to="/seller"
@@ -393,7 +393,7 @@ const Navbar = () => {
                     </span>
                   </Link>
                 </div>
-
+                {/* Search option */}
                 <div className="flex lg:ml-6">
                   <a
                     onClick={() => setShowSearch(!showSearch)}
@@ -402,7 +402,9 @@ const Navbar = () => {
                     <MagnifyingGlassIcon className="size-6" />
                   </a>
                 </div>
-
+                {/* Cart Option */}
+                {cart == null  ? 
+                // When item is Zero
                 <div className="ml-4 flow-root lg:ml-6">
                   <Link
                     to="/cart"
@@ -415,6 +417,21 @@ const Navbar = () => {
                     </span>
                   </Link>
                 </div>
+                : 
+                // When item is more then zero
+                <div className="ml-4 flow-root lg:ml-6">
+                  <Link
+                    to="/cart"
+                    onClick={() => setShowSearch(false)}
+                    className="group -m-2 flex items-center bg-pink-100 rounded-full px-3 border-2 hover:bg-pink-300 border-pink-500 hover:border-pink-700 py-1"
+                  >
+                    <ShoppingBagIcon className="size-6 shrink-0 text-pink-700 group-hover:text-black" />
+                    <span className="ml-2 text-md font-medium text-black">
+                      {cart.items.length}
+                    </span>
+                  </Link>
+                </div>
+}
               </div>
             </div>
           </div>

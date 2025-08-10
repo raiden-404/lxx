@@ -2,12 +2,14 @@ import { useEffect, useState } from "react";
 import CategorySidebar from "../../components/Sidebar/CategorySidebar";
 import ProductCard from "../../components/Product/ProductCard";
 import { useParams } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 // --- Main App Component ---
 const CategoryPage = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const {collection, category} = useParams();
   const [productData ,setProductData] = useState([]);
+  const cart = useSelector(state => state.cart.items);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -37,9 +39,13 @@ const CategoryPage = () => {
     fetchData();
   },[collection,category]);
 
-  useEffect(() => {
-    console.log(productData);
-  });
+  const checkProductInCart = (id) => {
+    const isProductInCart = cart.items.find(item => item.productId === id);
+    if(isProductInCart) {
+      return isProductInCart.quantity;
+    }
+    return 0;
+  }
 
   return (
     <div className="bg-gray-100 min-h-screen font-sans">
@@ -59,9 +65,17 @@ const CategoryPage = () => {
               {selectedCategory}
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
-              {productData.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
+              {
+                cart === null ? 
+                productData.map((product) => (
+                <ProductCard key={product.id} product={product} inCartQuantity={0} />
+              ))
+              : 
+              productData.map((product) => (
+                <ProductCard key={product.id} product={product} inCartQuantity={checkProductInCart(product.id)} />
+              ))
+            }
+              
             </div>
           </section>
         </main>
