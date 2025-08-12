@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import ReactMarkdown from "react-markdown";
 import Markdown from "react-markdown";
 import ProductCard from "../../components/Product/ProductCard";
+import { useDispatch, useSelector } from "react-redux";
+import { AddItemAtFirst, addItem, removeItem } from "../../../features/cart/cartSlice";
 
 // --- Icon Components (Self-contained SVGs) ---
 const Star = ({ className, fill = "none", ...props }) => (
@@ -60,7 +61,6 @@ const Upload = ({ className }) => (
     <line x1="12" y1="3" x2="12" y2="15" />
   </svg>
 );
-
 
 const reviews = [
   {
@@ -126,7 +126,7 @@ const ProductImageGallery = ({ images }) => {
 
   useEffect(() => {
     setMainImage(images[0].imageUrl);
-  },[images]);
+  }, [images]);
 
   const handleImageUpload = (event) => {
     const file = event.target.files[0];
@@ -216,14 +216,63 @@ export default function ProductPage() {
   const [rating, setRating] = useState(0);
   const [product, setProduct] = useState(null);
   const [relatedProducts, setRelatedProducts] = useState(null);
+  const [quantity, setQuantity] = useState(0);
+  const cart = useSelector((state) => state.cart.items);
+  const dispatch = useDispatch();
+
+  //Function to check that this product exists in cart or not
 
   useEffect(() => {
     fetchProduct();
-  }, [id]);
+    checkProductInCart();
+  },[cart,id]);
+
+  //Check product in cart and set the quantity
+  const checkProductInCart = () => {
+    if(cart !== null) {
+      const isProductInCart = cart.items.find(item => item.productId === id);
+      if(isProductInCart) {
+        setQuantity(isProductInCart.quantity);
+      }
+    }else{
+    setQuantity(0);
+    }
+  };
   
-  useEffect(() =>{
+  //Handle cart operation
+  const handleAddItemAtStart = () => {
+    const item = {
+      productId: id,
+      productImage: product.images[0].imageUrl,
+      productMrp: product.mrp,
+      productName: product.title,
+      productSellPrice: product.sellingPrice,
+      quantity: 1,
+    }
+    dispatch(AddItemAtFirst(item));
+    setQuantity(1);
+  }
+
+  const handleAddItem = () => {
+    const item = {
+      id: id,
+      quantity:1,
+    }
+    dispatch(addItem(item));
+  }
+
+  const handleRemoveItem = () => {
+    const item ={
+      id: id,
+      quantity:1,
+    }
+    dispatch(removeItem(item));
+  }
+
+  useEffect(() => {
     fetchRelatedProduct();
-  },[product])
+  }, [product]);
+
   //Function to Fetch Data using id
   const fetchProduct = async () => {
     //Base URL of product details data fetch
@@ -246,16 +295,14 @@ export default function ProductPage() {
     setProduct(result);
   };
 
-
-
   //Function to fetch Related Products
   const fetchRelatedProduct = async () => {
-    const baseUri="http://localhost:8080/public/related-products";
+    const baseUri = "http://localhost:8080/public/related-products";
     const slug = product.categories[0].slug;
     const params = {
-      slug : slug,
-      exclude_id : id,
-    }
+      slug: slug,
+      exclude_id: id,
+    };
 
     const queryUri = new URLSearchParams(params).toString();
 
@@ -265,8 +312,7 @@ export default function ProductPage() {
     const response = await fetch(fullUri);
     const result = await response.json();
     setRelatedProducts(result);
-  }
-  
+  };
 
   useEffect(() => {
     console.log(product);
@@ -305,10 +351,26 @@ export default function ProductPage() {
 
               {/* Add to Cart - Buy Now */}
               <div className="flex flex-col sm:flex-row gap-4">
-                <button className="w-full flex items-center justify-center gap-3 px-6 py-3 bg-pink-600 text-white font-semibold rounded-lg shadow-md hover:bg-pink-700 transition-transform transform hover:scale-105">
-                  <ShoppingCart className="w-6 h-6" />
-                  <span>Add to Cart</span>
-                </button>
+                {quantity > 0 ? (
+                  <div
+                    className="w-full flex items-center overflow-hidden justify-between text-white font-semibold rounded-lg shadow-md"
+                  >
+                    <button onClick={handleRemoveItem} className="w-[30%] bg-gray-800 h-full transition-transform transform hover:scale-125">
+                      -
+                    </button>
+                    <span className="text-black">
+                      {quantity}
+                    </span>
+                    <button onClick={handleAddItem} className="w-[30%] bg-gray-800 h-full transition-transform transform hover:scale-125">
+                      +
+                    </button>
+                  </div>
+                ) : (
+                  <button onClick={handleAddItemAtStart} className="w-full flex items-center justify-center gap-3 px-6 py-3 bg-pink-600 text-white font-semibold rounded-lg shadow-md hover:bg-pink-700 transition-transform transform hover:scale-105">
+                    <ShoppingCart className="w-6 h-6" />
+                    <span>Add to Cart</span>
+                  </button>
+                )}
                 <button className="w-full px-6 py-3 bg-gray-800 text-white font-semibold rounded-lg shadow-md hover:bg-gray-900 transition-transform transform hover:scale-105">
                   Buy Now
                 </button>
@@ -327,19 +389,21 @@ export default function ProductPage() {
 
           {/* Review Section */}
           <section className="mb-12 sm:mb-16">
-          {product.reviews <= 0 ? <></> : 
-            <div>
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 sm:mb-8 border-b pb-4">
-              Customer Reviews
-            </h2>
+            {product.reviews <= 0 ? (
+              <></>
+            ) : (
+              <div>
+                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 sm:mb-8 border-b pb-4">
+                  Customer Reviews
+                </h2>
 
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mb-8">
-              {reviews.map((review) => (
-                <ReviewCard key={review.id} review={review} />
-              ))}
-            </div>
-            </div>
-}
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mb-8">
+                  {reviews.map((review) => (
+                    <ReviewCard key={review.id} review={review} />
+                  ))}
+                </div>
+              </div>
+            )}
             <div className="bg-white p-6 sm:p-8 rounded-lg shadow-sm border border-gray-100">
               <h3 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-4">
                 Write a review
@@ -388,18 +452,20 @@ export default function ProductPage() {
               </form>
             </div>
           </section>
-            {relatedProducts == null ? <></> : 
-          <section>
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 sm:mb-8">
-              Related Products
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {relatedProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
-          </section>
-          }
+          {relatedProducts == null ? (
+            <></>
+          ) : (
+            <section>
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 sm:mb-8">
+                Related Products
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {relatedProducts.map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+              </div>
+            </section>
+          )}
         </div>
       )}
     </div>

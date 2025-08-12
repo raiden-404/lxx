@@ -1,9 +1,39 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { addItem, removeItem, updateCart, AddItemAtFirst } from "../../../features/cart/cartSlice";
+import { useDispatch } from "react-redux";
 
 const ProductCard = (props) => {
   const { id, imageUrl, title, discount, averageRating, reviewCount, sellingPrice } = props.product;
   const [quantity, setQuantity] = useState(props.inCartQuantity);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    setQuantity(props.inCartQuantity);
+  },[props]);
+
+  const handleItemAtFirst = () => {
+    const product = {
+      productId: id,
+      productImage: imageUrl,
+      productMrp : (sellingPrice/1-(discount/100)),
+      productName : title,
+      productSellPrice: sellingPrice,
+      quantity: 1,
+    };
+    dispatch(AddItemAtFirst(product));
+  }
+
+  const handleItemAdd = () => {
+    dispatch(addItem({id, quantity: 1}));
+    setQuantity(quantity+1);
+    updateCart();
+  }
+
+  const handleItemRemove = () => {
+    dispatch(removeItem({id, quantity: 1}));
+    setQuantity(quantity-1);
+  }
 
   const preciseRating = Number(averageRating);
   const displayRating = Math.round(preciseRating * 2) / 2; // Rounds to nearest .5
@@ -117,7 +147,7 @@ const ProductCard = (props) => {
 
           {/* Quantity counter is already responsive due to flexbox */}
           {quantity === 0 ? (
-            <button onClick={() => setQuantity(1)}
+            <button onClick={(e) => {e.preventDefault();handleItemAtFirst();}}
               type="button"
               className="hidden min-[340px]:inline-flex items-center rounded-lg bg-pink-700 px-5 py-2.5 text-sm font-medium text-white
                 hover:bg-pink-800 focus:outline-none focus:ring-4 focus:ring-pink-300">
@@ -129,13 +159,13 @@ const ProductCard = (props) => {
               Add to cart
             </button>
           ) : (
-            <div className="flex items-center rounded-lg border border-gray-600 overflow-hidden">
-              <button onClick={() => setQuantity(q => Math.max(0, q - 1))}
+            <div className="flex items-center rounded-lg overflow-hidden" onClick={(e) => e.preventDefault()}>
+              <button onClick={() => handleItemRemove()}
                 className="bg-black hover:bg-gray-800 px-3 py-2 text-white font-bold">
                 -
               </button>
               <span className="px-3 py-2 bg-white text-black">{quantity}</span>
-              <button onClick={() => setQuantity(q => q + 1)}
+              <button onClick={() => handleItemAdd()}
                 className="bg-black hover:bg-gray-800 px-3 py-2 text-white font-bold">
                 +
               </button>
