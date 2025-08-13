@@ -1,6 +1,7 @@
 import CarouselHome from "../../components/carousel/CarouselHome";
 import HorizontalProductCarousel from "../../components/carousel/productCarousel/HorizontalProductCarousel";
 import HomeCategoryGrid from "../../components/categories/HomeCategoryGrid";
+import InfinitePaging from "../../components/Paging/InfinitePaging";
 
 const HomePage = () => {
   return (
@@ -9,9 +10,7 @@ const HomePage = () => {
       <div>
         <HomeCategoryGrid />
         <HorizontalProductCarousel />
-        <HorizontalProductCarousel />
-        <HomeCategoryGrid />
-        <HorizontalProductCarousel />
+        <InfinitePaging title={"Latest Products"} sort={"createdAt,desc"} size={10} />
       </div>
     </div>
   );

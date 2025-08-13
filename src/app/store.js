@@ -1,6 +1,7 @@
 import { configureStore } from "@reduxjs/toolkit";
 import cartReducer from "../features/cart/cartSlice"
 import userReducer from "../features/user/userSlice"
+import wishlistReducer from "../features/wishlist/wishlistSlice"
 
 export default configureStore({
     reducer: {
@@ -9,5 +10,6 @@ export default configureStore({
         // The value `cartReducer` is the function that will manage this part of the state.
         cart: cartReducer,
         user: userReducer,
+        wishlist: wishlistReducer,
     },
 });

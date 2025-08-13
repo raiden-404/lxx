@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { updateUser } from "../features/user/userSlice";
 import ScrollToTop from "../reusables/ScrollToTop";
 import { updateCart } from "../features/cart/cartSlice";
+import { updateWishlist } from "../features/wishlist/wishlistSlice";
 
 const UserLayout = () => {
   const dispatch = useDispatch();
@@ -14,12 +15,15 @@ const UserLayout = () => {
     //Call function to fetch user profile
     fetchUser();
     fetchCart();
+    fethWishlist();
   }, []);
-  const c = useSelector((state) => state.cart.items);
-  useEffect(() => {
-    console.log(c);
-  });
+  const w = useSelector(state => state.wishlist.items);
 
+  useEffect(() => {
+    console.log(w);
+
+  })
+  
   //Fetching User Profile Data and store in Redux Store
   const fetchUser = async () => {
     const jwtToken = Cookies.get("jwtToken");
@@ -61,6 +65,28 @@ const UserLayout = () => {
       }
     }
   };
+
+  //Fetching wishlist data and storing it in wishlist
+  const fethWishlist = async () => {
+    const jwtToken = Cookies.get("jwtToken");
+    if(jwtToken) {
+      try {
+        const apiUri = "http://localhost:8080/user/get-wishlist";
+        const response = await fetch(apiUri, {
+          method: "GET",
+          headers : {
+            Authorization: `Bearer ${jwtToken}`,
+          },
+        });
+
+        const result = await response.json();
+        dispatch(updateWishlist(result));
+
+      } catch (error) {
+        console.log("Error while loading wishlist ", error);
+      }
+    }
+  }
 
   return (
     <div>

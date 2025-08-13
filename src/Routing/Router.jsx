@@ -11,6 +11,7 @@ import AdminLayout from "../Layouts/AdminLayout";
 import Jwt from "../reusables/Jwt";
 import Logout from "../reusables/Logout";
 import TokenCheck from "../reusables/TokenCheck";
+import Wishlist from "../customer/pages/WishlistPage/WishlistPage";
 
 const Router = createBrowserRouter([
     {
@@ -56,6 +57,10 @@ const Router = createBrowserRouter([
             {
                 path: "logout",
                 element: <Logout />
+            },
+            {
+                path: "wishlist",
+                element: <Wishlist />
             }
         ]
     },

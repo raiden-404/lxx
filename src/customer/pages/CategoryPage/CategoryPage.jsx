@@ -10,6 +10,13 @@ const CategoryPage = () => {
   const {collection, category} = useParams();
   const [productData ,setProductData] = useState([]);
   const cart = useSelector(state => state.cart.items);
+  const wishlist = useSelector(state => state.wishlist.items);
+
+   // 2. For performance, convert arrays to faster lookup structures
+  const cartMap = new Map((cart?.items || []).map(item => [item.productId, item.quantity]));
+  // A Set is perfect for checking if an ID exists
+  const wishlistSet = new Set(wishlist.map(item => item.productId));
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -38,14 +45,25 @@ const CategoryPage = () => {
   }
     fetchData();
   },[collection,category]);
+  
+  // const checkProductInCart = (id) => {
+  //   const isProductInCart = cart.items.find(item => item.productId === id);
+  //   if(isProductInCart) {
+  //     return isProductInCart.quantity;
+  //   }
+  //   return 0;
+  // }
 
-  const checkProductInCart = (id) => {
-    const isProductInCart = cart.items.find(item => item.productId === id);
-    if(isProductInCart) {
-      return isProductInCart.quantity;
-    }
-    return 0;
-  }
+  // const checkProductInWishlist = (id) => {
+  //   if(wishlist == null ){
+  //     return false; 
+  //   }
+  //   const isProductInWishlist = wishlist.find(item => item.productId === id);
+  //   if(isProductInWishlist) {
+  //     return true;
+  //   }
+  //   return false;
+  // }
 
   return (
     <div className="bg-gray-100 min-h-screen font-sans">
@@ -66,13 +84,8 @@ const CategoryPage = () => {
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
               {
-                cart === null ? 
                 productData.map((product) => (
-                <ProductCard key={product.id} product={product} inCartQuantity={0} />
-              ))
-              : 
-              productData.map((product) => (
-                <ProductCard key={product.id} product={product} inCartQuantity={checkProductInCart(product.id)} />
+                <ProductCard key={product.id} product={product} inCartQuantity={cartMap.get(product.id) || 0} wishlist={wishlistSet.has(product.id)} />
               ))
             }
               

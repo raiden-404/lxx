@@ -1,19 +1,20 @@
 import { useParams } from "react-router-dom";
 import { Link } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 const CategorySidebar = ({ selectedCategory, setSelectedCategory }) => {
   const {collection, category} = useParams();
-  setSelectedCategory(category);
   const [categories, setCategories] = useState([]);
-  const allData = {categoryName : "All", categorySlug : collection, imageUrl : "https://img.freepik.com/premium-vector/lx-letter-linked-logo-business-company-identity-initial-letter-lx-logo-vector-template_754537-800.jpg"};
+  
+  
   useEffect(() => {
-    //Calling fetch funtion here
-    fetchData();
-  },[]);
-
+    if(category) {
+      setSelectedCategory(category);
+    }
+  },[category, setSelectedCategory]);
   //function to fetch data
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
+    const allData = {categoryName : "All", categorySlug : collection, imageUrl : "https://img.freepik.com/premium-vector/lx-letter-linked-logo-business-company-identity-initial-letter-lx-logo-vector-template_754537-800.jpg"};
     //backend api endpoint to fetch all category for that slug
     const baseUri = "http://localhost:8080/public/get-slug-category";
     
@@ -40,7 +41,12 @@ const CategorySidebar = ({ selectedCategory, setSelectedCategory }) => {
     const finalResult = [allData, ...result];
 
     setCategories(finalResult);
-  }
+  }, [collection, setCategories]);
+
+  useEffect(() => {
+    //Calling fetch funtion here
+    fetchData();
+  },[fetchData]);
 
   return (
     // Use responsive widths: narrow on mobile, wider on larger screens.
@@ -51,8 +57,8 @@ const CategorySidebar = ({ selectedCategory, setSelectedCategory }) => {
           {categories.map((categ) => {
             const isSelected = selectedCategory === categ.categoryName;
             return (
-            <Link to={`/collection/${collection}/${categ.categoryName}`}>
-              <li key={categ.categoryName}>
+            <Link key={categ.categoryName} to={`/collection/${collection}/${categ.categoryName}`}>
+              <li>
                 <button
                   onClick={() => setSelectedCategory(categ.categoryName)}
                   className={`w-full max-[400px]:w-auto h-full flex flex-col items-center p-2 rounded-lg transition-all duration-200 ease-in-out ${

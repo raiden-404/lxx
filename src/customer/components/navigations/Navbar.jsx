@@ -26,7 +26,7 @@ import { ChevronDown } from "lucide-react";
 // Options after navigation
 const pages = [
     { name: "Company", href: "#" },
-    { name: "Stores", href: "#" },
+    { name: "Wishlist", href: "#" },
   ]
 
 // ... (navigation data remains the same)
@@ -347,13 +347,13 @@ const Navbar = () => {
                   ))}
 
                   {pages.map((page) => (
-                    <a
+                    <Link to="wishlist"
                       key={page.name}
                       href={page.href}
                       className="flex items-center text-sm font-medium text-gray-700 hover:text-gray-800"
                     >
                       {page.name}
-                    </a>
+                    </Link>
                   ))}
                 </div>
 }
