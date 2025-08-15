@@ -4,6 +4,8 @@ import {
   deleteItem,
   removeItem,
 } from "../../../features/cart/cartSlice";
+import { updateCheckout } from "../../../features/checkout/checkoutSlice";
+import { useNavigate } from "react-router-dom";
 
 // --- Icon Components (Self-contained SVGs) ---
 const Trash2 = ({ className }) => (
@@ -118,7 +120,15 @@ const CartItem = ({ item, onItemAdd, onItemRemove, onItemDelete }) => {
 
 const OrderSummary = ({cartItems}) => {
   
-  // const cartItems = useSelector(state => state.cart.items);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  console.log(cartItems)
+
+  const handleCheckOut = () => {
+    dispatch(updateCheckout(cartItems));
+    console.log("ye cart chla");
+    navigate('/checkout')
+  }
 
   return (
     <div className="w-full lg:w-1/3 bg-white p-6 rounded-lg shadow-md lg:sticky lg:top-8">
@@ -145,7 +155,7 @@ const OrderSummary = ({cartItems}) => {
         <span>Total</span>
         <span>₹{cartItems.total.toFixed(2)}</span>
       </div>
-      <button className="w-full mt-6 bg-indigo-600 text-white font-semibold py-3 rounded-lg hover:bg-indigo-700 transition-all duration-300 transform hover:scale-105">
+      <button onClick={handleCheckOut} className="w-full mt-6 bg-pink-600 text-white font-semibold py-3 rounded-lg hover:bg-pink-700 transition-all duration-300 transform hover:scale-105">
         Proceed to Checkout
       </button>
     </div>

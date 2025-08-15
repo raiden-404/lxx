@@ -23,7 +23,7 @@ export const cartSlice = createSlice({
 
         addItem: (state, action) => {
             //get value passed to addItem function
-            console.log(addItemFromBackend(action.payload));
+            addItemFromBackend(action.payload);
 
             const { id, quantity } = action.payload;
 

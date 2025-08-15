@@ -12,6 +12,7 @@ import Jwt from "../reusables/Jwt";
 import Logout from "../reusables/Logout";
 import TokenCheck from "../reusables/TokenCheck";
 import Wishlist from "../customer/pages/WishlistPage/WishlistPage";
+import CheckoutPage from "../customer/pages/CheckoutPage/CheckOutPage";
 
 const Router = createBrowserRouter([
     {
@@ -61,6 +62,10 @@ const Router = createBrowserRouter([
             {
                 path: "wishlist",
                 element: <Wishlist />
+            },
+            {
+                path: "checkout",
+                element: <CheckoutPage />
             }
         ]
     },

@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Markdown from "react-markdown";
 import ProductCard from "../../components/Product/ProductCard";
 import { useDispatch, useSelector } from "react-redux";
 import { AddItemAtFirst, addItem, removeItem } from "../../../features/cart/cartSlice";
+import { updateCheckout } from "../../../features/checkout/checkoutSlice";
 
 // --- Icon Components (Self-contained SVGs) ---
 const Star = ({ className, fill = "none", ...props }) => (
@@ -219,6 +220,7 @@ export default function ProductPage() {
   const [quantity, setQuantity] = useState(0);
   const cart = useSelector((state) => state.cart.items);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   //Function to check that this product exists in cart or not
 
@@ -233,6 +235,8 @@ export default function ProductPage() {
       const isProductInCart = cart.items.find(item => item.productId === id);
       if(isProductInCart) {
         setQuantity(isProductInCart.quantity);
+      }else {
+        setQuantity(0);
       }
     }else{
     setQuantity(0);
@@ -267,6 +271,29 @@ export default function ProductPage() {
       quantity:1,
     }
     dispatch(removeItem(item));
+  }
+
+  const handleBuyNow = () => {
+    const item = {
+      items:[{
+        productId: id,
+        productImage: product.images[0].imageUrl,
+        productMrp: product.mrp,
+        productName: product.title,
+        productSellPrice: product.sellingPrice,
+        quantity: 1,
+      }],
+      mrpTotal : product.mrp,
+      shipping: product.sellingPrice >= 249 ? 0 : 49,
+      subTotal : product.sellingPrice,
+      tax : (18 / 100) * product.sellingPrice,
+      taxPercent: 18,
+      total: product.sellingPrice + (product.sellingPrice >= 249 ? 0 : 49) + ((18 / 100) * product.sellingPrice),
+    }
+
+    dispatch(updateCheckout(item));
+    console.log("product tk to chlaa");
+    navigate('/checkout');
   }
 
   useEffect(() => {
@@ -371,7 +398,7 @@ export default function ProductPage() {
                     <span>Add to Cart</span>
                   </button>
                 )}
-                <button className="w-full px-6 py-3 bg-gray-800 text-white font-semibold rounded-lg shadow-md hover:bg-gray-900 transition-transform transform hover:scale-105">
+                <button onClick={handleBuyNow} className="w-full px-6 py-3 bg-gray-800 text-white font-semibold rounded-lg shadow-md hover:bg-gray-900 transition-transform transform hover:scale-105">
                   Buy Now
                 </button>
               </div>

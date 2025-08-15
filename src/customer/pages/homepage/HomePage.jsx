@@ -9,7 +9,7 @@ const HomePage = () => {
       <CarouselHome />
       <div>
         <HomeCategoryGrid />
-        <HorizontalProductCarousel />
+        {/* <HorizontalProductCarousel /> */}
         <InfinitePaging title={"Latest Products"} sort={"createdAt,desc"} size={10} />
       </div>
     </div>
