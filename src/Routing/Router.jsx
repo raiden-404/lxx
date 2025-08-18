@@ -14,6 +14,7 @@ import TokenCheck from "../reusables/TokenCheck";
 import Wishlist from "../customer/pages/WishlistPage/WishlistPage";
 import CheckoutPage from "../customer/pages/CheckoutPage/CheckoutPage";
 import MyOrdersPage from "../customer/pages/OrderPage/MyOrdersPage";
+import OrderPage from "../customer/pages/OrderPage/OrderPage";
 
 const Router = createBrowserRouter([
     {
@@ -71,6 +72,10 @@ const Router = createBrowserRouter([
             {
                 path: "my-orders",
                 element: <MyOrdersPage />
+            },
+            {
+                path: "my-orders/order/:orderId",
+                element: <OrderPage />
             }
         ]
     },

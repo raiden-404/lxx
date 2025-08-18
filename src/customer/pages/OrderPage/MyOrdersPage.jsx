@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import Cookies from "js-cookie";
 import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 
 // This function returns the appropriate Tailwind CSS classes for each order status.
@@ -31,6 +32,7 @@ const OrderItem = ({ order }) => {
 
   return (
     <article className="bg-white rounded-xl shadow-md overflow-hidden mb-6 transition-transform duration-300 hover:scale-[1.02] hover:shadow-lg">
+      <Link to={`order/${id}`} >
       <div className="p-6">
         {/* --- Card Header: Status and Order ID --- */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
@@ -78,6 +80,7 @@ const OrderItem = ({ order }) => {
             <span className="text-lg font-bold text-gray-900">$₹{totalPrice.toFixed(2)}</span>
         </div>
       </div>
+      </Link>
     </article>
   );
 };
