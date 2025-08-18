@@ -341,9 +341,6 @@ export default function ProductPage() {
     setRelatedProducts(result);
   };
 
-  useEffect(() => {
-    console.log(product);
-  });
 
   return (
     <div className="bg-gray-50 font-sans">

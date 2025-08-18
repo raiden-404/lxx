@@ -1,5 +1,16 @@
-import { MapPinHouse, Pencil } from "lucide-react";
-
+import {
+  Building,
+  Clock,
+  Ellipsis,
+  House,
+  Mailbox,
+  MapPinHouse,
+  Pencil,
+  Trash2,
+  Truck,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import Cookies from "js-cookie";
 
 // --- Input Component ---
 const InputField = ({ name, value, onChange, placeholder, label }) => (
@@ -22,103 +33,450 @@ const InputField = ({ name, value, onChange, placeholder, label }) => (
   </div>
 );
 
-const AddressStep = ({
-  formData,
-  savedAddresses,
-  handleChange,
-  nextStep,
-  isAddingNew,
-  setIsAddingNew,
-  handleUseCurrentLocation,
-  handleEditAddress,
-}) => {
-  const { newAddress } = formData;
-  const formIsValid =
-    newAddress.email &&
-    newAddress.fullName &&
-    newAddress.address &&
-    newAddress.city &&
-    newAddress.zipCode;
-  const canProceed = !isAddingNew || formIsValid;
-  const AddressForm = () => (
+const AddressForm = ({ setIsAddNewAddress, savedAddress }) => {
+  //Input fields of Form
+  const [name, setName] = useState(null);
+  const [houseNoOrName, setHouseNoOrName] = useState(null);
+  const [street, setStreet] = useState(null);
+  const [city, setCity] = useState(null);
+  const [landmark, setLandmark] = useState(null);
+  const [phone, setPhone] = useState(null);
+  const [state, setState] = useState("");
+  const [zip, setZip] = useState(null);
+  const [country] = useState("INDIA");
+  const [addressType, setAddressType] = useState("RESIDENTIAL");
+
+  //Address Type options
+  const options = [
+    { id: "RESIDENTIAL", icon: <House size={18} />, description: "Home" },
+    { id: "BUSINESS", icon: <Building size={18} />, description: "Office" },
+    { id: "MAILING", icon: <Mailbox size={18} />, description: "Gifting" },
+    { id: "OTHER", icon: <Ellipsis size={18} />, description: "Other" },
+  ];
+
+  //Option for States
+  const indianStates = [
+    "Andhra Pradesh",
+    "Arunachal Pradesh",
+    "Assam",
+    "Bihar",
+    "Chhattisgarh",
+    "Goa",
+    "Gujarat",
+    "Haryana",
+    "Himachal Pradesh",
+    "Jharkhand",
+    "Karnataka",
+    "Kerala",
+    "Madhya Pradesh",
+    "Maharashtra",
+    "Manipur",
+    "Meghalaya",
+    "Mizoram",
+    "Nagaland",
+    "Odisha",
+    "Punjab",
+    "Rajasthan",
+    "Sikkim",
+    "Tamil Nadu",
+    "Telangana",
+    "Tripura",
+    "Uttar Pradesh",
+    "Uttarakhand",
+    "West Bengal",
+    "Andaman and Nicobar Islands",
+    "Chandigarh",
+    "Dadra and Nagar Haveli and Daman and Diu",
+    "Delhi",
+    "Jammu and Kashmir",
+    "Ladakh",
+    "Lakshadweep",
+    "Puducherry",
+  ];
+
+  const saveAddressToBackend = async () => {
+    //Api end point for setting address
+    const apiUri = "http://localhost:8080/user/set-address";
+    //Jwt token
+    const jwtToken = Cookies.get("jwtToken");
+
+    if (
+      jwtToken &&
+      name &&
+      houseNoOrName &&
+      street &&
+      city &&
+      phone &&
+      state &&
+      zip &&
+      country &&
+      addressType
+    ) {
+      //Obj to send on api to save
+      const address = {
+        name: name,
+        houseNoOrName: houseNoOrName,
+        street: street,
+        city: city,
+        landmark: landmark,
+        phone: phone,
+        state: state,
+        zip: zip,
+        country: "INDIA",
+        addressType: addressType,
+      };
+
+      //Fetch method - get response
+      const response = await fetch(apiUri, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${jwtToken}`,
+        },
+        body: JSON.stringify(address),
+      });
+
+      if (response.ok) {
+        console.log("Save hogya address");
+        console.log(response.json());
+      }
+    } else {
+      console.log("Fill all fields || Login ");
+    }
+  };
+
+  return (
     <div className="space-y-4 mt-4 animate-fade-in">
       <button
-        onClick={handleUseCurrentLocation}
-        className="w-full flex items-center justify-center gap-2 text-pink-600 font-semibold border-2 border-pink-200 bg-pink-50 rounded-lg py-2.5 mb-2 hover:bg-pink-100 transition-colors"
+        // onClick={handleUseCurrentLocation}
+        className="w-full flex items-center justify-center gap-2 text-pink-600 font-semibold border-2 border-pink-200 bg-pink-50 rounded-lg py-2.5 mb-8 hover:bg-pink-100 transition-colors"
       >
         <MapPinHouse />
         Use Current Location
       </button>
-      <InputField
-        name="email"
-        value={newAddress.email}
-        onChange={handleChange}
-        label="Email Address"
-        placeholder="you@example.com"
-      />
-      <InputField
-        name="fullName"
-        value={newAddress.fullName}
-        onChange={handleChange}
-        label="Full Name"
-        placeholder="John Doe"
-      />
-      <InputField
-        name="address"
-        value={newAddress.address}
-        onChange={handleChange}
-        label="Address"
-        placeholder="123 Main St"
-      />
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <InputField
-          name="city"
-          value={newAddress.city}
-          onChange={handleChange}
-          label="City"
-          placeholder="Anytown"
-        />
-        <InputField
-          name="zipCode"
-          value={newAddress.zipCode}
-          onChange={handleChange}
-          label="ZIP Code"
-          placeholder="12345"
-        />
+
+      {/* Name */}
+      <div className="flex flex-col gap-8">
+        <div className="relative">
+          <input
+            id="name"
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="peer h-10 w-full border-0 border-b-2 border-gray-300 bg-transparent px-1 text-gray-900 placeholder-transparent outline-none ring-0 transition-colors focus:border-pink-600"
+            placeholder="Name"
+          />
+          <label
+            htmlFor="name"
+            className="absolute left-1 -top-3.5 cursor-text text-xs text-gray-500 transition-all 
+                   peer-placeholder-shown:top-2 peer-placeholder-shown:text-base 
+                   peer-focus:-top-3.5 peer-focus:text-xs peer-focus:text-pink-600"
+          >
+            Name *
+          </label>
+        </div>
+
+        {/* Phone number */}
+        <div className="relative">
+          <input
+            id="phone"
+            type="text"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            className="peer h-10 w-full border-0 border-b-2 border-gray-300 bg-transparent px-1 text-gray-900 placeholder-transparent outline-none ring-0 transition-colors focus:border-pink-600"
+            placeholder="Phone"
+          />
+          <label
+            htmlFor="phone"
+            className="absolute left-1 -top-3.5 cursor-text text-xs text-gray-500 transition-all 
+                   peer-placeholder-shown:top-2 peer-placeholder-shown:text-base 
+                   peer-focus:-top-3.5 peer-focus:text-xs peer-focus:text-pink-600"
+          >
+            Contact Number *
+          </label>
+        </div>
+
+        {/* For house no. or name */}
+        <div className="relative">
+          <input
+            id="houseNo"
+            type="text"
+            value={houseNoOrName}
+            onChange={(e) => setHouseNoOrName(e.target.value)}
+            className="peer h-10 w-full border-0 border-b-2 border-gray-300 bg-transparent px-1 text-gray-900 placeholder-transparent outline-none ring-0 transition-colors focus:border-pink-600"
+            placeholder="House no. / Building Name"
+          />
+          <label
+            htmlFor="houseNo"
+            className="absolute left-1 -top-3.5 cursor-text text-xs text-gray-500 transition-all 
+                   peer-placeholder-shown:top-2 peer-placeholder-shown:text-base 
+                   peer-focus:-top-3.5 peer-focus:text-xs peer-focus:text-pink-600"
+          >
+            House no. / Building Name *
+          </label>
+        </div>
+
+        {/* Street */}
+        <div className="relative">
+          <input
+            id="street"
+            type="text"
+            value={street}
+            onChange={(e) => setStreet(e.target.value)}
+            className="peer h-10 w-full border-0 border-b-2 border-gray-300 bg-transparent px-1 text-gray-900 placeholder-transparent outline-none ring-0 transition-colors focus:border-pink-600"
+            placeholder="Road name / Area / Colony"
+          />
+          <label
+            htmlFor="street"
+            className="absolute left-1 -top-3.5 cursor-text text-xs text-gray-500 transition-all 
+                   peer-placeholder-shown:top-2 peer-placeholder-shown:text-base 
+                   peer-focus:-top-3.5 peer-focus:text-xs peer-focus:text-pink-600"
+          >
+            Road name / Area / Colony *
+          </label>
+        </div>
+
+        {/* Landmark */}
+        <div className="relative">
+          <input
+            id="landmark"
+            type="text"
+            value={landmark}
+            onChange={(e) => setLandmark(e.target.value)}
+            className="peer h-10 w-full border-0 border-b-2 border-gray-300 bg-transparent px-1 text-gray-900 placeholder-transparent outline-none ring-0 transition-colors focus:border-pink-600"
+            placeholder="Landmark"
+          />
+          <label
+            htmlFor="landmark"
+            className="absolute left-1 -top-3.5 cursor-text text-xs text-gray-500 transition-all 
+                   peer-placeholder-shown:top-2 peer-placeholder-shown:text-base 
+                   peer-focus:-top-3.5 peer-focus:text-xs peer-focus:text-pink-600"
+          >
+            Landmark (Optional)
+          </label>
+        </div>
+
+        {/* City - Pin code */}
+        <div className="flex justify-between">
+          {/* City */}
+          <div className="relative">
+            <input
+              id="city"
+              type="text"
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              className="peer h-10 w-full border-0 border-b-2 border-gray-300 bg-transparent px-1 text-gray-900 placeholder-transparent outline-none ring-0 transition-colors focus:border-pink-600"
+              placeholder="City"
+            />
+            <label
+              htmlFor="city"
+              className="absolute left-1 -top-3.5 cursor-text text-xs text-gray-500 transition-all 
+                   peer-placeholder-shown:top-2 peer-placeholder-shown:text-base 
+                   peer-focus:-top-3.5 peer-focus:text-xs peer-focus:text-pink-600"
+            >
+              City *
+            </label>
+          </div>
+
+          {/* Pincode */}
+          <div className="relative">
+            <input
+              id="zip"
+              type="text"
+              value={zip}
+              onChange={(e) => setZip(e.target.value)}
+              className="peer h-10 w-full border-0 border-b-2 border-gray-300 bg-transparent px-1 text-gray-900 placeholder-transparent outline-none ring-0 transition-colors focus:border-pink-600"
+              placeholder="Pincode"
+            />
+            <label
+              htmlFor="zip"
+              className="absolute left-1 -top-3.5 cursor-text text-xs text-gray-500 transition-all 
+                   peer-placeholder-shown:top-2 peer-placeholder-shown:text-base 
+                   peer-focus:-top-3.5 peer-focus:text-xs peer-focus:text-pink-600"
+            >
+              Pincode *
+            </label>
+          </div>
+        </div>
+
+        {/* state - country */}
+
+        {/* State */}
+        <div className="relative">
+          <select
+            id="state"
+            value={state}
+            onChange={(e) => setState(e.target.value)}
+            // The `peer` and `required` attributes are key to the new logic
+            className="peer h-10 w-full appearance-none border-0 border-b-2 border-gray-300 bg-transparent px-1 text-gray-900 outline-none ring-0 transition-colors focus:border-pink-600"
+            required // This makes the select invalid when the default empty option is selected
+          >
+            {/* This empty option is the "placeholder" */}
+            <option value="" disabled hidden></option>
+            {indianStates.map((state) => (
+              <option key={state} value={state}>
+                {state}
+              </option>
+            ))}
+          </select>
+
+          <label
+            htmlFor="state"
+            className="absolute left-1 -top-3.5 cursor-text text-xs text-gray-500 transition-all
+                   peer-invalid:top-2 peer-invalid:text-base 
+                   peer-focus:-top-3.5 peer-focus:text-xs peer-focus:text-pink-600"
+          >
+            State *
+          </label>
+
+          {/* Custom dropdown arrow */}
+          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+            <svg
+              className="h-4 w-4 fill-current"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 20 20"
+            >
+              <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+            </svg>
+          </div>
+        </div>
+
+        {/* country */}
+        <div className="relative">
+          <input
+            id="country"
+            type="text"
+            value={country}
+            className="peer h-10 w-full border-0 border-b-2 border-gray-300 bg-transparent px-1 text-gray-900 placeholder-transparent outline-none ring-0 transition-colors focus:border-pink-600"
+            placeholder="Country"
+          />
+          <label
+            htmlFor="country"
+            className="absolute left-1 -top-3.5 cursor-text text-xs text-gray-500 transition-all 
+                   peer-placeholder-shown:top-2 peer-placeholder-shown:text-base 
+                   peer-focus:-top-3.5 peer-focus:text-xs peer-focus:text-pink-600"
+          >
+            Country *
+          </label>
+        </div>
+
+        {/* Address Type */}
+
+        <div className="flex gap-2">
+          {options.map((option) => (
+            <label
+              key={option.id}
+              htmlFor={option.id}
+              className={`cursor-pointer flex items-center gap-1 justify-center rounded-full bg-pink-50 py-1 px-3 border-2 transition
+              ${
+                addressType === option.id
+                  ? "border-pink-800 bg-pink-600 text-white"
+                  : "border-pink-200"
+              }`}
+            >
+              {option.icon} {option.description}
+              <input
+                type="radio"
+                id={option.id}
+                name="shape"
+                value={option.id}
+                checked={addressType === option.id}
+                onChange={() => setAddressType(option.id)}
+                className="hidden"
+              />
+            </label>
+          ))}
+        </div>
       </div>
-      <InputField
-        name="phone"
-        value={newAddress.phone}
-        onChange={handleChange}
-        label="Phone (Optional)"
-        placeholder="+1 (555) 123-4567"
-      />
-      {savedAddresses.length > 0 && (
+
+      {savedAddress.length > 0 && (
         <button
-          onClick={() => setIsAddingNew(false)}
+          onClick={() => setIsAddNewAddress(false)}
           className="text-sm text-gray-600 hover:text-gray-900"
         >
           &larr; Back to saved addresses
         </button>
       )}
+      <button
+        onClick={() => {
+          saveAddressToBackend(), setIsAddNewAddress(false);
+        }}
+        className="w-full bg-pink-600 text-white font-bold py-3 px-4 rounded-lg mt-8 hover:bg-pink-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+      >
+        Save Address
+      </button>
     </div>
   );
+};
 
+const AddressStep = ({setStep, addressId, setAddressId}) => {
+  const [savedAddress, setSavedAddress] = useState([]);
+  const [isAddNewAddress, setIsAddNewAddress] = useState(false);
+  const [loadAddress, setLoadAddress] = useState(0);
+
+  useEffect(() => {
+    fetchSavedAddresses();
+  }, [isAddNewAddress, loadAddress]);
+
+  //It fetch all saved address from server
+  const fetchSavedAddresses = async () => {
+    //Api end point do get all saved address related to user
+    const apiUri = "http://localhost:8080/user/get-addresses";
+
+    //Jwt token
+    const jwtToken = Cookies.get("jwtToken");
+
+    if (jwtToken) {
+      try {
+        const response = await fetch(apiUri, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${jwtToken}`,
+          },
+        });
+
+        const result = await response.json();
+
+        setSavedAddress(result);
+      } catch (error) {
+        console.log("Error while fetching saved addresse ", error);
+      }
+    }
+  };
+
+
+  //Remove address from server
+  const removeSavedAddress = async (addressId) => {
+    const baseUri = "http://localhost:8080/user/remove-address";
+    const queryUri = new URLSearchParams({id:addressId});
+    const fullUri = `${baseUri}?${queryUri}`;
+    const jwtToken = Cookies.get("jwtToken");
+    if(jwtToken && addressId) {
+      const response = await fetch(fullUri, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${jwtToken}`,
+        },
+      });
+      if(response.ok) {
+        setLoadAddress(loadAddress+1);
+      }
+    }
+  }
   return (
-    // <----Debugger------------------------------------------------------------------
     <div className="animate-fade-in">
       <h2 className="text-2xl font-bold text-gray-800 mb-6">
         Shipping Address
       </h2>
 
-      {!isAddingNew ? (
+      {savedAddress.length > 0 && !isAddNewAddress ? (
         <div className="space-y-4">
-          {savedAddresses.map((addr) => (
+          {savedAddress.map((addr) => (
             <div
-              key={addr.id}
+              key={addr.addressId}
               className={`flex items-start p-4 border rounded-lg transition-all ${
-                formData.selectedAddressId === addr.id
-                  ? "border-blue-500 ring-2 ring-blue-500"
+                addressId === addr.addressId
+                  ? "border-pink-500 ring-2 ring-pink-500"
                   : "border-gray-300"
               }`}
             >
@@ -126,47 +484,61 @@ const AddressStep = ({
                 <input
                   type="radio"
                   name="selectedAddressId"
-                  value={addr.id}
-                  checked={formData.selectedAddressId === addr.id}
-                  onChange={handleChange}
-                  className="h-5 w-5 mt-1 text-blue-600 focus:ring-blue-500"
+                  value={addr.addressId}
+                  onChange={() => setAddressId(addr.addressId)}
+                  className="h-5 w-5 mt-1 hidden text-blue-600 focus:ring-blue-500"
                 />
                 <div className="ml-4">
-                  <p className="font-semibold text-gray-800">{addr.fullName}</p>
+                  <p className="font-semibold text-gray-800">
+                    {addr.name} ({addr.phone})
+                  </p>
                   <p className="text-sm text-gray-600">
-                    {addr.address}, {addr.city}, {addr.zipCode}
+                    {addr.houseNoOrName} / {addr.street} / {addr.city},{" "}
+                    {addr.zip}
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    {addr.state} / {addr.country}
                   </p>
                 </div>
               </label>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleEditAddress(addr.id);
-                }}
-                className="ml-4 p-2 text-gray-500 hover:text-blue-600"
-              >
-                <Pencil />
-              </button>
+              {addressId === addr.addressId ? (
+                <div className="flex flex-col justify-between gap-5 items-end">
+                  <button
+                    className="text-gray-500 hover:text-pink-600"
+                  >
+                    <Pencil size={20} />
+                  </button>
+                  <button
+                  onClick={() => (removeSavedAddress(addressId))} 
+                  className="text-gray-600 hover:text-pink-600">
+                    <Trash2 size={20} />
+                  </button>
+                </div>
+              ) : (
+                <></>
+              )}
             </div>
           ))}
           <button
-            onClick={() => setIsAddingNew(true)}
-            className="w-full text-blue-600 font-semibold border-2 border-blue-500 rounded-lg py-2 mt-4 hover:bg-blue-50 transition-colors"
+            onClick={() => setIsAddNewAddress(true)}
+            className="w-full text-pink-600 font-semibold border-2 border-pink-500 rounded-lg py-2 mt-4 hover:bg-pink-50 transition-colors"
           >
             + Add a New Address
           </button>
+          <button
+            onClick={() => setStep("Payment")}
+            disabled={addressId === ''}
+            className="w-full bg-pink-600 text-white font-bold py-3 px-4 rounded-lg mt-8 hover:bg-pink-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+          >
+            Continue to Payment
+          </button>
         </div>
       ) : (
-        <AddressForm />
+        <AddressForm
+          setIsAddNewAddress={setIsAddNewAddress}
+          savedAddress={savedAddress}
+        />
       )}
-
-      <button
-        onClick={nextStep}
-        disabled={!canProceed}
-        className="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg mt-8 hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
-      >
-        Continue to Payment
-      </button>
     </div>
   );
 };

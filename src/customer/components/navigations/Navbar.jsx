@@ -397,7 +397,7 @@ const Navbar = () => {
                         profileList && 
                     <div id="profile-list" className="border-2 border-gray-300 top-10 absolute overflow-hidden max-w-64 bg-white rounded-2xl w-[95%]">
                       <ul className="flex flex-col justify-center">
-                        <Link to="/Orders"><li className="flex items-end gap-1 hover:bg-gray-100 px-5 py-2 pt-4 "><Package size={18} />My Orders</li></Link>
+                        <Link to="/my-orders"><li className="flex items-end gap-1 hover:bg-gray-100 px-5 py-2 pt-4 "><Package size={18} />My Orders</li></Link>
                         <Link to="/wishlist"><li className="flex items-end gap-1 hover:bg-gray-100 px-5 py-2 "><Heart size={17} stroke="red"/>Wishlist ({wishlist.length || 0})</li></Link>
                         <Link to="/logout"><li className="flex items-end gap-1 hover:bg-gray-100 px-5 py-2 pb-4"><LogOut size={17}  />Logout</li></Link>
                       </ul>

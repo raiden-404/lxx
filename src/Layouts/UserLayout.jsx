@@ -2,7 +2,7 @@ import { Outlet } from "react-router-dom";
 import Navbar from "../customer/components/navigations/Navbar";
 import { useEffect } from "react";
 import Cookies from "js-cookie";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch} from "react-redux";
 import { updateUser } from "../features/user/userSlice";
 import ScrollToTop from "../reusables/ScrollToTop";
 import { updateCart } from "../features/cart/cartSlice";
@@ -17,12 +17,6 @@ const UserLayout = () => {
     fetchCart();
     fethWishlist();
   }, []);
-  const w = useSelector(state => state.wishlist.items);
-
-  useEffect(() => {
-    console.log(w);
-
-  })
   
   //Fetching User Profile Data and store in Redux Store
   const fetchUser = async () => {
