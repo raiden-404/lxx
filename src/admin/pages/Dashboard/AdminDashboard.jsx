@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useRef } from 'react';
 
 // --- SVG Icon Components ---
 // A collection of icons for different sections of the dashboard.
@@ -33,11 +33,10 @@ const StarIcon = ({ className = "w-4 h-4" }) => (
     </svg>
 );
 
-
 // --- Individual Dashboard Components ---
 
 const StatCard = ({ icon, title, value, change, changeType, color }) => (
-    <div className={`relative overflow-hidden bg-black p-6 rounded-2xl border border-gray-900`}>
+    <div className={`relative overflow-hidden bg-black/70 backdrop-blur-sm p-6 rounded-2xl border border-gray-900`}>
         <div className={`absolute -top-4 -right-4 w-24 h-24 rounded-full bg-${color}-500/20 blur-2xl`}></div>
         <div className="relative z-10">
             <div className={`bg-gray-900 border border-gray-800 w-12 h-12 flex items-center justify-center rounded-full text-${color}-400`}>
@@ -54,44 +53,116 @@ const StatCard = ({ icon, title, value, change, changeType, color }) => (
     </div>
 );
 
+// Helper function to create a smooth SVG path for the chart
+const createSmoothPath = (points) => {
+    const line = (pointA, pointB) => {
+        const lengthX = pointB[0] - pointA[0];
+        const lengthY = pointB[1] - pointA[1];
+        return {
+            length: Math.sqrt(Math.pow(lengthX, 2) + Math.pow(lengthY, 2)),
+            angle: Math.atan2(lengthY, lengthX)
+        };
+    };
+    const controlPoint = (current, previous, next, reverse) => {
+        const p = previous || current;
+        const n = next || current;
+        const smoothing = 0;
+        const o = line(p, n);
+        const angle = o.angle + (reverse ? Math.PI : 0);
+        const length = o.length * smoothing;
+        const x = current[0] + Math.cos(angle) * length;
+        const y = current[1] + Math.sin(angle) * length;
+        return [x, y];
+    };
+    const bezierCommand = (point, i, a) => {
+        const cps = controlPoint(a[i - 1], a[i - 2], point);
+        const cpe = controlPoint(point, a[i - 1], a[i + 1], true);
+        return `C ${cps[0]},${cps[1]} ${cpe[0]},${cpe[1]} ${point[0]},${point[1]}`;
+    };
+    return points.reduce((acc, point, i, a) => 
+        i === 0 ? `M ${point[0]},${point[1]}` : `${acc} ${bezierCommand(point, i, a)}`, ''
+    );
+};
+
 const RevenueChart = () => {
-    // Mock data points [x, y] for the trade graph
-    const dataPoints = [
-        [0, 80], [40, 60], [80, 75], [120, 50], [160, 65], [200, 40], [240, 55], [280, 30], [320, 45]
-    ];
-    
-    // Create the string for the polyline
-    const polylinePoints = dataPoints.map(p => p.join(',')).join(' ');
-    // Create the path for the filled area underneath the line
-    const areaPath = `M ${dataPoints[0][0]},100 ` + polylinePoints + ` L ${dataPoints[dataPoints.length - 1][0]},100 Z`;
+    const [tooltip, setTooltip] = useState(null);
+    const svgRef = useRef(null);
+
+    // Mock data points [x, y]
+    const monthlyData = [[0, 80], [40, 60], [80, 75], [120, 50], [160, 65], [200, 40], [240, 55], [280, 30], [320, 45]];
+    const overallData = [[0, 70], [40, 65], [80, 68], [120, 60], [160, 55], [200, 50], [240, 48], [280, 40], [320, 35]];
+
+    const overallPath = createSmoothPath(overallData);
+    const monthlyPath = createSmoothPath(monthlyData);
+    const areaPath = `${monthlyPath} L ${monthlyData[monthlyData.length - 1][0]},100 L ${monthlyData[0][0]},100 Z`;
+
+    const handleMouseMove = (event) => {
+        if (!svgRef.current) return;
+        const svg = svgRef.current;
+        const rect = svg.getBoundingClientRect();
+        const mouseX = event.clientX - rect.left;
+        
+        const svgX = (mouseX / rect.width) * 320; // 320 is the viewBox width
+        
+        // Find the closest data point
+        const index = Math.min(Math.max(Math.round((svgX / 320) * (monthlyData.length - 1)), 0), monthlyData.length - 1);
+        const monthlyPoint = monthlyData[index];
+        const overallPoint = overallData[index];
+
+        setTooltip({
+            x: monthlyPoint[0],
+            monthlyY: monthlyPoint[1],
+            overallY: overallPoint[1],
+            monthlyValue: 100 - monthlyPoint[1], // Invert Y for value
+            overallValue: 100 - overallPoint[1],
+            displayX: mouseX,
+        });
+    };
+
+    const handleMouseLeave = () => {
+        setTooltip(null);
+    };
 
     return (
-        <div className="bg-black p-6 rounded-2xl border border-gray-900 h-[400px] flex flex-col">
+        <div className="bg-black/70 backdrop-blur-sm p-6 rounded-2xl border border-gray-900 flex flex-col">
             <div className="flex items-center justify-between">
                 <div>
-                    <h3 className="text-lg font-semibold text-white">Monthly Revenue</h3>
-                    <p className="text-sm text-gray-500">Last 30 Days</p>
+                    <h3 className="text-lg font-semibold text-white">Revenue Analysis</h3>
+                    <div className="flex items-center space-x-4 text-sm mt-1">
+                        <div className="flex items-center space-x-2"><div className="w-3 h-3 rounded-full bg-pink-500"></div><span className="text-gray-400">Last 30 Days</span></div>
+                        <div className="flex items-center space-x-2"><div className="w-3 h-3 rounded-full bg-cyan-500"></div><span className="text-gray-400">Overall</span></div>
+                    </div>
                 </div>
                 <button className="flex items-center space-x-2 text-sm text-gray-400 bg-gray-900 border border-gray-800 px-3 py-1.5 rounded-lg hover:bg-gray-800">
-                    <span>Monthly</span>
-                    <ChevronDownIcon />
+                    <span>Monthly</span><ChevronDownIcon />
                 </button>
             </div>
-            <div className="flex-grow mt-4 relative">
-                <svg width="100%" height="100%" viewBox="0 0 320 100" preserveAspectRatio="none">
+            <div className="flex-grow mt-4 relative" onMouseMove={handleMouseMove} onMouseLeave={handleMouseLeave}>
+                <svg ref={svgRef} width="100%" height="100%" viewBox="0 0 320 100" preserveAspectRatio="none">
                     <defs>
                         <linearGradient id="pinkGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                            <stop offset="0%" style={{ stopColor: '#ec4899', stopOpacity: 0.4 }} />
+                            <stop offset="0%" style={{ stopColor: '#ec4899', stopOpacity: 0.3 }} />
                             <stop offset="100%" style={{ stopColor: '#ec4899', stopOpacity: 0 }} />
                         </linearGradient>
                     </defs>
                     <path d={areaPath} fill="url(#pinkGradient)" />
-                    <polyline fill="none" stroke="#ec4899" strokeWidth="2" points={polylinePoints} />
-                    {dataPoints.map(([x, y], i) => (
-                        <circle key={i} cx={x} cy={y} r="3" fill="#ec4899" stroke="#000" strokeWidth="1.5" />
-                    ))}
+                    <path d={monthlyPath} fill="none" stroke="#ec4899" strokeWidth="0.5" />
+                    <path d={overallPath} fill="none" stroke="#06b6d4" strokeWidth="0.5" />
+                    {tooltip && (
+                        <g>
+                            <line x1={tooltip.x} y1="0" x2={tooltip.x} y2="100" stroke="#4b5563" strokeWidth="0.5" strokeDasharray="2 1" />
+                            <circle cx={tooltip.x} cy={tooltip.monthlyY} r="1" fill="#ec4899" stroke="#000" strokeWidth="0.2" />
+                            <circle cx={tooltip.x} cy={tooltip.overallY} r="1" fill="#06b6d4" stroke="#000" strokeWidth="0.2" />
+                        </g>
+                    )}
                 </svg>
-                <div className="absolute inset-0 flex flex-col justify-between text-xs text-gray-600">
+                {tooltip && (
+                    <div className="absolute top-0 p-2 bg-gray-900/80 border border-gray-800 rounded-lg text-xs pointer-events-none" style={{ left: `${tooltip.displayX + 15}px`, transform: 'translateY(-50%)' }}>
+                        <p className="text-pink-400 font-semibold">30 Days: ${tooltip.monthlyValue.toFixed(0)}k</p>
+                        <p className="text-cyan-400 font-semibold">Overall: ${tooltip.overallValue.toFixed(0)}k</p>
+                    </div>
+                )}
+                <div className="absolute inset-0 flex flex-col justify-between text-xs text-gray-600 pointer-events-none">
                     {[...Array(5)].map((_, i) => <div key={i} className="w-full border-t border-gray-900"></div>)}
                 </div>
             </div>
@@ -107,7 +178,7 @@ const TopProducts = () => {
         { name: "Mechanical Gaming Keyboard", sold: 156, img: "https://placehold.co/100x100/ec4899/000000?text=⌨️" },
     ];
     return (
-        <div className="bg-black p-6 rounded-2xl border border-gray-900 h-full">
+        <div className="bg-black/70 backdrop-blur-sm p-6 rounded-2xl border border-gray-900 h-full">
             <h3 className="text-lg font-semibold text-white mb-4">Top Products This Month</h3>
             <div className="space-y-4">
                 {products.map(p => (
@@ -131,7 +202,7 @@ const RecentReviews = () => {
         { name: "Chen Wei", rating: 5, comment: "Incredible value for the price. Highly recommended." },
     ];
     return (
-        <div className="bg-black p-6 rounded-2xl border border-gray-900 h-full">
+        <div className="bg-black/70 backdrop-blur-sm p-6 rounded-2xl border border-gray-900 h-full">
             <h3 className="text-lg font-semibold text-white mb-4">Recent Customer Reviews</h3>
             <div className="space-y-5">
                 {reviews.map(r => (
@@ -152,7 +223,7 @@ const RecentReviews = () => {
 };
 
 const GeoSales = () => (
-    <div className="bg-black p-6 rounded-2xl border border-gray-900 h-full flex flex-col">
+    <div className="bg-black/70 backdrop-blur-sm p-6 rounded-2xl border border-gray-900 h-full flex flex-col">
         <h3 className="text-lg font-semibold text-white mb-4">Sales by Region</h3>
         <div className="flex-grow bg-gray-900 rounded-lg flex items-center justify-center">
             <p className="text-gray-600">[World Map Visualization]</p>
@@ -169,7 +240,7 @@ const TopStates = () => {
         { name: "Illinois", sales: 650 },
     ];
     return (
-        <div className="bg-black p-6 rounded-2xl border border-gray-900 h-full flex flex-col">
+        <div className="bg-black/70 backdrop-blur-sm p-6 rounded-2xl border border-gray-900 h-full flex flex-col">
             <h3 className="text-lg font-semibold text-white mb-4">Top States by Sales</h3>
             <div className="space-y-3 flex-grow">
                 {states.map(s => (
@@ -187,7 +258,14 @@ const TopStates = () => {
 // --- Dashboard Page Component ---
 export default function Dashboard() {
   return (
-    <div className="space-y-6">
+    <div 
+        className="space-y-6 p-1 rounded-2xl" 
+        style={{
+            backgroundImage: `url('https://images.unsplash.com/photo-1531685250784-7569952593d2?auto=format&fit=crop&q=80')`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center'
+        }}
+    >
       {/* Top row with stat cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard icon={<DollarSignIcon />} title="Monthly Revenue" value="$58,372" change="+12.8%" changeType="increase" color="green" />
@@ -197,9 +275,7 @@ export default function Dashboard() {
       </div>
 
       {/* Full-width revenue chart */}
-      <div>
-        <RevenueChart />
-      </div>
+      <RevenueChart />
 
       {/* Top Products and Reviews side-by-side */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

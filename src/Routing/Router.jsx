@@ -15,6 +15,8 @@ import CheckoutPage from "../customer/pages/CheckoutPage/CheckoutPage";
 import MyOrdersPage from "../customer/pages/OrderPage/MyOrdersPage";
 import OrderPage from "../customer/pages/OrderPage/OrderPage";
 import AdminDashboard from "../admin/pages/Dashboard/AdminDashboard";
+import AdminOrdersPage from "../admin/pages/OrderPage/AdminOrdersPage";
+import AdminOrderDetailePage from "../admin/pages/OrderPage/AdminOrderDetailPage";
 
 const Router = createBrowserRouter([
     {
@@ -86,6 +88,14 @@ const Router = createBrowserRouter([
             {
                 index: true,
                 element: <AdminDashboard/>
+            },
+            {
+                path: "/admin/orders",
+                element: <AdminOrdersPage />
+            },
+            {
+                path: "/admin/order/:orderId",
+                element: <AdminOrderDetailePage />
             }
         ]
         

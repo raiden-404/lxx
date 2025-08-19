@@ -412,7 +412,7 @@ const Navbar = () => {
                 {/* Seller Option */}
                 <div className="hidden lg:ml-8 lg:flex">
                   <Link
-                    to="/seller"
+                    to="/admin"
                     onClick={() => setShowSearch(false)}
                     className="flex items-center text-gray-700 hover:text-gray-800"
                   >

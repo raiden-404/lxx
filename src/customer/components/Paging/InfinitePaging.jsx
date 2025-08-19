@@ -9,7 +9,6 @@ const InfinitePaging = ({ title, sort, size }) => {
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
 
-  // 2. Redux Integration (As per your request, this is NOT corrected)
   const cart = useSelector(state => state.cart.items);
   const wishlist = useSelector(state => state.wishlist.items);
 
