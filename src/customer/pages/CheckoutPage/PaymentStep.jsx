@@ -1,4 +1,4 @@
-import { Lock } from "lucide-react";
+import { Circle, Loader, Loader2, LoaderPinwheel, Lock } from "lucide-react";
 import React, { useState } from "react";
 
 // SVG Icon Component for UPI
@@ -38,7 +38,12 @@ const CodIcon = () => (
 );
 
 // Main PaymentStep Component
-const PaymentStep = ({setStep, total, setPaymentMethod, handlePlaceOrder}) => {
+const PaymentStep = ({
+  setStep,
+  total,
+  setPaymentMethod,
+  handlePlaceOrder,
+}) => {
   // State to track the selected payment method.
   const [selectedOption, setSelectedOption] = useState(null);
 
@@ -56,10 +61,12 @@ const PaymentStep = ({setStep, total, setPaymentMethod, handlePlaceOrder}) => {
     buttonColor,
   }) => {
     const isSelected = selectedOption === id;
+    const [isLoading, setIsLoading] = useState(false);
 
     const handleButtonClick = (e) => {
       e.stopPropagation(); // Prevent the parent div's onClick from firing
       handlePlaceOrder();
+      setIsLoading(true);
     };
 
     return (
@@ -72,16 +79,23 @@ const PaymentStep = ({setStep, total, setPaymentMethod, handlePlaceOrder}) => {
               : "border-gray-200 bg-white hover:border-teal-300 hover:shadow-md"
           }
         `}
-        onClick={() => {setSelectedOption((prev) => (prev === id ? null : id)), setPaymentMethod(id)}}
+        onClick={() => {
+          setSelectedOption((prev) => (prev === id ? null : id)),
+            setPaymentMethod(id);
+        }}
       >
         <div className="flex items-center space-x-4">
           {icon}
           <div>
             <div className="flex h-7 items-center gap-2">
-            <h3 className="font-bold text-lg text-gray-800">{title}</h3>
-            <div className="object-contain relative">
-                <img className=" h-6 rounded-full" src="https://ecards.hypupad.com/wp-content/uploads/2021/01/payment-logo-icons-1024x272.png" alt="" />
-            </div>
+              <h3 className="font-bold text-lg text-gray-800">{title}</h3>
+              <div className="object-contain relative">
+                <img
+                  className=" h-6 rounded-full"
+                  src="https://ecards.hypupad.com/wp-content/uploads/2021/01/payment-logo-icons-1024x272.png"
+                  alt=""
+                />
+              </div>
             </div>
             <p className="text-sm text-gray-500">{subtitle}</p>
           </div>
@@ -93,16 +107,26 @@ const PaymentStep = ({setStep, total, setPaymentMethod, handlePlaceOrder}) => {
             isSelected ? "max-h-40 mt-6 pt-4 border-t" : "max-h-0"
           }`}
         >
-          <p className="text-sm font-semibold text-gray-600 mb-4">{description}</p>
+          <p className="text-sm font-semibold text-gray-600 mb-4">
+            {description}
+          </p>
           <button
+            disabled={isLoading}
             className={`
-                w-full flex gap-3 justify-center py-3 px-4 rounded-lg text-white font-semibold 
+                w-full flex gap-3 disabled:cursor-not-allowed justify-center py-3 px-4 rounded-lg text-white font-semibold 
                 
                 ${buttonColor}
               `}
             onClick={handleButtonClick}
           >
-            <Lock size={22} />{buttonText}
+            {isLoading ? (
+              <Loader2 className="animate-spin" />
+            ) : (
+              <>
+                <Lock size={22} />
+                {buttonText}
+              </>
+            )}
           </button>
         </div>
       </div>
@@ -119,7 +143,7 @@ const PaymentStep = ({setStep, total, setPaymentMethod, handlePlaceOrder}) => {
         >
           &larr; Back to saved addresses
         </button>
-        
+
         {/* UPI Full Payment Option */}
         <PaymentOption
           id="UPI"
@@ -127,7 +151,7 @@ const PaymentStep = ({setStep, total, setPaymentMethod, handlePlaceOrder}) => {
           subtitle="Pay the complete amount now"
           icon={<UpiIcon />}
           description="Pay Full Payment Now to Get ₹20 OFF"
-          buttonText={`Place Order & Paynow ₹${total-20}`}
+          buttonText={`Place Order & Paynow ₹${total - 20}`}
           buttonColor="bg-green-600 hover:bg-green-700"
         />
 
@@ -137,8 +161,10 @@ const PaymentStep = ({setStep, total, setPaymentMethod, handlePlaceOrder}) => {
           title="UPI + COD"
           subtitle="Pay an initial amount now"
           icon={<CodIcon />}
-          description={`Pay 30% ( ₹${(.3*total).toFixed(2)} ) Now, Remaining( ₹${(.7*total).toFixed(2)} ) on COD.`}
-          buttonText={`Place Order & Paynow ₹${(0.3*total).toFixed(2)}`}
+          description={`Pay 30% ( ₹${(0.3 * total).toFixed(
+            2
+          )} ) Now, Remaining( ₹${(0.7 * total).toFixed(2)} ) on COD.`}
+          buttonText={`Place Order & Paynow ₹${(0.3 * total).toFixed(2)}`}
           buttonColor="bg-green-600 hover:bg-green-700"
         />
       </div>

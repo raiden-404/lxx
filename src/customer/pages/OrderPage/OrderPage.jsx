@@ -146,50 +146,6 @@ const ArrowLeft = ({ className }) => (
   </svg>
 );
 
-// --- Mock Data ---
-const orderData = {
-  orderId: "A58104",
-  orderedAt: "August 17, 2025",
-  // MODIFICATION: Set status to 'Ordered' to test the first step
-  orderStatus: "Ordered",
-  items: [
-    {
-      id: 1,
-      name: "Aura Wireless Earbuds",
-      price: 129.99,
-      quantity: 1,
-      image: "https://placehold.co/100x100/1a1a1a/ffffff?text=Aura",
-    },
-    {
-      id: 2,
-      name: "Nebula Smart Watch",
-      price: 279.0,
-      quantity: 1,
-      image: "https://placehold.co/100x100/333333/ffffff?text=Nebula",
-    },
-    {
-      id: 3,
-      name: "Flow USB-C Cable",
-      price: 24.5,
-      quantity: 2,
-      image: "https://placehold.co/100x100/555555/ffffff?text=Flow",
-    },
-  ],
-  summary: { shipping: 5.0, tax: 36.64, total: 499.64 },
-  shippingAddress: {
-    name: "Alex Johnson",
-    address: "123 Tech Lane, Silicon Valley",
-    city: "San Francisco, CA 94105",
-  },
-  tracking: [
-    // MODIFICATION: Updated 'completed' status to match the main order status
-    { status: "Ordered", date: "Aug 15, 2025", completed: true },
-    { status: "Shipped", date: "Aug 16, 2025", completed: false },
-    { status: "Out for Delivery", date: "Aug 17, 2025", completed: false },
-    { status: "Delivered", date: "Aug 17, 2025", completed: false },
-  ],
-};
-
 // --- Child Components ---
 
 const OrderItem = ({ item, onWriteReview }) => {
@@ -496,6 +452,10 @@ const OrderPage = () => {
   useEffect(() => {
     fetchOrderDetails();
   }, [fetchOrderDetails]);
+
+  useEffect(() => {
+    console.log(order);
+  },[order]);
 
   const helpOptions = [
     { label: "Request Refund", action: handleRequestRefund },

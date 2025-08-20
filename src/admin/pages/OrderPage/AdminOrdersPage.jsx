@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 
@@ -54,107 +54,22 @@ const TagIcon = ({ className = "w-4 h-4" }) => (
     />
   </svg>
 );
-
-// --- Mock Data for Orders ---
-const ordersData = [
-  {
-    id: "LX84523",
-    customerName: "John Doe",
-    dateTime: "August 19, 2025 at 3:15 PM",
-    items: [
-      {
-        name: "Headphones",
-        imgUrl: "https://placehold.co/100x100/ec4899/000000?text=🎧",
-      },
-      {
-        name: "Smartwatch",
-        imgUrl: "https://placehold.co/100x100/06b6d4/000000?text=⌚️",
-      },
-    ],
-    totalPrice: 150.0,
-    status: "Processing",
-  },
-  {
-    id: "LX84522",
-    customerName: "Jane Smith",
-    dateTime: "August 19, 2025 at 11:45 AM",
-    items: [
-      {
-        name: "Keyboard",
-        imgUrl: "https://placehold.co/100x100/f59e0b/000000?text=⌨️",
-      },
-      {
-        name: "Camera",
-        imgUrl: "https://placehold.co/100x100/10b981/000000?text=📷",
-      },
-      {
-        name: "Mouse",
-        imgUrl: "https://placehold.co/100x100/6366f1/000000?text=🖱️",
-      },
-      {
-        name: "Webcam",
-        imgUrl: "https://placehold.co/100x100/ef4444/000000?text=📹",
-      },
-      {
-        name: "Microphone",
-        imgUrl: "https://placehold.co/100x100/d946ef/000000?text=🎤",
-      },
-    ],
-    totalPrice: 475.5,
-    status: "Shipped",
-  },
-  {
-    id: "LX84521",
-    customerName: "Peter Jones",
-    dateTime: "August 18, 2025 at 9:30 PM",
-    items: [
-      {
-        name: "Laptop",
-        imgUrl: "https://placehold.co/100x100/84cc16/000000?text=💻",
-      },
-    ],
-    totalPrice: 1250.25,
-    status: "Delivered",
-  },
-  {
-    id: "LX84520",
-    customerName: "Mary Lamb",
-    dateTime: "August 18, 2025 at 1:00 PM",
-    items: [
-      {
-        name: "Smartwatch",
-        imgUrl: "https://placehold.co/100x100/06b6d4/000000?text=⌚️",
-      },
-      {
-        name: "Keyboard",
-        imgUrl: "https://placehold.co/100x100/f59e0b/000000?text=⌨️",
-      },
-      {
-        name: "Mouse",
-        imgUrl: "https://placehold.co/100x100/6366f1/000000?text=🖱️",
-      },
-    ],
-    totalPrice: 242.0,
-    status: "Cancelled",
-  },
-];
-
 const getStatusClass = (status) => {
   switch (status) {
     case "SHIPPED":
-      return "bg-cyan-500/20 text-cyan-400 border-cyan-500/30";
+      return "bg-cyan-500/20 text-cyan-400 border-cyan-500/30 hover:bg-cyan-500/40";
     case "PROCESSING":
-      return "bg-yellow-500/20 text-yellow-400 border-yellow-500/30";
+      return "bg-yellow-500/20 text-yellow-400 border-yellow-500/30 hover:bg-yellow-500/40";
     case "NONDELIVERED":
-      return "bg-green-500/20 text-green-400 border-green-500/30";
+      return "bg-green-500/20 text-green-400 border-green-500/30 hover:bg-green-500/40";
     case "DELIVERED":
-      return "bg-green-500/20 text-green-400 border-green-500/30";
+      return "bg-green-500/20 text-green-400 border-green-500/30 hover:bg-green-500/40";
     case "CANCELLED":
-      return "bg-red-500/20 text-red-400 border-red-500/30";
+      return "bg-red-500/20 text-red-400 border-red-500/30 hover:bg-red-500/40";
     case "RETURNED":
-      return "bg-orange-500/20 text-orange-400 border-orange-500/30";  
+      return "bg-orange-500/20 text-orange-400 border-orange-500/30 hover:bg-orange-500/40";
     default:
-      return "bg-gray-500/20 text-gray-400 border-gray-500/30";
+      return "bg-pink-500/20 text-pink-400 border-pink-500/30 hover:bg-pink-500/40";
   }
 };
 
@@ -249,17 +164,25 @@ const OrderCard = ({ order }) => {
   );
 };
 
+// Loading Spinner at bottom
+const LoadingSpinner = () => (
+  <div className="flex justify-center items-center py-6">
+    <div className="w-8 h-8 border-4 border-dashed rounded-full animate-spin border-pink-500"></div>
+  </div>
+);
+
 // --- Main Orders Page Component ---
 const AdminOrdersPage = () => {
   const [orders, setOrders] = useState([]);
   const [page, setPage] = useState(0);
-  const [forOrderStatus, setForOrderStatus] = useState("PROCESSING");
+  const [forOrderStatus, setForOrderStatus] = useState("");
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(false);
-
+  const navigate = useNavigate();
   const [isStatusListShow, setIsStatusListShow] = useState(false);
   //All order statuses
   const orderStatuses = [
+    {label: "All", value: ""},
     { label: "Ordered", value: "PROCESSING" },
     { label: "Shipped", value: "SHIPPED" },
     { label: "Out For  Devlivery", value: "NONDELIVERED" },
@@ -268,55 +191,86 @@ const AdminOrdersPage = () => {
     { label: "Returned", value: "RETURNED" },
   ];
 
-  //This function fetch the order list data
-  const fetchOrders = useCallback(async () => {
-    const controller = new AbortController();
-    const jwtToken = Cookies.get("jwtToken");
-    if (jwtToken) {
-      setLoading(true);
-      const baseUri = "http://localhost:8080/admin/get-orders";
-
-      //Query uri with params
-      const param = {
-        page: page,
-        size: 20,
-        sort: "orderedAt,desc",
-        orderStatus: forOrderStatus,
-      };
-      const queryUri = new URLSearchParams(param);
-
-      //Full uri
-      const fullUri = `${baseUri}?${queryUri}`;
-
-      try {
-        //fething response
-        const response = await fetch(fullUri, {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${jwtToken}`,
-          },
-          signal: controller.signal,
-        });
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch more orders");
-        }
-
-        const result = await response.json();
-
-        setOrders((prev) => [...prev, ...result.content]);
-        setHasMore(!result.last);
-      } catch (error) {
-        console.log("Failed to fetch : ", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-  }, [page, forOrderStatus, setOrders, setHasMore, setLoading]);
-
   useEffect(() => {
+    //check last page before fetching
+    if (!hasMore) return;
+
+    const controller = new AbortController();
+
+    //This function fetch the order list data
+    const fetchOrders = async () => {
+      const jwtToken = Cookies.get("jwtToken");
+      if (jwtToken) {
+        setLoading(true);
+        const baseUri = "http://localhost:8080/admin/get-orders";
+
+        //Query uri with params
+        const param = {
+          page: page,
+          size: 20,
+          sort: "orderedAt,desc",
+          orderStatus: forOrderStatus,
+        };
+        const queryUri = new URLSearchParams(param);
+
+        //Full uri
+        const fullUri = `${baseUri}?${queryUri}`;
+
+        try {
+          //fething response
+          const response = await fetch(fullUri, {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${jwtToken}`,
+            },
+            signal: controller.signal,
+          });
+
+          if (!response.ok) {
+            throw new Error("Failed to fetch more orders");
+          }
+
+          const result = await response.json();
+
+          setOrders((prev) => [...prev, ...result.content]);
+          setHasMore(!result.last);
+        } catch (error) {
+          // Don't log an error if it was our own abort action
+          if (error.name !== "AbortError") {
+            console.log("Failed to fetch: ", error);
+          }
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        navigate("/login");
+      }
+    };
+
     fetchOrders();
-  }, [fetchOrders]);
+
+    return () => {
+      controller.abort();
+    };
+  }, [page, forOrderStatus, hasMore, navigate]);
+
+  //Effect for infinite scrolling--
+  useEffect(() => {
+    const handleScroll = () => {
+      if (
+        window.innerHeight + document.documentElement.scrollTop + 100 >=
+        document.documentElement.offsetHeight
+      ) {
+        //Only fetch more if there are more pages and we are not already loading
+        if (hasMore && !loading) {
+          setPage((prevPage) => prevPage + 1);
+        }
+      }
+    };
+    window.addEventListener("scroll", handleScroll);
+    //cleanup function to remove the event listener
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [loading, hasMore]);
 
   return (
     <div className="space-y-6">
@@ -334,7 +288,12 @@ const AdminOrdersPage = () => {
           onMouseLeave={() => setIsStatusListShow(false)}
           className="relative bg-black border-2 border-gray-800 me-24 p-2 w-auto rounded-full "
         >
-          <button onClick={() => setIsStatusListShow(true)} className={`px-4 py-1 rounded-full w-60 text-xl font-semibold border ${getStatusClass(forOrderStatus)}`}>
+          <button
+            onClick={() => setIsStatusListShow(true)}
+            className={`px-4 py-1 rounded-full w-60 text-xl font-semibold border ${getStatusClass(
+              forOrderStatus
+            )}`}
+          >
             {orderStatuses.find((s) => s.value === forOrderStatus).label}
           </button>
           <div
@@ -343,7 +302,24 @@ const AdminOrdersPage = () => {
             } border border-gray-800 flex-col bg-black text-nowrap rounded-2xl p-3 items-start gap-2 left-0 mt-[12px] absolute w-full z-30`}
           >
             {orderStatuses.map((s) => (
-              <button onClick={() => {setForOrderStatus(s.value);setOrders([])}} className={`${getStatusClass(s.value)} px-4 py-2 w-full rounded-full ${s.value === forOrderStatus ? "hidden" : ""} border`}>{s.label}</button>
+              <button
+                onClick={() => {
+                  if (forOrderStatus != s.value) {
+                    setForOrderStatus(s.value);
+                    setOrders([]);
+                    setPage(0);
+                    setHasMore(true);
+                  }
+                  setIsStatusListShow(false);
+                }}
+                className={`${getStatusClass(
+                  s.value
+                )} px-4 py-2 w-full rounded-full ${
+                  s.value === forOrderStatus ? "hidden" : ""
+                } border`}
+              >
+                {s.label}
+              </button>
             ))}
           </div>
         </div>
@@ -351,12 +327,22 @@ const AdminOrdersPage = () => {
 
       {/* Orders List */}
       <div className="space-y-4">
-        {orders.length > 0 ? (
-          orders.map((order) => <OrderCard key={order.id} order={order} />)
-        ) : (
-          <></>
-        )}
+        {orders.map((order) => (
+          <OrderCard key={order.id} order={order} />
+        ))}
       </div>
+      {/* Loading spiner */}
+      {loading && <LoadingSpinner />}
+      {!hasMore && orders.length > 0 && (
+        <p className="text-center text-gray-500 py-4">
+          You've reached the end!
+        </p>
+      )}
+      {!loading && orders.length === 0 && (
+        <div className="text-center py-10">
+          <p className="text-gray-400">No orders found for this status.</p>
+        </div>
+      )}
     </div>
   );
 };

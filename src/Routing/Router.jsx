@@ -17,6 +17,7 @@ import OrderPage from "../customer/pages/OrderPage/OrderPage";
 import AdminDashboard from "../admin/pages/Dashboard/AdminDashboard";
 import AdminOrdersPage from "../admin/pages/OrderPage/AdminOrdersPage";
 import AdminOrderDetailePage from "../admin/pages/OrderPage/AdminOrderDetailPage";
+import Chart from "../dummydata/chart";
 
 const Router = createBrowserRouter([
     {
@@ -96,6 +97,10 @@ const Router = createBrowserRouter([
             {
                 path: "/admin/order/:orderId",
                 element: <AdminOrderDetailePage />
+            },
+            {
+                path: "/admin/test-features",
+                element: <Chart />
             }
         ]
         
