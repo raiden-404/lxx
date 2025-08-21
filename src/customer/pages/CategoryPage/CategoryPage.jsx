@@ -21,7 +21,7 @@ const CategoryPage = () => {
   useEffect(() => {
     const fetchData = async () => {
     //basic end point uri
-    const baseUri = "http://localhost:8080/public/get-products-by-slug-category";
+    const baseUri = `${import.meta.env.VITE_API_URL}/public/get-products-by-slug-category`;
 
     //Data need to send
     const params = {

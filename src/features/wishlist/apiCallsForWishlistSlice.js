@@ -3,7 +3,7 @@ import Cookies from "js-cookie";
 export const addItemToBackendWishlist = async (id) => {
 
     const jwtToken = Cookies.get("jwtToken");
-    const apiUri = "http://localhost:8080/user/add-wishlist-item";
+    const apiUri = `${import.meta.env.VITE_API_URL}/user/add-wishlist-item`;
     const response = await fetch(apiUri, {
         method: "PUT",
         headers: {
@@ -19,7 +19,7 @@ export const addItemToBackendWishlist = async (id) => {
 export const removeItemFromBackendWishlist = async (id) => {
     
     const jwtToken = Cookies.get("jwtToken");
-    const apiUri = "http://localhost:8080/user/remove-wishlist-item";
+    const apiUri = `${import.meta.env.VITE_API_URL}/user/remove-wishlist-item`;
     const response = await fetch(apiUri, {
         method: "DELETE",
         headers: {

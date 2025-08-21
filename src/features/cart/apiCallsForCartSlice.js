@@ -6,7 +6,7 @@ export const addItemFromBackend = async ({ id, quantity }) => {
         quantity: quantity
     };
     const jwtToken = Cookies.get("jwtToken");
-    const apiUri = "http://localhost:8080/user/add-cart-item";
+    const apiUri = `${import.meta.env.VITE_API_URL}/user/add-cart-item`;
     const response = await fetch(apiUri, {
         method: "PUT",
         headers: {
@@ -25,7 +25,7 @@ export const removeItemFromBackend = async ({ id, quantity }) => {
         quantity: quantity
     };
     const jwtToken = Cookies.get("jwtToken");
-    const apiUri = "http://localhost:8080/user/remove-cart-item";
+    const apiUri = `${import.meta.env.VITE_API_URL}/user/remove-cart-item`;
     const response = await fetch(apiUri, {
         method: "DELETE",
         headers: {
@@ -43,7 +43,7 @@ export const fetchCart = async () => {
     const jwtToken = Cookies.get("jwtToken");
     if (jwtToken) {
         try {
-            const apiUri = "http://localhost:8080/user/get-cart";
+            const apiUri = `${import.meta.env.VITE_API_URL}/user/get-cart`;
             const response = await fetch(apiUri, {
                 method: "GET",
                 headers: {

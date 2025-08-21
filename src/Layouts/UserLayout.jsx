@@ -23,7 +23,7 @@ const UserLayout = () => {
     const jwtToken = Cookies.get("jwtToken");
     if (jwtToken) {
       try {
-        const apiUri = "http://localhost:8080/profile/get-user-data";
+        const apiUri = `${import.meta.env.VITE_API_URL}/profile/get-user-data`;
         const response = await fetch(apiUri, {
           method: "GET",
           headers: {
@@ -44,7 +44,7 @@ const UserLayout = () => {
     const jwtToken = Cookies.get("jwtToken");
     if (jwtToken) {
       try {
-        const apiUri = "http://localhost:8080/user/get-cart";
+        const apiUri = `${import.meta.env.VITE_API_URL}/user/get-cart`;
         const response = await fetch(apiUri, {
           method: "GET",
           headers: {
@@ -65,7 +65,7 @@ const UserLayout = () => {
     const jwtToken = Cookies.get("jwtToken");
     if(jwtToken) {
       try {
-        const apiUri = "http://localhost:8080/user/get-wishlist";
+        const apiUri = `${import.meta.env.VITE_API_URL}/user/get-wishlist`;
         const response = await fetch(apiUri, {
           method: "GET",
           headers : {

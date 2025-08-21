@@ -196,14 +196,12 @@ const AdminOrdersPage = () => {
     if (!hasMore) return;
 
     const controller = new AbortController();
-
     //This function fetch the order list data
     const fetchOrders = async () => {
       const jwtToken = Cookies.get("jwtToken");
       if (jwtToken) {
         setLoading(true);
-        const baseUri = "http://localhost:8080/admin/get-orders";
-
+        const baseUri = `${import.meta.env.VITE_API_URL}/admin/get-orders`;
         //Query uri with params
         const param = {
           page: page,

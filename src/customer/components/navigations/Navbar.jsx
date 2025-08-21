@@ -48,7 +48,7 @@ const Navbar = () => {
   useEffect(() => {}, [navigation]);
 
   const fetchNavigation = async () => {
-    const uri = "http://localhost:8080/public/get-navbar-lists";
+    const uri = `${import.meta.env.VITE_API_URL}/public/get-navbar-lists`;
     const response = await fetch(uri);
     const result = await response.json();
     setNavigation(result);

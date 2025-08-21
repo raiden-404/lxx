@@ -303,7 +303,7 @@ export default function ProductPage() {
   //Function to Fetch Data using id
   const fetchProduct = async () => {
     //Base URL of product details data fetch
-    const baseUri = "http://localhost:8080/public/get-product-detail-by-id";
+    const baseUri = `${import.meta.env.VITE_API_URL}/public/get-product-detail-by-id`;
     //parameters to add in url
     const params = {
       id: id,
@@ -324,7 +324,7 @@ export default function ProductPage() {
 
   //Function to fetch Related Products
   const fetchRelatedProduct = async () => {
-    const baseUri = "http://localhost:8080/public/related-products";
+    const baseUri = `${import.meta.env.VITE_API_URL}/public/related-products`;
     const slug = product.categories[0].slug;
     const params = {
       slug: slug,

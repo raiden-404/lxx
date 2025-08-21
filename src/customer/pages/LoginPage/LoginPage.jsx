@@ -76,7 +76,7 @@ const LoginPage = () => {
     // Simulate API call to send OTP
 
     if (loginMethod === "phone") {
-      const response = await fetch("http://localhost:8080/login/num", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/login/num`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -107,7 +107,7 @@ const LoginPage = () => {
     setError("");
     
     //Api call - send number and otp and set received jwt token
-    const response = await fetch("http://localhost:8080/login/num/otp", {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/login/num/otp`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -209,7 +209,7 @@ const LoginPage = () => {
           <button
             onClick={() =>
               (window.location.href =
-                "http://localhost:8080/oauth2/authorization/google")
+                `${import.meta.env.VITE_API_URL}/oauth2/authorization/google`)
             }
             disabled={isLoading}
             className="w-full max-w-xs font-bold shadow-sm rounded-lg py-3 bg-white border border-gray-400 text-gray-800 flex items-center justify-center transition-all duration-300 ease-in-out focus:outline-none hover:shadow focus:shadow-sm focus:shadow-outline disabled:opacity-50"

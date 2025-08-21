@@ -219,7 +219,7 @@ export default function OrderDetailPage() {
         const updateStatus = async () => {
             const jwtToken = Cookies.get("jwtToken");
             if(!jwtToken) {navigate("/login")};
-            const apiUri = "http://localhost:8080/admin/update-order-status";
+            const apiUri = `${import.meta.env.VITE_API_URL}/admin/update-order-status`;
             try{
                 const response = await fetch(apiUri,{
                     method: "POST",
@@ -253,7 +253,7 @@ export default function OrderDetailPage() {
             navigate("/login");
         }
         try{
-            const fullUri = `http://localhost:8080/admin/get-order-detail?id=${orderId}`;
+            const fullUri = `${import.meta.env.VITE_API_URL}/admin/get-order-detail?id=${orderId}`;
             const response = await fetch(fullUri,{
                 method: "GET",
                 headers: {

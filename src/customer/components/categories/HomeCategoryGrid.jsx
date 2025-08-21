@@ -10,7 +10,7 @@ const HomeCategoryGrid = () => {
   },[]);
 
   const fetchData = async () => {
-    const apiUri = "http://localhost:8080/public/get-home-category-grid";
+    const apiUri = `${import.meta.env.VITE_API_URL}/public/get-home-category-grid`;
     const response = await fetch(apiUri);
     const result = await response.json();
     setCategories(result);

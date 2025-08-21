@@ -96,7 +96,7 @@ const AddressForm = ({ setIsAddNewAddress, savedAddress }) => {
 
   const saveAddressToBackend = async () => {
     //Api end point for setting address
-    const apiUri = "http://localhost:8080/user/set-address";
+    const apiUri = `${import.meta.env.VITE_API_URL}/user/set-address`;
     //Jwt token
     const jwtToken = Cookies.get("jwtToken");
 
@@ -421,7 +421,7 @@ const AddressStep = ({setStep, addressId, setAddressId}) => {
   //It fetch all saved address from server
   const fetchSavedAddresses = async () => {
     //Api end point do get all saved address related to user
-    const apiUri = "http://localhost:8080/user/get-addresses";
+    const apiUri = `${import.meta.env.VITE_API_URL}/user/get-addresses`;
 
     //Jwt token
     const jwtToken = Cookies.get("jwtToken");
@@ -447,7 +447,7 @@ const AddressStep = ({setStep, addressId, setAddressId}) => {
 
   //Remove address from server
   const removeSavedAddress = async (addressId) => {
-    const baseUri = "http://localhost:8080/user/remove-address";
+    const baseUri = `${import.meta.env.VITE_API_URL}/user/remove-address`;
     const queryUri = new URLSearchParams({id:addressId});
     const fullUri = `${baseUri}?${queryUri}`;
     const jwtToken = Cookies.get("jwtToken");

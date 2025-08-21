@@ -16,7 +16,7 @@ const CategorySidebar = ({ selectedCategory, setSelectedCategory }) => {
   const fetchData = useCallback(async () => {
     const allData = {categoryName : "All", categorySlug : collection, imageUrl : "https://img.freepik.com/premium-vector/lx-letter-linked-logo-business-company-identity-initial-letter-lx-logo-vector-template_754537-800.jpg"};
     //backend api endpoint to fetch all category for that slug
-    const baseUri = "http://localhost:8080/public/get-slug-category";
+    const baseUri = `${import.meta.env.VITE_API_URL}/public/get-slug-category`;
     
     //Data to send for getting return data according to that
     const params = {

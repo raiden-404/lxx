@@ -114,7 +114,7 @@ const CheckoutPage = () => {
   //This method is used to fetch item details(price, img) from backend based on checkout slice items
   const fetchProducts = useCallback(async () => {
     //Api to get items details
-    const apiUri = "http://localhost:8080/user/get-checkout-items";
+    const apiUri = `${import.meta.env.VITE_API_URL}/user/get-checkout-items`;
 
     //Jwt token for auth perpose
     const jwtToken = Cookies.get("jwtToken");
@@ -167,7 +167,7 @@ const CheckoutPage = () => {
       if (jwtToken) {
         try {
           //Api to create order
-          const apiUri = "http://localhost:8080/user/create-order";
+          const apiUri = `${import.meta.env.VITE_API_URL}/user/create-order`;
 
           //Data Obj to send
           const order = {
@@ -251,7 +251,7 @@ const CheckoutPage = () => {
     const jwtToken = Cookies.get("jwtToken");
     try {
       const response = await fetch(
-        "http://localhost:8080/user/verify-payment",
+        `${import.meta.env.VITE_API_URL}/user/verify-payment`,
         {
           method: "POST",
           headers: {

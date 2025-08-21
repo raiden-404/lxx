@@ -39,7 +39,7 @@ const InfinitePaging = ({ title, sort, size }) => {
 
     const fetchProducts = async () => {
       setLoading(true);
-      const baseUri = "http://localhost:8080/public/paging";
+      const baseUri = `${import.meta.env.VITE_API_URL}/public/paging`;
       const query = { page, size, sort };
       const queryUri = new URLSearchParams(query).toString();
       const fullUri = `${baseUri}?${queryUri}`;

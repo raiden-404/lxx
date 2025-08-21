@@ -97,7 +97,7 @@ const MyOrdersPage = () => {
     const jwtToken = Cookies.get("jwtToken");
     if(jwtToken) {
       try{
-        const apiUri = "http://localhost:8080/user/my-orders";
+        const apiUri = `${import.meta.env.VITE_API_URL}/user/my-orders`;
         const response = await fetch(apiUri,{
           method: "GET",
           headers: {

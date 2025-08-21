@@ -14,7 +14,7 @@ const CarouselHome = () => {
 
     //This function used to fetch Home Banner data from backend
     const fetchData = async () => {
-            const response = await fetch("http://localhost:8080/public/get-home-banners");
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/public/get-home-banners`);
             const result = await response.json();
             setBanners(result);
             console.log(banners);

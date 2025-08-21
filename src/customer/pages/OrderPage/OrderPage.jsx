@@ -404,7 +404,7 @@ const OrderPage = () => {
     const jwtToken = Cookies.get("jwtToken");
     if (jwtToken) {
       try {
-        const fullUri = `http://localhost:8080/user/get-order?id=${orderId}`;
+        const fullUri = `${import.meta.env.VITE_API_URL}/user/get-order?id=${orderId}`;
         const response = await fetch(fullUri, {
           method: "GET",
           headers: {
