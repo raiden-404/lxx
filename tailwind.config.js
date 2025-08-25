@@ -8,7 +8,11 @@ export default {
     ".flowbite-react\\class-list.json"
   ],
   theme: {
-    extend: {},
+    extend: {
+      screens: {
+        xs: "400px",
+      }
+    },
   },
   plugins: [flowbiteReact],
 }
