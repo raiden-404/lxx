@@ -17,7 +17,15 @@ import OrderPage from "../customer/pages/OrderPage/OrderPage";
 import AdminDashboard from "../admin/pages/Dashboard/AdminDashboard";
 import AdminOrdersPage from "../admin/pages/OrderPage/AdminOrdersPage";
 import AdminOrderDetailePage from "../admin/pages/OrderPage/AdminOrderDetailPage";
-import Chart from "../dummydata/chart";
+import AdminProductPage from "../admin/pages/ProductPage/AdminProductPage";
+import AddProduct from "../admin/pages/ProductPage/AdminProductHandle/Add/AddProduct";
+import AddBanner from "../admin/pages/ProductPage/AdminProductHandle/Add/AddBanner";
+import AddCategoryGrid from "../admin/pages/ProductPage/AdminProductHandle/Add/AddCategoryGrid";
+import AddNavbar from "../admin/pages/ProductPage/AdminProductHandle/Add/AddNavbar";
+import RemoveProducts from "../admin/pages/ProductPage/AdminProductHandle/Remove/RemoveProducts";
+import RemoveBanners from "../admin/pages/ProductPage/AdminProductHandle/Remove/RemoveBanners";
+import RemoveNavbar from "../admin/pages/ProductPage/AdminProductHandle/Remove/RemoveNavbar";
+import RemoveCategoryGrid from "../admin/pages/ProductPage/AdminProductHandle/Remove/RemoveCategoryGrid";
 
 const Router = createBrowserRouter([
     {
@@ -101,6 +109,41 @@ const Router = createBrowserRouter([
             {
                 path: "/admin/test-features",
                 element: <Chart />
+            },
+            {
+                path: "/admin/products",
+                element: <AdminProductPage />
+            },
+            {
+                path: "/admin/products/add-product",
+                element: <AddProduct />
+            },
+            {
+                path: "/admin/products/add-banner",
+                element: <AddBanner />
+            },
+            {
+                path: "/admin/products/add-grid",
+                element: <AddCategoryGrid />
+            },
+            {
+                path: "/admin/products/add-navbar",
+                element: <AddNavbar />
+            },
+            {
+                path: "/admin/products/remove-products",
+                element: <RemoveProducts />
+            },
+            {
+                path: "/admin/products/remove-banner",
+                element: <RemoveBanners />
+            },
+            {
+                path: "/admin/products/remove-navbar",
+                element:<RemoveNavbar />
+            }, {
+                path: "/admin/products/remove-grid",
+                element: <RemoveCategoryGrid />
             }
         ]
         
