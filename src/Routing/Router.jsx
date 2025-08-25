@@ -61,7 +61,7 @@ const Router = createBrowserRouter([
                 element : <CartPage />
             },
             {
-                path : "verify/redirect",
+                path : "/verify/redirect/:token",
                 element : <Jwt />
             },
             {
