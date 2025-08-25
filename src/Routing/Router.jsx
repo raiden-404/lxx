@@ -107,10 +107,6 @@ const Router = createBrowserRouter([
                 element: <AdminOrderDetailePage />
             },
             {
-                path: "/admin/test-features",
-                element: <Chart />
-            },
-            {
                 path: "/admin/products",
                 element: <AdminProductPage />
             },
