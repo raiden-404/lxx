@@ -3,6 +3,8 @@ import {
   Clock,
   Ellipsis,
   House,
+  Loader,
+  Loader2,
   Mailbox,
   MapPinHouse,
   Pencil,
@@ -34,6 +36,8 @@ const InputField = ({ name, value, onChange, placeholder, label }) => (
 );
 
 const AddressForm = ({ setIsAddNewAddress, savedAddress }) => {
+  const [ loading, setLoading] = useState(false);
+
   //Input fields of Form
   const [name, setName] = useState(null);
   const [houseNoOrName, setHouseNoOrName] = useState(null);
@@ -95,6 +99,7 @@ const AddressForm = ({ setIsAddNewAddress, savedAddress }) => {
   ];
 
   const saveAddressToBackend = async () => {
+    setLoading(true);
     //Api end point for setting address
     const apiUri = `${import.meta.env.VITE_API_URL}/user/set-address`;
     //Jwt token
@@ -143,6 +148,7 @@ const AddressForm = ({ setIsAddNewAddress, savedAddress }) => {
     } else {
       console.log("Fill all fields || Login ");
     }
+    setLoading(false);
   };
 
   return (
@@ -398,12 +404,13 @@ const AddressForm = ({ setIsAddNewAddress, savedAddress }) => {
         </button>
       )}
       <button
+        disabled={loading}
         onClick={() => {
           saveAddressToBackend(), setIsAddNewAddress(false);
         }}
         className="w-full bg-pink-600 text-white font-bold py-3 px-4 rounded-lg mt-8 hover:bg-pink-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
-      >
-        Save Address
+      >{loading ? <div className=" flex justify-center gap-2"><Loader2 className="animate-spin" />Saving Address</div> : 
+        "Save Address" }
       </button>
     </div>
   );
@@ -416,7 +423,7 @@ const AddressStep = ({setStep, addressId, setAddressId}) => {
 
   useEffect(() => {
     fetchSavedAddresses();
-  }, [isAddNewAddress, loadAddress]);
+  }, [isAddNewAddress, loadAddress,savedAddress]);
 
   //It fetch all saved address from server
   const fetchSavedAddresses = async () => {
@@ -437,7 +444,9 @@ const AddressStep = ({setStep, addressId, setAddressId}) => {
 
         const result = await response.json();
 
+        if(result) {
         setSavedAddress(result);
+        }
       } catch (error) {
         console.log("Error while fetching saved addresse ", error);
       }
