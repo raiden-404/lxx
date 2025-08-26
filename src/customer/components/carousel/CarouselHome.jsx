@@ -1,7 +1,7 @@
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 import { Carousel } from 'react-responsive-carousel';
 import { useEffect, useState } from "react";
-import { HomeBannerShimmer } from "../../../shimmers/users/HomeBannerShimmer";
+import { HomeBannerShimmer } from "../../../shimmers/users/HomeShimmers";
 
 const CarouselHome = () => {
 

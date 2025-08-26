@@ -267,7 +267,7 @@ const Navbar = () => {
             </div>
 
             <div className="border-t border-gray-200 px-4 py-6">
-              <a href="#" className="-m-2 flex items-center p-2">
+              <Link to={"/admin"} className="-m-2 flex items-center p-2">
                 <img
                   alt=""
                   src="https://static-assets-web.flixcart.com/batman-returns/batman-returns/p/images/Store-9eeae2.svg"
@@ -277,7 +277,7 @@ const Navbar = () => {
                   Become a Seller
                 </span>
                 <span className="sr-only">, change currency</span>
-              </a>
+              </Link>
             </div>
           </DialogPanel>
         </div>

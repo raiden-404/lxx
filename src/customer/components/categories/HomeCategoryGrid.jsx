@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { HomeGridShimmer } from "../../../shimmers/users/HomeShimmers";
 
 const HomeCategoryGrid = () => {
 
@@ -21,7 +22,7 @@ const HomeCategoryGrid = () => {
       <div className="flex justify-between items-center mb-6 ">
         <h2 className="text-2xl font-bold text-gray-900">Shop by Category</h2>
       </div>
-
+      {categories.length ==0 ? <HomeGridShimmer /> : 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 ">
         {categories.map((category) => (
           <div
@@ -32,7 +33,7 @@ const HomeCategoryGrid = () => {
             <img
               src={category.image}
               alt={category.name}
-              className="w-full h-64 object-cover"
+              className="w-full aspect-[8/5] object-cover"
             />
             <div className="absolute inset-0 bg-black bg-opacity-20 group-hover:bg-opacity-30 transition duration-300"></div>
             <div className="absolute bottom-4 left-4 text-white z-10">
@@ -42,7 +43,7 @@ const HomeCategoryGrid = () => {
           </Link>
           </div>
         ))}
-      </div>
+      </div>}
     </div>
   );
 };
