@@ -4,7 +4,7 @@ import Cookies from "js-cookie";
 import { useDispatch, useSelector } from "react-redux";
 import { clearCheckout } from "../../../features/checkout/checkoutSlice";
 import { useNavigate } from "react-router-dom";
-import { Check, CircleCheckBig, Currency } from "lucide-react";
+import { Check, CircleCheckBig } from "lucide-react";
 import AddressStep from "./AddressStep";
 import PaymentStep from "./PaymentStep";
 

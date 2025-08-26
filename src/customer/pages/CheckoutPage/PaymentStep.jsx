@@ -151,7 +151,7 @@ const PaymentStep = ({
           subtitle="Pay the complete amount now"
           icon={<UpiIcon />}
           description="Pay Full Payment Now to Get ₹20 OFF"
-          buttonText={`Place Order & Paynow ₹${total - 20}`}
+          buttonText={`Place Order & Paynow ₹${(total - 20).toFixed(2)}`}
           buttonColor="bg-green-600 hover:bg-green-700"
         />
 
@@ -161,9 +161,8 @@ const PaymentStep = ({
           title="UPI + COD"
           subtitle="Pay an initial amount now"
           icon={<CodIcon />}
-          description={`Pay 30% ( ₹${(0.3 * total).toFixed(
-            2
-          )} ) Now, Remaining( ₹${(0.7 * total).toFixed(2)} ) on COD.`}
+          description={`Pay 30% ( ₹${(0.3 * total).toFixed(2)
+        } ) Now, Remaining( ₹${(0.7 * total).toFixed(2)} ) on COD.`}
           buttonText={`Place Order & Paynow ₹${(0.3 * total).toFixed(2)}`}
           buttonColor="bg-green-600 hover:bg-green-700"
         />
