@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useSelector } from "react-redux";
 import ProductCard from "../Product/ProductCard";
+import { BellRing, Circle, CircleAlert, CircleArrowDown, Loader2 } from "lucide-react";
 
 const InfinitePaging = ({ title, sort, size }) => {
   // 1. State Management
@@ -73,6 +74,7 @@ const InfinitePaging = ({ title, sort, size }) => {
 
   return (
     <div className="w-full px-4 md:px-10 lg:px-20 py-8">
+    {products.length == 0 ? <></> : <>
       <h2 className="text-2xl font-bold mb-4 pb-4 pl-2">{title}</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
         {products.map((product, index) => {
@@ -89,9 +91,9 @@ const InfinitePaging = ({ title, sort, size }) => {
         })}
       </div>
       <div className="text-center p-8">
-        {loading && <p>Loading more products...</p>}
-        {!hasMore && <p>You've seen it all!</p>}
-      </div>
+        {loading && <div className="inline-flex mb-2 bg-gray-400/20 py-2 px-4 rounded-xl gap-2"><Loader2 className="animate-spin" />{" "}Loading... </div>}
+        {!hasMore && <div className="bg-gray-400/20 p-2 rounded-lg">You've seen it all!</div>}
+      </div></>}
     </div>
   );
 };

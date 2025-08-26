@@ -89,7 +89,7 @@ const ProductCard = ({product, inCartQuantity, wishlist, ref}) => {
         <div className="pt-6">
           <div className="mb-4 flex items-center justify-between gap-4">
             <span className="me-2 rounded bg-pink-100 px-2.5 py-0.5 text-xs font-medium text-pink-800">
-              Up to {discount}% off
+              Up to {discount.toFixed(0)}% off
             </span>
 
             <div className="flex items-center justify-end gap-1">

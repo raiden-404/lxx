@@ -3,8 +3,13 @@ import { useNavigate, useParams } from "react-router-dom";
 import Markdown from "react-markdown";
 import ProductCard from "../../components/Product/ProductCard";
 import { useDispatch, useSelector } from "react-redux";
-import { AddItemAtFirst, addItem, removeItem } from "../../../features/cart/cartSlice";
+import {
+  AddItemAtFirst,
+  addItem,
+  removeItem,
+} from "../../../features/cart/cartSlice";
 import { updateCheckout } from "../../../features/checkout/checkoutSlice";
+import { ProductPageShimmer } from "../../../shimmers/users/Shimmers";
 
 // --- Icon Components (Self-contained SVGs) ---
 const Star = ({ className, fill = "none", ...props }) => (
@@ -218,31 +223,39 @@ export default function ProductPage() {
   const [product, setProduct] = useState(null);
   const [relatedProducts, setRelatedProducts] = useState(null);
   const [quantity, setQuantity] = useState(0);
-  const cart = useSelector((state) => state.cart.items);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const cart = useSelector((state) => state.cart.items);
+  const wishlist = useSelector((state) => state.wishlist.items);
+
+  // 2. For performance, convert arrays to faster lookup structures
+  const cartMap = new Map(
+    (cart?.items || []).map((item) => [item.productId, item.quantity])
+  );
+  // A Set is perfect for checking if an ID exists
+  const wishlistSet = new Set(wishlist.map((item) => item.productId));
 
   //Function to check that this product exists in cart or not
 
   useEffect(() => {
     fetchProduct();
     checkProductInCart();
-  },[cart,id]);
+  }, [cart, id]);
 
   //Check product in cart and set the quantity
   const checkProductInCart = () => {
-    if(cart !== null) {
-      const isProductInCart = cart.items.find(item => item.productId === id);
-      if(isProductInCart) {
+    if (cart !== null) {
+      const isProductInCart = cart.items.find((item) => item.productId === id);
+      if (isProductInCart) {
         setQuantity(isProductInCart.quantity);
-      }else {
+      } else {
         setQuantity(0);
       }
-    }else{
-    setQuantity(0);
+    } else {
+      setQuantity(0);
     }
   };
-  
+
   //Handle cart operation
   const handleAddItemAtStart = () => {
     const item = {
@@ -252,49 +265,54 @@ export default function ProductPage() {
       productName: product.title,
       productSellPrice: product.sellingPrice,
       quantity: 1,
-    }
+    };
     dispatch(AddItemAtFirst(item));
     setQuantity(1);
-  }
+  };
 
   const handleAddItem = () => {
     const item = {
       id: id,
-      quantity:1,
-    }
+      quantity: 1,
+    };
     dispatch(addItem(item));
-  }
+  };
 
   const handleRemoveItem = () => {
-    const item ={
+    const item = {
       id: id,
-      quantity:1,
-    }
+      quantity: 1,
+    };
     dispatch(removeItem(item));
-  }
+  };
 
   const handleBuyNow = () => {
     const item = {
-      items:[{
-        productId: id,
-        productImage: product.images[0].imageUrl,
-        productMrp: product.mrp,
-        productName: product.title,
-        productSellPrice: product.sellingPrice,
-        quantity: 1,
-      }],
-      mrpTotal : product.mrp,
+      items: [
+        {
+          productId: id,
+          productImage: product.images[0].imageUrl,
+          productMrp: product.mrp,
+          productName: product.title,
+          productSellPrice: product.sellingPrice,
+          quantity: 1,
+        },
+      ],
+      mrpTotal: product.mrp,
       shipping: product.sellingPrice >= 249 ? 0 : 49,
-      subTotal : product.sellingPrice,
-      tax : (18 / 100) * product.sellingPrice,
+      subTotal: product.sellingPrice,
+      tax: (18 / 100) * product.sellingPrice,
       taxPercent: 18,
-      total: product.sellingPrice + (product.sellingPrice >= 249 ? 0 : 49) + ((18 / 100) * product.sellingPrice),
-    }
+      total:
+        product.sellingPrice +
+        (product.sellingPrice >= 249 ? 0 : 49) +
+        (18 / 100) * product.sellingPrice,
+    };
 
     dispatch(updateCheckout(item));
     console.log("product tk to chlaa");
-    navigate('/checkout');
-  }
+    navigate("/checkout");
+  };
 
   useEffect(() => {
     fetchRelatedProduct();
@@ -303,7 +321,9 @@ export default function ProductPage() {
   //Function to Fetch Data using id
   const fetchProduct = async () => {
     //Base URL of product details data fetch
-    const baseUri = `${import.meta.env.VITE_API_URL}/public/get-product-detail-by-id`;
+    const baseUri = `${
+      import.meta.env.VITE_API_URL
+    }/public/get-product-detail-by-id`;
     //parameters to add in url
     const params = {
       id: id,
@@ -338,14 +358,16 @@ export default function ProductPage() {
 
     const response = await fetch(fullUri);
     const result = await response.json();
+    if (result.length == 0) {
+      return;
+    }
     setRelatedProducts(result);
   };
-
 
   return (
     <div className="bg-gray-50 font-sans">
       {product == null ? (
-        <div></div>
+        <ProductPageShimmer />
       ) : (
         <div className="container mx-auto p-4 sm:p-6 lg:p-8">
           <main className="flex flex-col lg:flex-row gap-8 lg:gap-12 mb-12 sm:mb-16">
@@ -376,26 +398,34 @@ export default function ProductPage() {
               {/* Add to Cart - Buy Now */}
               <div className="flex flex-col sm:flex-row gap-4">
                 {quantity > 0 ? (
-                  <div
-                    className="w-full flex items-center overflow-hidden justify-between text-white font-semibold rounded-lg shadow-md"
-                  >
-                    <button onClick={handleRemoveItem} className="w-[30%] bg-gray-800 h-full transition-transform transform hover:scale-125">
+                  <div className="w-full flex items-center overflow-hidden justify-between text-white font-semibold rounded-lg shadow-md">
+                    <button
+                      onClick={handleRemoveItem}
+                      className="w-[30%] bg-gray-800 h-full transition-transform transform hover:scale-125"
+                    >
                       -
                     </button>
-                    <span className="text-black">
-                      {quantity}
-                    </span>
-                    <button onClick={handleAddItem} className="w-[30%] bg-gray-800 h-full transition-transform transform hover:scale-125">
+                    <span className="text-black">{quantity}</span>
+                    <button
+                      onClick={handleAddItem}
+                      className="w-[30%] bg-gray-800 h-full transition-transform transform hover:scale-125"
+                    >
                       +
                     </button>
                   </div>
                 ) : (
-                  <button onClick={handleAddItemAtStart} className="w-full flex items-center justify-center gap-3 px-6 py-3 bg-pink-600 text-white font-semibold rounded-lg shadow-md hover:bg-pink-700 transition-transform transform hover:scale-105">
+                  <button
+                    onClick={handleAddItemAtStart}
+                    className="w-full flex items-center justify-center gap-3 px-6 py-3 bg-pink-600 text-white font-semibold rounded-lg shadow-md hover:bg-pink-700 transition-transform transform hover:scale-105"
+                  >
                     <ShoppingCart className="w-6 h-6" />
                     <span>Add to Cart</span>
                   </button>
                 )}
-                <button onClick={handleBuyNow} className="w-full px-6 py-3 bg-gray-800 text-white font-semibold rounded-lg shadow-md hover:bg-gray-900 transition-transform transform hover:scale-105">
+                <button
+                  onClick={handleBuyNow}
+                  className="w-full px-6 py-3 bg-gray-800 text-white font-semibold rounded-lg shadow-md hover:bg-gray-900 transition-transform transform hover:scale-105"
+                >
                   Buy Now
                 </button>
               </div>
@@ -485,7 +515,12 @@ export default function ProductPage() {
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {relatedProducts.map((product) => (
-                  <ProductCard key={product.id} product={product} />
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    inCartQuantity={cartMap.get(product.id) || 0}
+                    wishlist={wishlistSet.has(product.id)}
+                  />
                 ))}
               </div>
             </section>

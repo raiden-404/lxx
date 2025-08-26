@@ -1,5 +1,4 @@
 "use client";
-
 import { Fragment, useEffect, useState } from "react";
 import {
   Dialog,
@@ -13,15 +12,28 @@ import {
   Transition,
 } from "@headlessui/react";
 import {
+  Accordion,
+  AccordionHeader,
+  AccordionBody,
+} from "@material-tailwind/react";
+import {
   Bars3Icon,
   MagnifyingGlassIcon,
   ShoppingBagIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import SearchBar from "./SearchBar";
 import { useSelector } from "react-redux";
-import { ChevronDown, Heart, LogOut, Package, UserRoundPen } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronUp,
+  Heart,
+  LogIn,
+  LogOut,
+  Package,
+  UserRoundPen,
+} from "lucide-react";
 
 // Options after navigation
 const pages = [
@@ -37,9 +49,14 @@ const Navbar = () => {
   const [showSearch, setShowSearch] = useState(false);
   const user = useSelector((state) => state.user.items);
   const cart = useSelector((state) => state.cart.items);
-  const wishlist = useSelector(state => state.wishlist.items);
+  const wishlist = useSelector((state) => state.wishlist.items);
   const [navigation, setNavigation] = useState(null);
   const [profileList, setProfileList] = useState(false);
+  const navigate = useNavigate();
+
+  //Accordian
+  const [open, setOpen] = useState(0);
+  const handleOpen = (value) => setOpen(open === value ? 0 : value);
 
   useEffect(() => {
     fetchNavigation();
@@ -53,7 +70,6 @@ const Navbar = () => {
     const result = await response.json();
     setNavigation(result);
   };
-
 
   return (
     <div className="bg-white sticky z-30 w-full top-0 left-0">
@@ -108,6 +124,7 @@ const Navbar = () => {
                       key={nav.id}
                       className="space-y-10 px-4 pt-10 pb-8"
                     >
+                      {/* Featured images */}
                       <div className="grid grid-cols-2 gap-x-4">
                         {nav.featured.map((item) => (
                           <Link
@@ -140,33 +157,46 @@ const Navbar = () => {
                           </Link>
                         ))}
                       </div>
-                      {nav.slugs.map((slug) => (
-                        <div key={slug.id}>
-                          <p
-                            id={`${nav.id}-${slug.id}-heading-mobile`}
-                            className="font-medium text-gray-900"
+
+                      {/* Slugs lists accordian */}
+                      <div className="flex flex-col gap-4">
+                        {nav.slugs.map((slug, idx) => (
+                          <Accordion
+                            key={slug.id}
+                            className="shadow-md rounded-lg "
+                            open={open === idx + 1}
                           >
-                            {slug.name}
-                          </p>
-                          <ul
-                            role="list"
-                            aria-labelledby={`${nav.id}-${slug.id}-heading-mobile`}
-                            className="mt-6 flex flex-col space-y-6"
-                          >
-                            {slug.items.map((item) => (
-                              <li key={item.id} className="flow-root">
-                                <Link
-                                  to={`/collection/${slug.value}/${item.name}`}
-                                  onClick={() => setMobileMenuOpen(false)}
-                                  className="-m-2 block p-2 text-gray-500"
-                                >
-                                  {item.name}
-                                </Link>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      ))}
+                            <AccordionHeader
+                              className=""
+                              onClick={() => handleOpen(idx + 1)}
+                            >
+                              <div className=" flex items-center justify-between px-3 text-md text-slate-700 w-full">
+                                {slug.name}
+                                {open === idx + 1 ? (
+                                  <ChevronUp size={18} />
+                                ) : (
+                                  <ChevronDown size={18} />
+                                )}
+                              </div>
+                            </AccordionHeader>
+                            <AccordionBody className="flex flex-col text-md px-4 gap-4 font-semibold text-gray-600">
+                              {slug.items.map((item) => (
+                                <div key={item.id}>
+                                  <Link
+                                    to={`/collection/${slug.value}/${item.name}`}
+                                    onClick={() => {
+                                      setMobileMenuOpen(false);
+                                      setOpen(0);
+                                    }}
+                                  >
+                                    {item.name}
+                                  </Link>
+                                </div>
+                              ))}
+                            </AccordionBody>
+                          </Accordion>
+                        ))}
+                      </div>
                     </TabPanel>
                   ))}
                 </TabPanels>
@@ -186,26 +216,58 @@ const Navbar = () => {
             </div>
 
             <div className="space-y-6 border-t border-gray-200 px-4 py-6">
-              <div className="flow-root">
+              {/* Profile */}
+              {user === null ? (
+                <div onClick={() => {setMobileMenuOpen(false);navigate('/login')}} className="flex items-center gap-2">
+                  <LogIn size={18} />
+                  <a
+                    href="#"
+                    className="-m-2 block p-2 font-medium text-gray-900"
+                  >
+                    Login
+                  </a>
+                </div>
+              ) : (
+                <div className="flex gap-2 items-center">
+                  <img className="h-8 aspect-square rounded-full" src={user.picture} alt={user.fullName} />
+                  <h1 className="text-md font-semibold">{user.fullName}</h1>
+                </div>
+              )}
+              {/* Wishlist */}
+              <div onClick={() => {setMobileMenuOpen(false);navigate("/wishlist")}} className="flex items-center gap-2">
+                <Heart size={18} color="red" />
                 <a
                   href="#"
                   className="-m-2 block p-2 font-medium text-gray-900"
                 >
-                  Sign in
+                  Wishlist
+                </a>
+                <p className="font-semibold">({wishlist.length || 0})</p>
+              </div>
+              {/* My orders */}
+              <div onClick={() => {setMobileMenuOpen(false); navigate('/my-orders')}} className="flex items-center gap-2">
+                <Package size={18} />
+                <a
+                  href="#"
+                  className="-m-2 block p-2 font-medium text-gray-900"
+                >
+                  My Orders
                 </a>
               </div>
-              <div className="flow-root">
+              {/* Logout */}
+              <div onClick={() => {setMobileMenuOpen(false); navigate('/logout')}} className="flex items-center gap-2">
+                <LogOut size={18} />
                 <a
                   href="#"
                   className="-m-2 block p-2 font-medium text-gray-900"
                 >
-                  Create account
+                  Logout
                 </a>
               </div>
             </div>
 
             <div className="border-t border-gray-200 px-4 py-6">
-              <a href="#" className="-m-2 flex items-center p-2">
+              <Link to={"/admin"} className="-m-2 flex items-center p-2">
                 <img
                   alt=""
                   src="https://static-assets-web.flixcart.com/batman-returns/batman-returns/p/images/Store-9eeae2.svg"
@@ -215,13 +277,13 @@ const Navbar = () => {
                   Become a Seller
                 </span>
                 <span className="sr-only">, change currency</span>
-              </a>
+              </Link>
             </div>
           </DialogPanel>
         </div>
       </Dialog>
 
-      {/* Monitor Screen */}
+      {/* Monitor Screen ---------------------------------------- */}
       <header className="bg-white relative">
         <nav
           aria-label="Top"
@@ -304,6 +366,7 @@ const Navbar = () => {
                               <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                                 <div className="grid grid-cols-2 gap-x-8 gap-y-10 py-16">
                                   <div className="col-start-2 grid grid-cols-2 gap-x-8">
+                                    {/* Featured */}
                                     {nav.featured.map((item) => (
                                       <Link
                                         to={`/collection/${item.value}/All`}
@@ -327,6 +390,7 @@ const Navbar = () => {
                                     ))}
                                   </div>
                                   <div className="row-start-1 grid grid-cols-3 gap-x-8 gap-y-10 text-sm">
+                                    {/* Slugs */}
                                     {nav.slugs.map((slug) => (
                                       <div key={slug.id}>
                                         <p className="font-medium text-gray-900">
@@ -382,30 +446,51 @@ const Navbar = () => {
                     {user == null ? (
                       <Link to="/login">Login</Link>
                     ) : (
-                      <div onMouseEnter={() => setProfileList(true)} onMouseLeave={() => setProfileList(false)}>
-                      
-                      <div className="flex relative max-w-64 items-center rounded-3xl p-1 gap-2 hover:border-2 border-2 border-white hover:border-gray-300 hover:bg-gray-100">
-                        <div className="overflow-hidden h-7 w-7 rounded-full">
-                          <img src={user.picture} alt="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png" />
+                      <div
+                        onMouseEnter={() => setProfileList(true)}
+                        onMouseLeave={() => setProfileList(false)}
+                      >
+                        <div className="flex relative max-w-64 items-center rounded-3xl p-1 gap-2 hover:border-2 border-2 border-white hover:border-gray-300 hover:bg-gray-100">
+                          <div className="overflow-hidden h-7 w-7 rounded-full">
+                            <img
+                              src={user.picture}
+                              alt="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
+                            />
+                          </div>
+                          <div>{user.fullName}</div>
+                          <div className="pe-1">
+                            <ChevronDown size={20} />
+                          </div>
                         </div>
-                        <div>{user.fullName}</div>
-                        <div className="pe-1">
-                          <ChevronDown size={20} />
-                        </div>
+                        {profileList && (
+                          <div
+                            id="profile-list"
+                            className="border-2 border-gray-300 top-10 absolute overflow-hidden max-w-64 bg-white rounded-2xl w-[95%]"
+                          >
+                            <ul className="flex flex-col justify-center">
+                              <Link to="/my-orders">
+                                <li className="flex items-end gap-1 hover:bg-gray-100 px-5 py-2 pt-4 ">
+                                  <Package size={18} />
+                                  My Orders
+                                </li>
+                              </Link>
+                              <Link to="/wishlist">
+                                <li className="flex items-end gap-1 hover:bg-gray-100 px-5 py-2 ">
+                                  <Heart size={17} stroke="red" />
+                                  Wishlist ({wishlist.length || 0})
+                                </li>
+                              </Link>
+                              <Link to="/logout">
+                                <li className="flex items-end gap-1 hover:bg-gray-100 px-5 py-2 pb-4">
+                                  <LogOut size={17} />
+                                  Logout
+                                </li>
+                              </Link>
+                            </ul>
+                          </div>
+                        )}
                       </div>
-                      {
-                        profileList && 
-                    <div id="profile-list" className="border-2 border-gray-300 top-10 absolute overflow-hidden max-w-64 bg-white rounded-2xl w-[95%]">
-                      <ul className="flex flex-col justify-center">
-                        <Link to="/my-orders"><li className="flex items-end gap-1 hover:bg-gray-100 px-5 py-2 pt-4 "><Package size={18} />My Orders</li></Link>
-                        <Link to="/wishlist"><li className="flex items-end gap-1 hover:bg-gray-100 px-5 py-2 "><Heart size={17} stroke="red"/>Wishlist ({wishlist.length || 0})</li></Link>
-                        <Link to="/logout"><li className="flex items-end gap-1 hover:bg-gray-100 px-5 py-2 pb-4"><LogOut size={17}  />Logout</li></Link>
-                      </ul>
-                    </div>
-                      }
-                    </div>
                     )}
-                      
                   </div>
                   <span className="h-6 w-px bg-gray-200" />
                 </div>

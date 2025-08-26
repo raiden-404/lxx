@@ -1,6 +1,7 @@
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 import { Carousel } from 'react-responsive-carousel';
 import { useEffect, useState } from "react";
+import { HomeBannerShimmer } from "../../../shimmers/users/Shimmers";
 
 const CarouselHome = () => {
 
@@ -21,12 +22,12 @@ const CarouselHome = () => {
         }
 
     return (
-        <div className="w-full h-[500px] overflow-hidden relative">
+        <div className="w-full aspect-[12/4] overflow-hidden relative">
             {
-                banners == null ? <></> : 
+                banners == null ? <HomeBannerShimmer /> : 
             
             <Carousel 
-                dynamicHeight={false}
+                dynamicHeight={true}
                 emulateTouch={true}
                 interval={3000}
                 autoPlay={true}
@@ -37,11 +38,12 @@ const CarouselHome = () => {
                 labels={{leftArrow: 'previous slide / item', rightArrow: 'next slide / item', item: 'slide item'}}
             >
                 { 
-                    banners.map((banner) => (<div className="relative">
+                    banners.map((banner) => (
+                <div className="relative w-full aspect-[12/4] ">
                     <img 
                         src={banner.image} 
                         alt="Fashion Sale" 
-                        className="h-[500px] w-full object-cover"
+                        className=" h-full object-cover"
                     />
                     {/* Sharp diagonal gradient overlay only behind text */}
                     <div 
@@ -50,9 +52,9 @@ const CarouselHome = () => {
                             background: 'radial-gradient(ellipse at bottom left, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 50%, transparent 70%)'
                         }}
                     ></div>
-                    <div className="absolute left-6 bottom-8 z-20 text-white max-w-[60%]">
-                        <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-2">{banner.title}</h2>
-                        <p className="text-lg md:text-xl">{banner.description}</p>
+                    <div className="absolute left-2 xs:left-2 lg:left-6 bottom-2 z-20 text-white w-[40%] gap-0 text-start">
+                        <h2 className="text-sm xs:text-xl md:text-3xl lg:text-5xl font-bold mb-2">{banner.title}</h2>
+                        <p className="text-xs line-clamp-1 xs:text-sm sm:text-lg md:text-lg">{banner.description}</p>
                     </div>
                 </div>))
                 }
