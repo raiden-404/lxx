@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { HomeGridShimmer } from "../../../shimmers/users/HomeShimmers";
+import { HomeGridShimmer } from "../../../shimmers/users/Shimmers";
 
 const HomeCategoryGrid = () => {
 

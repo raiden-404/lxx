@@ -5,6 +5,7 @@ import ProductCard from "../../components/Product/ProductCard";
 import { useDispatch, useSelector } from "react-redux";
 import { AddItemAtFirst, addItem, removeItem } from "../../../features/cart/cartSlice";
 import { updateCheckout } from "../../../features/checkout/checkoutSlice";
+import { ProductPageShimmer } from "../../../shimmers/users/Shimmers";
 
 // --- Icon Components (Self-contained SVGs) ---
 const Star = ({ className, fill = "none", ...props }) => (
@@ -338,6 +339,9 @@ export default function ProductPage() {
 
     const response = await fetch(fullUri);
     const result = await response.json();
+    if(result.length == 0) {
+      return;
+    }
     setRelatedProducts(result);
   };
 
@@ -345,7 +349,7 @@ export default function ProductPage() {
   return (
     <div className="bg-gray-50 font-sans">
       {product == null ? (
-        <div></div>
+        <ProductPageShimmer />
       ) : (
         <div className="container mx-auto p-4 sm:p-6 lg:p-8">
           <main className="flex flex-col lg:flex-row gap-8 lg:gap-12 mb-12 sm:mb-16">
