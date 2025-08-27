@@ -51,6 +51,10 @@ const CategorySidebar = ({ selectedCategory, setSelectedCategory }) => {
     fetchData();
   }, [fetchData]);
 
+  useEffect(() => {
+    console.log(categories);
+  })
+
   return (
     // Use responsive widths: narrow on mobile, wider on larger screens.
     <div className="w-auto flex-shrink-0 bg-white shadow-md pt-3 max-[400px]:pt-1 h-fit max-[400px]:w-auto max-[400px]:h-auto max-[400px]:gap-4">
