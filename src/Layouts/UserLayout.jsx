@@ -1,6 +1,6 @@
 import { Outlet } from "react-router-dom";
 import Navbar from "../customer/components/navigations/Navbar";
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import Cookies from "js-cookie";
 import { useDispatch} from "react-redux";
 import { updateUser } from "../features/user/userSlice";
@@ -11,15 +11,8 @@ import { updateWishlist } from "../features/wishlist/wishlistSlice";
 const UserLayout = () => {
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    //Call function to fetch user profile
-    fetchUser();
-    fetchCart();
-    fethWishlist();
-  }, []);
-  
   //Fetching User Profile Data and store in Redux Store
-  const fetchUser = async () => {
+  const fetchUser = useCallback(async () => {
     const jwtToken = Cookies.get("jwtToken");
     if (jwtToken) {
       try {
@@ -37,10 +30,10 @@ const UserLayout = () => {
         console.log("Invalid Login - Login Again", error);
       }
     }
-  };
+  },[dispatch]);
 
   //Fetching cart data and store in redux
-  const fetchCart = async () => {
+  const fetchCart = useCallback(async () => {
     const jwtToken = Cookies.get("jwtToken");
     if (jwtToken) {
       try {
@@ -58,10 +51,10 @@ const UserLayout = () => {
         console.log("Error while loading cart ", error);
       }
     }
-  };
+  },[dispatch]);
 
   //Fetching wishlist data and storing it in wishlist
-  const fethWishlist = async () => {
+  const fetchWishlist = useCallback(async () => {
     const jwtToken = Cookies.get("jwtToken");
     if(jwtToken) {
       try {
@@ -80,7 +73,15 @@ const UserLayout = () => {
         console.log("Error while loading wishlist ", error);
       }
     }
-  }
+  },[dispatch]);
+
+  useEffect(() => {
+    //Call function to fetch user profile
+    fetchUser();
+    fetchCart();
+    fetchWishlist();
+  }, [fetchCart,fetchUser,fetchWishlist]);
+  
 
   return (
     <div>

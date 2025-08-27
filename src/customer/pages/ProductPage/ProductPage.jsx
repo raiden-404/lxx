@@ -1,14 +1,14 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Markdown from "react-markdown";
 import ProductCard from "../../components/Product/ProductCard";
 import { useDispatch, useSelector } from "react-redux";
+import Cookies from "js-cookie";
 import {
   AddItemAtFirst,
   addItem,
   removeItem,
 } from "../../../features/cart/cartSlice";
-import { updateCheckout } from "../../../features/checkout/checkoutSlice";
 import { ProductPageShimmer } from "../../../shimmers/users/Shimmers";
 
 // --- Icon Components (Self-contained SVGs) ---
@@ -127,12 +127,9 @@ const StarRating = ({ rating }) => {
 };
 
 const ProductImageGallery = ({ images }) => {
-  const [mainImage, setMainImage] = useState(images[0].imageUrl);
+  const [mainImage, setMainImage] = useState((images.find(image => image.featured === true)).imageUrl);
   const fileInputRef = useRef(null);
 
-  useEffect(() => {
-    setMainImage(images[0].imageUrl);
-  }, [images]);
 
   const handleImageUpload = (event) => {
     const file = event.target.files[0];
@@ -237,13 +234,9 @@ export default function ProductPage() {
 
   //Function to check that this product exists in cart or not
 
-  useEffect(() => {
-    fetchProduct();
-    checkProductInCart();
-  }, [cart, id]);
-
+  
   //Check product in cart and set the quantity
-  const checkProductInCart = () => {
+  const checkProductInCart = useCallback(() => {
     if (cart !== null) {
       const isProductInCart = cart.items.find((item) => item.productId === id);
       if (isProductInCart) {
@@ -254,7 +247,7 @@ export default function ProductPage() {
     } else {
       setQuantity(0);
     }
-  };
+  },[cart,id]);
 
   //Handle cart operation
   const handleAddItemAtStart = () => {
@@ -286,31 +279,26 @@ export default function ProductPage() {
     dispatch(removeItem(item));
   };
 
-  const handleBuyNow = () => {
-    const item = {
-      items: [
-        {
-          productId: id,
-          productImage: product.images[0].imageUrl,
-          productMrp: product.mrp,
-          productName: product.title,
-          productSellPrice: product.sellingPrice,
-          quantity: 1,
-        },
-      ],
-      mrpTotal: product.mrp,
-      shipping: product.sellingPrice >= 249 ? 0 : 49,
-      subTotal: product.sellingPrice,
-      tax: (18 / 100) * product.sellingPrice,
-      taxPercent: 18,
-      total:
-        product.sellingPrice +
-        (product.sellingPrice >= 249 ? 0 : 49) +
-        (18 / 100) * product.sellingPrice,
-    };
+  const handleBuyNow = async () => {
+    const jwtToken = Cookies.get("jwtToken");
+    if(!jwtToken)navigate("/login");
+    
+    const item = [{
+      productId: product.id,
+      quantity: 1
+    }];
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/user/update-checkout`,{
+      method:"POST",
+      headers: {
+        "Content-Type" : "application/json",
+        Authorization: `Bearer ${jwtToken}`,
+      },
+      body: JSON.stringify(item),
+    });
 
-    dispatch(updateCheckout(item));
-    console.log("product tk to chlaa");
+    if(!response.ok) {
+      throw new Error("Failed to update checkout");
+    }
     navigate("/checkout");
   };
 
@@ -319,7 +307,7 @@ export default function ProductPage() {
   }, [product]);
 
   //Function to Fetch Data using id
-  const fetchProduct = async () => {
+  const fetchProduct = useCallback(async () => {
     //Base URL of product details data fetch
     const baseUri = `${
       import.meta.env.VITE_API_URL
@@ -340,7 +328,14 @@ export default function ProductPage() {
     const result = await response.json();
 
     setProduct(result);
-  };
+  },[id]);
+
+
+  useEffect(() => {
+    fetchProduct();
+    checkProductInCart();
+  }, [fetchProduct, checkProductInCart]);
+ 
 
   //Function to fetch Related Products
   const fetchRelatedProduct = async () => {
