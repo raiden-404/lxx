@@ -77,7 +77,7 @@ const OrderItem = ({ order }) => {
         
         <div className="flex justify-between items-center mt-2">
             <span className="text-base font-bold text-gray-900">Total Price</span>
-            <span className="text-lg font-bold text-gray-900">$₹{totalPrice.toFixed(2)}</span>
+            <span className="text-lg font-bold text-gray-900">₹{totalPrice.toFixed(2)}</span>
         </div>
       </div>
       </Link>

@@ -1,17 +1,14 @@
 import {
   Building,
-  Clock,
   Ellipsis,
   House,
-  Loader,
   Loader2,
   Mailbox,
   MapPinHouse,
   Pencil,
   Trash2,
-  Truck,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Cookies from "js-cookie";
 
 // --- Input Component ---
@@ -37,6 +34,10 @@ const InputField = ({ name, value, onChange, placeholder, label }) => (
 
 const AddressForm = ({ setIsAddNewAddress, savedAddress }) => {
   const [ loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [locationLoading, setLocationLoading] = useState(false);
+  const [invalid, setInvalid] = useState(true);
+  const [countPin, setCountPin] = useState(0);
 
   //Input fields of Form
   const [name, setName] = useState(null);
@@ -98,6 +99,8 @@ const AddressForm = ({ setIsAddNewAddress, savedAddress }) => {
     "Puducherry",
   ];
 
+
+  //Used to save address to backend 
   const saveAddressToBackend = async () => {
     setLoading(true);
     //Api end point for setting address
@@ -142,8 +145,7 @@ const AddressForm = ({ setIsAddNewAddress, savedAddress }) => {
       });
 
       if (response.ok) {
-        console.log("Save hogya address");
-        console.log(response.json());
+        setIsAddNewAddress(false);
       }
     } else {
       console.log("Fill all fields || Login ");
@@ -151,14 +153,109 @@ const AddressForm = ({ setIsAddNewAddress, savedAddress }) => {
     setLoading(false);
   };
 
+  //Get latitude and longitude from browser and call for reverse decode
+  const handleLocationDetect = () => {
+    setLocationLoading(true);
+    //When browser don't support navigation then show error and return
+    if(!navigator.geolocation) {
+      setError('Geolocation is not supported by your browser.');
+      setLocationLoading(false);
+      setTimeout(() => {setError('');return;},3000);
+    }
+
+    //Clear previous error and location
+    setError('');
+
+    //get latitude and longitude
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        reverseCoordinates(latitude, longitude);
+      },
+      (err) => {
+        //Handle common errors
+        switch(err.code) {
+          case err.PERMISSION_DENIED:
+            setError('Grant Access to location');
+            break;
+          case err.POSITION_UNAVAILABLE:
+            setError('Unknown Location');
+            break;
+          case err.TIMEOUT:
+            setError('Request time out');
+            break;
+          default:
+            setError('Unknown error ocurred');
+            break;
+        }
+        setLocationLoading(false);
+      }
+    );
+  };
+
+  //take latitude and longitude and provide readable address
+  const reverseCoordinates = async (latitude, longitude) => {
+    try{
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+      );
+      const data = await response.json();
+      const fetchedAddress = await data.address;
+      //Setting values to variables
+      setCity(fetchedAddress.city);
+      setZip(fetchedAddress.postcode);
+      setState(fetchedAddress.state);
+      setStreet(fetchedAddress.county);
+      setInvalid(false);
+    } catch(e) {
+      setError('Error fetching details, fill manually.');
+    }
+    setLocationLoading(false);
+  };
+
+  //Take pincode and give address based on it
+  const addressBasedOnPincode = useCallback(async () => {
+    try {
+      setError('');
+      const response = await fetch(`https://api.postalpincode.in/pincode/${zip}`);
+      
+      const data = await response.json();
+      console.log(data)
+      //Check for pincode status
+      if(data && data[0].Status == 'Success') {
+        const fetchedAd = data[0].PostOffice[0];
+        
+        //Setting values
+        setState(fetchedAd.Circle);
+        setCity(fetchedAd.Block);
+        setStreet(fetchedAd.Block);
+        setInvalid(false);
+      } else {
+        setInvalid(true);
+        setError("Invalid pincode");
+      }
+
+    } catch(e) {
+      console.log("error",e);
+    }
+  },[zip]);
+
+  useEffect(() => {
+    if(zip > 99999 && zip < 1000000) {
+    addressBasedOnPincode();
+    }
+  },[countPin]);
+
+  
   return (
     <div className="space-y-4 mt-4 animate-fade-in">
       <button
-        // onClick={handleUseCurrentLocation}
-        className="w-full flex items-center justify-center gap-2 text-pink-600 font-semibold border-2 border-pink-200 bg-pink-50 rounded-lg py-2.5 mb-8 hover:bg-pink-100 transition-colors"
-      >
-        <MapPinHouse />
-        Use Current Location
+        onClick={handleLocationDetect}
+        disabled={locationLoading}
+        className="w-full flex disabled:cursor-not-allowed items-center justify-center gap-2 text-pink-600 font-semibold border-2 border-pink-200 bg-pink-50 rounded-lg py-2.5 mb-8 hover:bg-pink-100 transition-colors"
+      >{locationLoading ? <div className="animate-spin"><Loader2 /></div> :
+        <><MapPinHouse />
+        Use Current Location</>}
       </button>
 
       {/* Name */}
@@ -290,7 +387,7 @@ const AddressForm = ({ setIsAddNewAddress, savedAddress }) => {
               id="zip"
               type="text"
               value={zip}
-              onChange={(e) => setZip(e.target.value)}
+              onChange={(e) => {setZip(e.target.value);setCountPin(countPin + 1)}}
               className="peer h-10 w-full border-0 border-b-2 border-gray-300 bg-transparent px-1 text-gray-900 placeholder-transparent outline-none ring-0 transition-colors focus:border-pink-600"
               placeholder="Pincode"
             />
@@ -368,7 +465,7 @@ const AddressForm = ({ setIsAddNewAddress, savedAddress }) => {
 
         {/* Address Type */}
 
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-nowrap overflow-scroll">
           {options.map((option) => (
             <label
               key={option.id}
@@ -403,8 +500,9 @@ const AddressForm = ({ setIsAddNewAddress, savedAddress }) => {
           &larr; Back to saved addresses
         </button>
       )}
+      <div className="text-red-600">{error}</div>
       <button
-        disabled={loading}
+        disabled={loading || invalid}
         onClick={() => {
           saveAddressToBackend(), setIsAddNewAddress(false);
         }}
@@ -421,12 +519,9 @@ const AddressStep = ({setStep, addressId, setAddressId}) => {
   const [isAddNewAddress, setIsAddNewAddress] = useState(false);
   const [loadAddress, setLoadAddress] = useState(0);
 
-  useEffect(() => {
-    fetchSavedAddresses();
-  }, [isAddNewAddress, loadAddress,savedAddress]);
-
+  
   //It fetch all saved address from server
-  const fetchSavedAddresses = async () => {
+  const fetchSavedAddresses = useCallback(async () => {
     //Api end point do get all saved address related to user
     const apiUri = `${import.meta.env.VITE_API_URL}/user/get-addresses`;
 
@@ -451,8 +546,17 @@ const AddressStep = ({setStep, addressId, setAddressId}) => {
         console.log("Error while fetching saved addresse ", error);
       }
     }
-  };
+  },[]);
 
+  useEffect(() => {
+    fetchSavedAddresses();
+  }, [fetchSavedAddresses,loadAddress,isAddNewAddress]);
+
+  useEffect(() => {
+    if(savedAddress.length == 0) {
+      setIsAddNewAddress(true);
+    }
+  },[savedAddress]);
 
   //Remove address from server
   const removeSavedAddress = async (addressId) => {
