@@ -2,7 +2,6 @@ import { configureStore } from "@reduxjs/toolkit";
 import cartReducer from "../features/cart/cartSlice"
 import userReducer from "../features/user/userSlice"
 import wishlistReducer from "../features/wishlist/wishlistSlice"
-import checkoutReducer from "../features/checkout/checkoutSlice"
 
 export default configureStore({
     reducer: {
@@ -12,6 +11,5 @@ export default configureStore({
         cart: cartReducer,
         user: userReducer,
         wishlist: wishlistReducer,
-        checkout: checkoutReducer,
     },
 });

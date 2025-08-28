@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useCallback } from "react";
 import OrderSummary from "./OrderSummery";
 import Cookies from "js-cookie";
-import { useDispatch, useSelector } from "react-redux";
-import { clearCheckout } from "../../../features/checkout/checkoutSlice";
+import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { Check, CircleCheckBig, Currency } from "lucide-react";
+import { Check, CircleCheckBig } from "lucide-react";
 import AddressStep from "./AddressStep";
 import PaymentStep from "./PaymentStep";
 
@@ -96,7 +95,6 @@ const SuccessMessage = ({ onReset }) => {
 // --- Main App Component ---
 
 const CheckoutPage = () => {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
   const [step, setStep] = useState("Address"); // Address, Payment
   const [isOrderPlaced, setIsOrderPlaced] = useState(false);
@@ -107,35 +105,24 @@ const CheckoutPage = () => {
   //Product details
   const [products, setProducts] = useState(null);
 
-  //Saved Addresses
-
-  const item = useSelector((state) => state.checkout.items);
-
   //This method is used to fetch item details(price, img) from backend based on checkout slice items
   const fetchProducts = useCallback(async () => {
     //Api to get items details
-    const apiUri = `${import.meta.env.VITE_API_URL}/user/get-checkout-items`;
+    const apiUri = `${import.meta.env.VITE_API_URL}/user/get-checkout`;
 
     //Jwt token for auth perpose
     const jwtToken = Cookies.get("jwtToken");
 
     //checking if user has jwt token and also there is some item in checkout
-    if (jwtToken && item.length > 0) {
+    if (jwtToken) {
       try {
-        //Getting array of obj(productId,quantity) from checkout slice
-        const itemsArray = item.map((item) => ({
-          productId: item.productId,
-          quantity: item.quantity,
-        }));
 
         //Making API call on backend
         const response = await fetch(apiUri, {
-          method: "POST",
+          method: "GET",
           headers: {
-            "Content-Type": "application/json",
             Authorization: `Bearer ${jwtToken}`,
           },
-          body: JSON.stringify(itemsArray),
         });
 
         const result = await response.json();
@@ -147,7 +134,7 @@ const CheckoutPage = () => {
     } else {
       console.log("Add products to checkout");
     }
-  }, [item, setProducts]);
+  }, [setProducts]);
 
   useEffect(() => {
     fetchProducts();
@@ -156,7 +143,7 @@ const CheckoutPage = () => {
   //This method handle the click on button(Start new order) of success page
   //clear the checkout slice and navigate to home page
   const handleReset = () => {
-    dispatch(clearCheckout());
+    //Here call method to clear checkout and cart if needed
     navigate("/");
   };
 

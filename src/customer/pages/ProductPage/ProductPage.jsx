@@ -1,14 +1,15 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Markdown from "react-markdown";
 import ProductCard from "../../components/Product/ProductCard";
 import { useDispatch, useSelector } from "react-redux";
+import Cookies from "js-cookie";
 import {
   AddItemAtFirst,
   addItem,
   removeItem,
 } from "../../../features/cart/cartSlice";
-import { updateCheckout } from "../../../features/checkout/checkoutSlice";
+import { ProductPageShimmer } from "../../../shimmers/users/Shimmers";
 
 // --- Icon Components (Self-contained SVGs) ---
 const Star = ({ className, fill = "none", ...props }) => (
@@ -126,12 +127,9 @@ const StarRating = ({ rating }) => {
 };
 
 const ProductImageGallery = ({ images }) => {
-  const [mainImage, setMainImage] = useState(images[0].imageUrl);
+  const [mainImage, setMainImage] = useState((images.find(image => image.featured === true)).imageUrl);
   const fileInputRef = useRef(null);
 
-  useEffect(() => {
-    setMainImage(images[0].imageUrl);
-  }, [images]);
 
   const handleImageUpload = (event) => {
     const file = event.target.files[0];
@@ -222,19 +220,23 @@ export default function ProductPage() {
   const [product, setProduct] = useState(null);
   const [relatedProducts, setRelatedProducts] = useState(null);
   const [quantity, setQuantity] = useState(0);
-  const cart = useSelector((state) => state.cart.items);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const cart = useSelector((state) => state.cart.items);
+  const wishlist = useSelector((state) => state.wishlist.items);
+
+  // 2. For performance, convert arrays to faster lookup structures
+  const cartMap = new Map(
+    (cart?.items || []).map((item) => [item.productId, item.quantity])
+  );
+  // A Set is perfect for checking if an ID exists
+  const wishlistSet = new Set(wishlist.map((item) => item.productId));
 
   //Function to check that this product exists in cart or not
 
-  useEffect(() => {
-    fetchProduct();
-    checkProductInCart();
-  }, [cart, id]);
-
+  
   //Check product in cart and set the quantity
-  const checkProductInCart = () => {
+  const checkProductInCart = useCallback(() => {
     if (cart !== null) {
       const isProductInCart = cart.items.find((item) => item.productId === id);
       if (isProductInCart) {
@@ -245,7 +247,7 @@ export default function ProductPage() {
     } else {
       setQuantity(0);
     }
-  };
+  },[cart,id]);
 
   //Handle cart operation
   const handleAddItemAtStart = () => {
@@ -277,31 +279,26 @@ export default function ProductPage() {
     dispatch(removeItem(item));
   };
 
-  const handleBuyNow = () => {
-    const item = {
-      items: [
-        {
-          productId: id,
-          productImage: product.images[0].imageUrl,
-          productMrp: product.mrp,
-          productName: product.title,
-          productSellPrice: product.sellingPrice,
-          quantity: 1,
-        },
-      ],
-      mrpTotal: product.mrp,
-      shipping: product.sellingPrice >= 249 ? 0 : 49,
-      subTotal: product.sellingPrice,
-      tax: (18 / 100) * product.sellingPrice,
-      taxPercent: 18,
-      total:
-        product.sellingPrice +
-        (product.sellingPrice >= 249 ? 0 : 49) +
-        (18 / 100) * product.sellingPrice,
-    };
+  const handleBuyNow = async () => {
+    const jwtToken = Cookies.get("jwtToken");
+    if(!jwtToken)navigate("/login");
+    
+    const item = [{
+      productId: product.id,
+      quantity: 1
+    }];
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/user/update-checkout`,{
+      method:"POST",
+      headers: {
+        "Content-Type" : "application/json",
+        Authorization: `Bearer ${jwtToken}`,
+      },
+      body: JSON.stringify(item),
+    });
 
-    dispatch(updateCheckout(item));
-    console.log("product tk to chlaa");
+    if(!response.ok) {
+      throw new Error("Failed to update checkout");
+    }
     navigate("/checkout");
   };
 
@@ -310,7 +307,7 @@ export default function ProductPage() {
   }, [product]);
 
   //Function to Fetch Data using id
-  const fetchProduct = async () => {
+  const fetchProduct = useCallback(async () => {
     //Base URL of product details data fetch
     const baseUri = `${
       import.meta.env.VITE_API_URL
@@ -331,7 +328,14 @@ export default function ProductPage() {
     const result = await response.json();
 
     setProduct(result);
-  };
+  },[id]);
+
+
+  useEffect(() => {
+    fetchProduct();
+    checkProductInCart();
+  }, [fetchProduct, checkProductInCart]);
+ 
 
   //Function to fetch Related Products
   const fetchRelatedProduct = async () => {
@@ -349,13 +353,16 @@ export default function ProductPage() {
 
     const response = await fetch(fullUri);
     const result = await response.json();
+    if (result.length == 0) {
+      return;
+    }
     setRelatedProducts(result);
   };
 
   return (
     <div className="bg-gray-50 font-sans">
       {product == null ? (
-        <div></div>
+        <ProductPageShimmer />
       ) : (
         <div className="container mx-auto p-4 sm:p-6 lg:p-8">
           <main className="flex flex-col lg:flex-row gap-8 lg:gap-12 mb-12 sm:mb-16">
@@ -389,14 +396,14 @@ export default function ProductPage() {
                   <div className="w-full flex items-center overflow-hidden justify-between text-white font-semibold rounded-lg shadow-md">
                     <button
                       onClick={handleRemoveItem}
-                      className="w-[30%] bg-gray-800 h-full transition-transform transform hover:scale-125"
+                      className="w-[30%] py-3 bg-gray-800 h-full transition-transform transform hover:scale-125"
                     >
                       -
                     </button>
                     <span className="text-black">{quantity}</span>
                     <button
                       onClick={handleAddItem}
-                      className="w-[30%] bg-gray-800 h-full transition-transform transform hover:scale-125"
+                      className="w-[30%] py-3 bg-gray-800 h-full transition-transform transform hover:scale-125"
                     >
                       +
                     </button>
@@ -503,7 +510,12 @@ export default function ProductPage() {
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {relatedProducts.map((product) => (
-                  <ProductCard key={product.id} product={product} />
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    inCartQuantity={cartMap.get(product.id) || 0}
+                    wishlist={wishlistSet.has(product.id)}
+                  />
                 ))}
               </div>
             </section>

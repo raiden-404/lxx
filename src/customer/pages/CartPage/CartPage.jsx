@@ -4,8 +4,8 @@ import {
   deleteItem,
   removeItem,
 } from "../../../features/cart/cartSlice";
-import { updateCheckout } from "../../../features/checkout/checkoutSlice";
 import { useNavigate } from "react-router-dom";
+import Cookies from "js-cookie";
 
 // --- Icon Components (Self-contained SVGs) ---
 const Trash2 = ({ className }) => (
@@ -120,13 +120,29 @@ const CartItem = ({ item, onItemAdd, onItemRemove, onItemDelete }) => {
 
 const OrderSummary = ({cartItems}) => {
   
-  const dispatch = useDispatch();
   const navigate = useNavigate();
   console.log(cartItems)
 
-  const handleCheckOut = () => {
-    dispatch(updateCheckout(cartItems));
-    console.log("ye cart chla");
+  const handleCheckOut = async () => {
+    const jwtToken = Cookies.get("jwtToken");
+    if(!jwtToken){navigate("/login");}
+    
+    const item = cartItems.items.map(item => ({productId: item.productId, quantity: item.quantity}));
+    
+
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/user/update-checkout`,{
+      method:"POST",
+      headers: {
+        "Content-Type" : "application/json",
+        Authorization: `Bearer ${jwtToken}`,
+      },
+      body: JSON.stringify(item),
+    });
+
+    if(!response.ok) {
+      throw new Error(response.statusText);
+    }
+
     navigate('/checkout')
   }
 
