@@ -389,14 +389,14 @@ export default function ProductPage() {
                   <div className="w-full flex items-center overflow-hidden justify-between text-white font-semibold rounded-lg shadow-md">
                     <button
                       onClick={handleRemoveItem}
-                      className="w-[30%] py-3 bg-gray-800 h-full transition-transform transform hover:scale-125"
+                      className="w-[30%] bg-gray-800 h-full transition-transform transform hover:scale-125"
                     >
                       -
                     </button>
                     <span className="text-black">{quantity}</span>
                     <button
                       onClick={handleAddItem}
-                      className="w-[30%] bg-gray-800 py-3 h-full transition-transform transform hover:scale-125"
+                      className="w-[30%] bg-gray-800 h-full transition-transform transform hover:scale-125"
                     >
                       +
                     </button>
