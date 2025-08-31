@@ -6,6 +6,8 @@ import {
 } from "../../../features/cart/cartSlice";
 import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
+import { useState } from "react";
+import { Loader2 } from "lucide-react";
 
 // --- Icon Components (Self-contained SVGs) ---
 const Trash2 = ({ className }) => (
@@ -119,11 +121,12 @@ const CartItem = ({ item, onItemAdd, onItemRemove, onItemDelete }) => {
 };
 
 const OrderSummary = ({cartItems}) => {
-  
+  const [load, setLoad] = useState(false);
   const navigate = useNavigate();
   console.log(cartItems)
 
   const handleCheckOut = async () => {
+    setLoad(true);
     const jwtToken = Cookies.get("jwtToken");
     if(!jwtToken){navigate("/login");}
     
@@ -142,7 +145,7 @@ const OrderSummary = ({cartItems}) => {
     if(!response.ok) {
       throw new Error(response.statusText);
     }
-
+    setLoad(false);
     navigate('/checkout')
   }
 
@@ -172,7 +175,9 @@ const OrderSummary = ({cartItems}) => {
         <span>₹{cartItems.total.toFixed(2)}</span>
       </div>
       <button onClick={handleCheckOut} className="w-full mt-6 bg-pink-600 text-white font-semibold py-3 rounded-lg hover:bg-pink-700 transition-all duration-300 transform hover:scale-105">
-        Proceed to Checkout
+        {
+          load ? <Loader2 className="inline-flex animate-spin" />: "Proceed to Checkout"
+        }
       </button>
     </div>
   );

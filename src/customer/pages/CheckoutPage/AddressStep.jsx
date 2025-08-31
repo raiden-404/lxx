@@ -32,7 +32,7 @@ const InputField = ({ name, value, onChange, placeholder, label }) => (
   </div>
 );
 
-const AddressForm = ({ setIsAddNewAddress, savedAddress }) => {
+const AddressForm = ({ setIsAddNewAddress, savedAddress, loadAddress, setLoadAddress }) => {
   const [ loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [locationLoading, setLocationLoading] = useState(false);
@@ -148,9 +148,10 @@ const AddressForm = ({ setIsAddNewAddress, savedAddress }) => {
         setIsAddNewAddress(false);
       }
     } else {
-      console.log("Fill all fields || Login ");
+      setError("Fill all details");
     }
     setLoading(false);
+    setLoadAddress(loadAddress+1);
   };
 
   //Get latitude and longitude from browser and call for reverse decode
@@ -552,11 +553,11 @@ const AddressStep = ({setStep, addressId, setAddressId}) => {
     fetchSavedAddresses();
   }, [fetchSavedAddresses,loadAddress,isAddNewAddress]);
 
-  useEffect(() => {
-    if(savedAddress.length == 0) {
-      setIsAddNewAddress(true);
-    }
-  },[savedAddress]);
+  // useEffect(() => {
+  //   if(savedAddress.length == 0) {
+  //     setIsAddNewAddress(true);
+  //   }
+  // },[savedAddress]);
 
   //Remove address from server
   const removeSavedAddress = async (addressId) => {
@@ -650,6 +651,8 @@ const AddressStep = ({setStep, addressId, setAddressId}) => {
         <AddressForm
           setIsAddNewAddress={setIsAddNewAddress}
           savedAddress={savedAddress}
+          loadAddress={loadAddress}
+          setLoadAddress={setLoadAddress}
         />
       )}
     </div>

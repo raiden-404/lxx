@@ -1,5 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Outlet, Link, useNavigate } from "react-router-dom";
+import Notification from "../admin/components/Notification/Notification";
+import Cookies from "js-cookie";
+import { Client } from "@stomp/stompjs";
+import SockJS from "sockjs-client";
+import { preconnect } from "react-dom";
 
 // --- SVG Icon Components ---
 // Using inline SVGs for icons to avoid external dependencies and ensure they load quickly.
@@ -272,7 +277,7 @@ const Sidebar = ({
       ></div>
 
       <aside
-        className={`group fixed top-0 left-0 h-full bg-black text-gray-400 flex flex-col z-40 transition-all duration-300 ease-in-out border-r rounded-2xl border-gray-600
+        className={`group fixed top-0 left-0 h-full bg-black text-gray-400 flex flex-col z-40 transition-all duration-300 ease-in-out border-r rounded-se-2xl rounded-ee-2xl border-gray-600
         ${
           isSidebarOpen ? "w-64" : "w-0 lg:w-[74px]"
         } lg:hover:w-64 overflow-hidden`}
@@ -303,8 +308,94 @@ const Sidebar = ({
 // --- Header Component ---
 const Header = ({ setSidebarOpen }) => {
   const navigate = useNavigate();
+  const [notificationOpen, setNotificationOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+    const [notifications, setNotifications] = useState([]);
+
+
+    //Stomp client rhega yha, na pta kya hai ye
+      const [stompClient, setStompClient] = useState(null);
+    
+      //Used to get live notifications
+      //Send handshake request and subscribing to notification channel
+      useEffect(() => {
+        const jwtToken = Cookies.get("jwtToken");
+        if (!jwtToken) {
+          navigate("/login");return;
+        }
+    
+        //Stomp client ka instence bnaye
+        const client = new Client({
+          //SockJS ka use karke connection bnaye
+          webSocketFactory: () => new SockJS(`${import.meta.env.VITE_API_URL}/ws`),
+    
+          //JWT Token ko header me connect kare
+          connectHeaders: {
+            Authorization: `Bearer ${jwtToken}`,
+          },
+    
+          //Connection success hone pe
+          onConnect: () => {
+            console.log("Web Socket Connected Successfully!");
+    
+            //Notification ko subscribe krlo
+            client.subscribe("/topic/notifications", (message) => {
+              const receiveNotification = JSON.parse(message.body);
+              console.log("new notification received: ", receiveNotification);
+    
+              //notification array ke suru me add krde
+              setUnreadCount(prevCount => prevCount + 1);
+              setNotifications((prev) => [receiveNotification, ...prev]);
+            });
+          },
+    
+          //Jab connection fail hoja
+          onStompError: (frame) => {
+            console.log("Broker reported error: ", frame.headers["message"]);
+            console.log("Additional details : ", frame.body);
+          },
+        });
+    
+        //CLient ko activate karle
+        client.activate();
+     
+        //Client ke instance ko state me save krle
+        setStompClient(client);
+    
+        //Cleanup function - jb commponent unmount hoga tb connection band krde memmory leak se bachne ke liye
+        return () => {
+          if (client) {
+            client.deactivate();
+            console.log("WebSocket Disconnected!");
+          }
+        };
+      }, [navigate]);
+    
+
+
+  useEffect(() => {
+    const fetchUnreadNotificationCount = async () => {
+      const jwtToken = Cookies.get("jwtToken");
+      if(!jwtToken) {
+        navigate("/login");
+      }
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/admin/get-count-nonread-notifications`,{
+        headers: {
+          Authorization : `Bearer ${jwtToken}`,
+        },
+      });
+      if(!response.ok) {
+        throw new Error("Error fetching unread notifications count");
+      }
+      setUnreadCount(await response.json());
+    }
+    fetchUnreadNotificationCount();
+  },[navigate]);
+  
+
   return (
-    <div className="h-20 flex-shrink-0">
+    <>
+    <div className="h-20 sticky top-0 z-30 bg-black flex-shrink-0 ">
       <header className="h-full px-4 md:px-10 flex items-center justify-between">
         <button
           onClick={() => setSidebarOpen(true)}
@@ -312,21 +403,34 @@ const Header = ({ setSidebarOpen }) => {
         >
           <MenuIcon />
         </button>
-        <div onClick={() => navigate("/")} className="flex-grow cursor-pointer">Laxmi Customize</div>
+        <div onClick={() => navigate("/")} className=" p-4 cursor-pointer">Laxmi Customize</div>
 
         <div className="flex items-center space-x-8">
-          <button className="relative text-gray-400 hover:text-white transition-colors duration-200">
-            <MailIcon />
-          </button>
-          <button className="relative text-gray-400 hover:text-white transition-colors duration-200">
+          
+          {/* Notification */}
+          <div className="relative">
+            {/* Icon */}
+            <button className="relative text-gray-400 hover:text-white transition-colors duration-200"
+             onClick={() => {setNotificationOpen(!notificationOpen)}}>
             <BellIcon />
             <span className="absolute -top-1 -right-1 flex h-4 w-4">
+              {
+                unreadCount <= 0 ? <></> :<> 
               <span className="animate-ping-slow absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-4 w-4 bg-pink-500 text-white text-xs items-center justify-center">
-                3
-              </span>
+                <span className="relative inline-flex rounded-full h-4 w-4 bg-pink-500 text-white text-xs items-center justify-center">
+                  {unreadCount}
+              </span></>
+              }
             </span>
           </button>
+          {/* Notification box */}
+          {
+            notificationOpen && 
+            <div className="absolute bg-black p-2 border border-gray-600/80 md:w-96 w-[80vw] h-[70vh] overflow-hidden md:end-[-15px] end-[-45px] rounded-lg top-10">
+            <Notification setUnreadCount={setUnreadCount} notifications={notifications} setNotifications={setNotifications} setNotificationOpen={setNotificationOpen} />
+          </div>
+          }
+          </div>
           <div className="relative">
             <button className="flex items-center space-x-3">
               <img
@@ -349,6 +453,10 @@ const Header = ({ setSidebarOpen }) => {
       </header>
       <div className="w-[98%] mx-auto h-[1px] bg-gray-900"></div>
     </div>
+    {
+      notificationOpen && <div onClick={() => setNotificationOpen(false)} className="bg-slate-900/50 fixed top-0 left-0 h-[100vh] w-[100vw] z-20"></div>
+    }
+    </>
   );
 };
 
@@ -379,7 +487,7 @@ const AdminLayout = () => {
           setSidebarOpen={setSidebarOpen}
         />
 
-        <div className="lg:ml-20 transition-all duration-300">
+        <div className="lg:ml-16 transition-all duration-300">
           <Header setSidebarOpen={setSidebarOpen} />
           <main className="p-4 md:p-6">
             <Outlet />

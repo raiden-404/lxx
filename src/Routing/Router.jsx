@@ -1,9 +1,9 @@
 import { createBrowserRouter } from "react-router-dom";
-import UserLayout from "../Layouts/UserLayout"
-import HomePage from "../customer/pages/homepage/HomePage"
+import UserLayout from "../Layouts/UserLayout";
+import HomePage from "../customer/pages/homepage/HomePage";
 import ProductPage from "../customer/pages/ProductPage/ProductPage";
-import CartPage from "../customer/pages/CartPage/CartPage"
-import ProductListPage from "../customer/pages/ProductPage/ProductListPage"
+import CartPage from "../customer/pages/CartPage/CartPage";
+import ProductListPage from "../customer/pages/ProductPage/ProductListPage";
 import CategoryPage from "../customer/pages/CategoryPage/CategoryPage";
 import LoginPage from "../customer/pages/LoginPage/LoginPage";
 import AdminLayout from "../Layouts/AdminLayout";
@@ -28,121 +28,121 @@ import RemoveNavbar from "../admin/pages/ProductPage/AdminProductHandle/Remove/R
 import RemoveCategoryGrid from "../admin/pages/ProductPage/AdminProductHandle/Remove/RemoveCategoryGrid";
 
 const Router = createBrowserRouter([
-    {
-        path : "/",
-        element : <UserLayout />,
-        children : [
-            {
-                index: true,
-                element : <HomePage />
-            },
-            {
-                path : "/collection/:collection/:category",
-                element : <CategoryPage />
-            },
-            {
-                path : "/product/:id",
-                element : <ProductPage />
-            },
-            {
-                path : "/category/:category/:categoryId",
-                element : <ProductListPage />
-            },
-            {
-                path : "/cart",
-                element : <CartPage />
-            },
-            {
-                path : "/login",
-                element : <LoginPage />
-            },
-            {
-                path : "/login-success",
-                element : <CartPage />
-            },
-            {
-                path : "/verify/redirect",
-                element : <Jwt />
-            },
-            {
-                path : "checktoken",
-                element : <TokenCheck />
-            },
-            {
-                path: "logout",
-                element: <Logout />
-            },
-            {
-                path: "wishlist",
-                element: <Wishlist />
-            },
-            {
-                path: "checkout",
-                element: <CheckoutPage />
-            },
-            {
-                path: "my-orders",
-                element: <MyOrdersPage />
-            },
-            {
-                path: "my-orders/order/:orderId",
-                element: <OrderPage />
-            }
-        ]
-    },
-    {
-        path : "/admin",
-        element : <AdminLayout />,
-        children: [
-            {
-                index: true,
-                element: <AdminDashboard/>
-            },
-            {
-                path: "/admin/orders",
-                element: <AdminOrdersPage />
-            },
-            {
-                path: "/admin/order/:orderId",
-                element: <AdminOrderDetailePage />
-            },
-            {
-                path: "/admin/products",
-                element: <AdminProductPage />
-            },
-            {
-                path: "/admin/products/add-product",
-                element: <AddProduct />
-            },
-            {
-                path: "/admin/products/add-banner",
-                element: <AddBanner />
-            },
-            {
-                path: "/admin/products/add-grid",
-                element: <AddCategoryGrid />
-            },
-            {
-                path: "/admin/products/add-navbar",
-                element: <AddNavbar />
-            },
-            {
-                path: "/admin/products/remove-products",
-                element: <RemoveProducts />
-            },
-            {
-                path: "/admin/products/remove-banner",
-                element: <RemoveBanners />
-            },
-            {
-                path: "/admin/products/remove-navbar",
-                element:<RemoveNavbar />
-            }, {
-                path: "/admin/products/remove-grid",
-                element: <RemoveCategoryGrid />
-            }
-        ]
-        
-    }
-])
+  {
+    path: "/",
+    element: <UserLayout />,
+    children: [
+      {
+        index: true,
+        element: <HomePage />,
+      },
+      {
+        path: "/collection/:collection/:category",
+        element: <CategoryPage />,
+      },
+      {
+        path: "/product/:id",
+        element: <ProductPage />,
+      },
+      {
+        path: "/category/:category/:categoryId",
+        element: <ProductListPage />,
+      },
+      {
+        path: "/cart",
+        element: <CartPage />,
+      },
+      {
+        path: "/login",
+        element: <LoginPage />,
+      },
+      {
+        path: "/login-success",
+        element: <CartPage />,
+      },
+      {
+        path: "/verify/redirect",
+        element: <Jwt />,
+      },
+      {
+        path: "checktoken",
+        element: <TokenCheck />,
+      },
+      {
+        path: "logout",
+        element: <Logout />,
+      },
+      {
+        path: "wishlist",
+        element: <Wishlist />,
+      },
+      {
+        path: "checkout",
+        element: <CheckoutPage />,
+      },
+      {
+        path: "my-orders",
+        element: <MyOrdersPage />,
+      },
+      {
+        path: "my-orders/order/:orderId",
+        element: <OrderPage />,
+      },
+    ],
+  },
+  {
+    path: "/admin",
+    element: <AdminLayout />,
+    children: [
+      {
+        index: true,
+        element: <AdminDashboard />,
+      },
+      {
+        path: "/admin/orders",
+        element: <AdminOrdersPage />,
+      },
+      {
+        path: "/admin/order/:orderId",
+        element: <AdminOrderDetailePage />,
+      },
+      {
+        path: "/admin/products",
+        element: <AdminProductPage />,
+      },
+      {
+        path: "/admin/products/add-product",
+        element: <AddProduct />,
+      },
+      {
+        path: "/admin/products/add-banner",
+        element: <AddBanner />,
+      },
+      {
+        path: "/admin/products/add-grid",
+        element: <AddCategoryGrid />,
+      },
+      {
+        path: "/admin/products/add-navbar",
+        element: <AddNavbar />,
+      },
+      {
+        path: "/admin/products/remove-products",
+        element: <RemoveProducts />,
+      },
+      {
+        path: "/admin/products/remove-banner",
+        element: <RemoveBanners />,
+      },
+      {
+        path: "/admin/products/remove-navbar",
+        element: <RemoveNavbar />,
+      },
+      {
+        path: "/admin/products/remove-grid",
+        element: <RemoveCategoryGrid />,
+      }
+    ],
+  },
+]);
 export default Router;
