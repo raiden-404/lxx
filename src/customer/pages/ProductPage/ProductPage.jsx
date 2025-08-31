@@ -10,6 +10,7 @@ import {
   removeItem,
 } from "../../../features/cart/cartSlice";
 import { ProductPageShimmer } from "../../../shimmers/users/Shimmers";
+import { Loader2 } from "lucide-react";
 
 // --- Icon Components (Self-contained SVGs) ---
 const Star = ({ className, fill = "none", ...props }) => (
@@ -224,6 +225,7 @@ export default function ProductPage() {
   const navigate = useNavigate();
   const cart = useSelector((state) => state.cart.items);
   const wishlist = useSelector((state) => state.wishlist.items);
+  const [loadBuyNow, setLoadBuyNow] = useState(false);
 
   // 2. For performance, convert arrays to faster lookup structures
   const cartMap = new Map(
@@ -280,6 +282,7 @@ export default function ProductPage() {
   };
 
   const handleBuyNow = async () => {
+    setLoadBuyNow(true);
     const jwtToken = Cookies.get("jwtToken");
     if(!jwtToken)navigate("/login");
     
@@ -299,6 +302,7 @@ export default function ProductPage() {
     if(!response.ok) {
       throw new Error("Failed to update checkout");
     }
+    setLoadBuyNow(false);
     navigate("/checkout");
   };
 
@@ -420,8 +424,9 @@ export default function ProductPage() {
                 <button
                   onClick={handleBuyNow}
                   className="w-full px-6 py-3 bg-gray-800 text-white font-semibold rounded-lg shadow-md hover:bg-gray-900 transition-transform transform hover:scale-105"
-                >
-                  Buy Now
+                >{loadBuyNow ? <Loader2 className="animate-spin inline-flex"/> :
+                  "Buy Now"
+                }
                 </button>
               </div>
               {/* Description */}
