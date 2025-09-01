@@ -14,10 +14,17 @@ import { useCallback, useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
 // --- Leaflet libraries for the dynamic map ---
-import { MapContainer, TileLayer, GeoJSON, Circle } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css'; // Leaflet ki default styling
-import { scaleLinear } from 'd3-scale';
-import { Box, CircleAlert, CircleDot, ShoppingBag, Star, User } from "lucide-react";
+import { MapContainer, TileLayer, GeoJSON, Circle } from "react-leaflet";
+import "leaflet/dist/leaflet.css"; // Leaflet ki default styling
+import { scaleLinear } from "d3-scale";
+import {
+  Box,
+  CircleAlert,
+  CircleDot,
+  ShoppingBag,
+  Star,
+  User,
+} from "lucide-react";
 
 // Dark theme ki definition
 const darkTheme = createTheme({
@@ -36,10 +43,12 @@ const IndiaLeafletMap = ({ data }) => {
 
   // Map ke liye GeoJSON data online fetch karein taaki local file ki zaroorat na pade
   useEffect(() => {
-    fetch('https://raw.githubusercontent.com/geohacker/india/master/state/india_state.geojson')
-      .then(res => res.json())
-      .then(geoData => setGeoJsonData(geoData))
-      .catch(error => console.error("Could not fetch map data:", error));
+    fetch(
+      "https://raw.githubusercontent.com/geohacker/india/master/state/india_state.geojson"
+    )
+      .then((res) => res.json())
+      .then((geoData) => setGeoJsonData(geoData))
+      .catch((error) => console.error("Could not fetch map data:", error));
   }, []);
 
   // Data ko ek object mein badal dein taaki state dhoondhna aasan ho
@@ -51,19 +60,21 @@ const IndiaLeafletMap = ({ data }) => {
 
   // Order count ke hisaab se color ka scale banayein
   const colorScale = scaleLinear()
-    .domain([0, Math.max(...data.map(d => d.orderCount), 1)])
+    .domain([0, Math.max(...data.map((d) => d.orderCount), 1)])
     .range(["rgb(44, 210, 40, 0)", "rgb(44, 210, 40, 1)"]); // Kam count ke liye halka color, zyada ke liye gehra
 
   // Har state ke liye style define karne waala function
   const styleGeoJson = (feature) => {
     // GeoJSON file mein state ka naam 'NAME_1' ya 'st_nm' ho sakta hai, isliye dono ko check karein
-    const stateName = (feature.properties.NAME_1 || feature.properties.st_nm).toLowerCase();
+    const stateName = (
+      feature.properties.NAME_1 || feature.properties.st_nm
+    ).toLowerCase();
     const count = dataByStateName[stateName] || 0;
     return {
       fillColor: colorScale(count),
       weight: 1,
       opacity: 1,
-      color: '#', // Dark border for states
+      color: "#", // Dark border for states
       fillOpacity: 0.6, // Opacity halki si kam kar di taaki neeche ka map dikhe
     };
   };
@@ -75,11 +86,13 @@ const IndiaLeafletMap = ({ data }) => {
         const stateName = feature.properties.NAME_1 || feature.properties.st_nm;
         const count = dataByStateName[stateName.toLowerCase()] || 0;
         // Tooltip/popup content
-        layer.bindTooltip(`<b>${stateName}</b><br/>${count} orders`).openTooltip();
+        layer
+          .bindTooltip(`<b>${stateName}</b><br/>${count} orders`)
+          .openTooltip();
         // Highlight effect
         e.target.setStyle({
           weight: 0,
-          color: 'rgb(255, 0, 0, 0)',
+          color: "rgb(255, 0, 0, 0)",
           fillOpacity: 0.6,
         });
       },
@@ -93,14 +106,23 @@ const IndiaLeafletMap = ({ data }) => {
 
   // Jab tak map ka data load na ho, loading message dikhayein
   if (!geoJsonData) {
-    return <div className="flex h-full w-full items-center justify-center">Loading Map Data...</div>;
+    return (
+      <div className="flex h-full w-full items-center justify-center">
+        Loading Map Data...
+      </div>
+    );
   }
 
   return (
-    <MapContainer 
+    <MapContainer
       center={[22, 82]} // Map ko India par center karein
-      zoom={4} 
-      style={{ height: "100%", width: "100%", backgroundColor: '#1a202c', borderRadius: '24px' }}
+      zoom={4}
+      style={{
+        height: "100%",
+        width: "100%",
+        backgroundColor: "#1a202c",
+        borderRadius: "24px",
+      }}
       scrollWheelZoom={true}
     >
       {/* Ab hum ek detailed map use kar rahe hain jisme labels aur roads dikhte hain */}
@@ -108,17 +130,16 @@ const IndiaLeafletMap = ({ data }) => {
         url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
       />
-      
+
       {/* Yeh layer aapke colored states ko detailed map ke upar dikhayega */}
-      <GeoJSON 
-        data={geoJsonData} 
+      <GeoJSON
+        data={geoJsonData}
         style={styleGeoJson}
         onEachFeature={onEachFeature}
       />
     </MapContainer>
   );
 };
-
 
 // Data load hote samay dikhaane ke liye ek chhota component
 const LoadingSpinner = () => (
@@ -142,22 +163,28 @@ const AdminDashboard = () => {
   const [allState, setAllStates] = useState([]);
 
   // API calls ke liye ek behtar, reusable function
-  const fetchApiData = useCallback(async (endpoint) => {
-    const jwtToken = Cookies.get("jwtToken");
-    if (!jwtToken) {
-      navigate("/login");
-      throw new Error("Authentication token nahi mila.");
-    }
-    const response = await fetch(`${import.meta.env.VITE_API_URL}${endpoint}`, {
-      headers: {
-        Authorization: `Bearer ${jwtToken}`,
-      },
-    });
-    if (!response.ok) {
-      throw new Error(`Endpoint se data fetch nahi ho paaya: ${endpoint}`);
-    }
-    return response.json();
-  }, [navigate]);
+  const fetchApiData = useCallback(
+    async (endpoint) => {
+      const jwtToken = Cookies.get("jwtToken");
+      if (!jwtToken) {
+        navigate("/login");
+        throw new Error("Authentication token nahi mila.");
+      }
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}${endpoint}`,
+        {
+          headers: {
+            Authorization: `Bearer ${jwtToken}`,
+          },
+        }
+      );
+      if (!response.ok) {
+        throw new Error(`Endpoint se data fetch nahi ho paaya: ${endpoint}`);
+      }
+      return response.json();
+    },
+    [navigate]
+  );
 
   // Saara data ek saath fetch karein taaki performance acchi rahe
   useEffect(() => {
@@ -204,100 +231,161 @@ const AdminDashboard = () => {
     paddingAngle: 1,
     cornerRadius: 3,
   };
-  
-  const largePieChartConfig = {
-    innerRadius: isMobile ? 50 : 60,
-    outerRadius: isMobile ? 90 : 110,
-    paddingAngle: 2,
-    cornerRadius: 5,
-  };
 
   if (loading) {
     return <LoadingSpinner />;
   }
 
   return (
-    <div className="min-h-screen bg-black p-4 text-white md:p-6 lg:p-8">
+    <div className="min-h-screen bg-black p-0 xs:p-2 text-white md:p-6 lg:p-8">
       <ThemeProvider theme={darkTheme}>
         <div className="flex flex-col gap-12">
-          
           {/* Section 1: Badi screen par flex-row, mobile par flex-col */}
           <div className="flex w-full flex-col gap-6 lg:flex-row">
-            <div className="h-96 py-4 px-4 w-full rounded-3xl relative border border-gray-700 lg:w-2/3">
-              <h1 className=" absolute right-8 -top-4 text-lg font-semibold px-2 bg-black">Rating & Reviews</h1>
-              <span className="absolute flex gap-2 -top-4 left-8 bg-black px-2 font-semibold text-lg items-center">LIVE<CircleDot size={14} fill="red" stroke="red" /></span>
+            <div className="h-96 py-4 px-2 xs:px-4 w-full rounded-3xl relative border border-gray-700 lg:w-2/3">
+              <h1 className=" absolute right-8 -top-4 text-lg font-semibold px-2 bg-black">
+                Rating & Reviews
+              </h1>
+              <span className="absolute flex gap-2 -top-4 left-8 bg-black px-2 font-semibold text-lg items-center">
+                LIVE
+                <CircleDot size={14} fill="red" stroke="red" />
+              </span>
               {/* Live reviews */}
               <div className=" h-full flex flex-col-reverse overflow-y-scroll gap-3 rounded-lg w-full">
                 {/* List for map*/}
-                {
-                  [1,2,3,4,5,6,78,8].map(() => (
-                    <div className="h-[18%] py-1 items-center px-2 border rounded-lg border-gray-400/40 flex">
-                  {/* Image */}
-                    <img className="h-[90%] rounded-full aspect-square" src="https://imgs.search.brave.com/O0Ivivs2MuYw9uwjjD_dXLAPLtA3gbOhSWYbSHdGo5A/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly93YWxs/cGFwZXJzLmNvbS9p/bWFnZXMvaGQvYWVz/dGhldGljLWFuaW1l/LXByb2ZpbGUtcGlj/dHVyZXMtYmhkOXAw/bW45bWFidWZjbS5q/cGc" alt="" />
-                  <div className="h-full flex flex-col justify-center text-nowrap px-2">
-                    <span className="flex max-w-[16ch] truncate gap-1 text-[12px] text-gray-500 font-semibold"><User size={14} stroke="gray" />{"User Default"}</span>
-                    <span className="text-gray-500 text-[12px] font-semibold">{"2 Mint ago"}</span>
+                {[1, 2, 3, 4, 5, 6, 78, 8].map(() => (
+                  <div className="h-[18%] py-1 items-center sm:px-2 px-1 border rounded-lg border-gray-400/40 flex">
+                    {/* Image, name and time container */}
+                    <div className="flex flex-row min-w-fit h-full items-center ">
+                    {/* Image */}
+                    <img
+                      className="sm:h-[90%] h-[55%] rounded-full aspect-square"
+                      src="https://imgs.search.brave.com/O0Ivivs2MuYw9uwjjD_dXLAPLtA3gbOhSWYbSHdGo5A/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly93YWxs/cGFwZXJzLmNvbS9p/bWFnZXMvaGQvYWVz/dGhldGljLWFuaW1l/LXByb2ZpbGUtcGlj/dHVyZXMtYmhkOXAw/bW45bWFidWZjbS5q/cGc"
+                      alt=""
+                    />
+                    <div className="h-full sm:ps-3 ps-1 flex flex-col justify-center text-nowrap sm:px-2">
+                      <span className="flex max-w-[10ch] sm:max-w-[16ch] truncate gap-1 text-[11px] sm:text-[12px] text-gray-500 font-semibold">
+                        <User size={14} stroke="gray" className="hidden sm:block" />
+                        {"User Default"}
+                      </span>
+                      <span className="text-gray-500 max-w-[10ch] sm:max-w-[16ch] text-[11px] sm:text-[12px] font-semibold">
+                        {"2 Mint ago"}
+                      </span>
+                      <span
+                          className={`flex sm:hidden bg-green-600 h-fit w-fit px-1 text-[12px] gap-1 items-center rounded-lg font-semibold`}
+                        >
+                          {4} <Star size={10} fill="white" />
+                        </span>
+                    </div>
+                    </div>
+                    {/*time, product,rating and reviews */}
+                    <div className="sm:ps-4 ps-2 flex flex-col">
+                      <span className="flex items-center gap-2 hover:underline font-semibold sm:text-sm text-[12px] text-gray-200">
+                        <ShoppingBag size={12} />{" "}<span className="line-clamp-1">
+                        {"Iphone 12 pro max black color"}</span>
+                      </span>
+                      <span className="flex gap-2 ">
+                        <span
+                          className={`hidden sm:flex bg-green-600 h-fit  px-1 text-[12px] gap-1 items-center rounded-lg font-semibold`}
+                        >
+                          {4} <Star size={10} fill="white" />
+                        </span>{" "}
+                        <p className="text-gray-400 sm:text-[12px] text-[11px] font-semibold line-clamp-2">
+                          {
+                            "Wow this product is good and creative. Better paper quality but little issue with glitering. image colour is also much accurate. Overall i love this product too much.Better paper quality but little issue with glitering. image colour is also much accurate. Overall i love this product too much.Better paper quality but little issue with glitering. image colour is also much accurate. Overall i love this product too much."
+                          }
+                        </p>
+                      </span>
+                    </div>
                   </div>
-                  {/*time, product,rating and reviews */}
-                  <div className="ps-4 flex flex-col">
-                    <span className="flex items-center gap-2 hover:underline font-semibold text-sm text-gray-200"><ShoppingBag size={12} /> {"Iphone 12 pro max black color"}</span>
-                    <span className="flex gap-2 "><span className={`flex bg-green-600 h-fit  px-1 text-[12px] gap-1 items-center rounded-lg font-semibold`}>{4} <Star size={10} fill="white" /></span> <p className="text-gray-400 text-[12px] font-semibold line-clamp-2">{"Wow this product is good and creative. Better paper quality but little issue with glitering. image colour is also much accurate. Overall i love this product too much.Better paper quality but little issue with glitering. image colour is also much accurate. Overall i love this product too much.Better paper quality but little issue with glitering. image colour is also much accurate. Overall i love this product too much."}</p></span>
-                  </div>
-                </div>
-                  ))
-                }
-                
+                ))}
               </div>
-              
             </div>
             <div className="grid w-full grid-rows-2 gap-5 lg:w-1/3">
               <div className="relative row-span-1 pe-4 rounded-3xl border border-gray-700">
-                <h1 className="absolute -top-4 right-6 bg-black px-2 text-lg font-semibold">Order Status</h1>
+                <h1 className="absolute -top-4 right-6 bg-black px-2 text-lg font-semibold">
+                  Order Status
+                </h1>
                 <PieChart
-                  series={[{
+                  series={[
+                    {
                       data: [
-                        { value: pendingAndShipped[0], label: "Processing", color: "#D99521" },
-                        { value: pendingAndShipped[1], label: "Shipped", color: "#0047B8" },
+                        {
+                          value: pendingAndShipped[0],
+                          label: "Processing",
+                          color: "#D99521",
+                        },
+                        {
+                          value: pendingAndShipped[1],
+                          label: "Shipped",
+                          color: "#0047B8",
+                        },
                       ],
-                      ...smallPieChartConfig
-                  }]}
+                      ...smallPieChartConfig,
+                    },
+                  ]}
                 />
               </div>
               <div className="relative row-span-1 pe-4 rounded-3xl border border-gray-700">
-                <h1 className="absolute -top-4 right-6 bg-black px-2 text-lg font-semibold">Orders This Month</h1>
+                <h1 className="absolute -top-4 right-6 bg-black px-2 text-lg font-semibold">
+                  Orders This Month
+                </h1>
                 <PieChart
-                  series={[{
+                  series={[
+                    {
                       data: [
-                        { value: orders[0], label: "Delivered", color: "#28a745" },
-                        { value: orders[1], label: "Cancelled", color: "#dc3545" },
-                        { value: orders[2], label: "Returned", color: "#fd7e14" },
+                        {
+                          value: orders[0],
+                          label: "Delivered",
+                          color: "#28a745",
+                        },
+                        {
+                          value: orders[1],
+                          label: "Cancelled",
+                          color: "#dc3545",
+                        },
+                        {
+                          value: orders[2],
+                          label: "Returned",
+                          color: "#fd7e14",
+                        },
                       ],
-                      ...smallPieChartConfig
-                  }]}
+                      ...smallPieChartConfig,
+                    },
+                  ]}
                 />
               </div>
             </div>
           </div>
-          
+
           {/* Section 2: Badi screen par flex-row, mobile par flex-col */}
           <div className="flex flex-col gap-6 lg:flex-row">
             <div className="relative w-full rounded-3xl border border-gray-700 lg:w-1/3">
-              <h1 className="absolute -top-4 right-6 bg-black px-2 text-lg font-semibold">Top Selling SLUGS</h1>
+              <h1 className="absolute -top-4 right-6 bg-black px-2 text-lg font-semibold">
+                Top Selling SLUGS
+              </h1>
               {topSlugs.length > 0 && (
                 <BarChart
-                  xAxis={[{ 
-                    scaleType: "band", 
-                    data: topSlugs.map((s) => s.slug),
-                    tickLabelStyle: {
+                  xAxis={[
+                    {
+                      scaleType: "band",
+                      data: topSlugs.map((s) => s.slug),
+                      tickLabelStyle: {
                         angle: 0,
-                        textAnchor: 'middle',
+                        textAnchor: "middle",
                         fontSize: 10,
-                        textTransform:"full-width"
-                    }
-                  }]}
-                  series={[{ data: topSlugs.map((s) => s.totalQuantity), color: "#00B377" }]}
+                        textTransform: "full-width",
+                      },
+                    },
+                  ]}
+                  series={[
+                    {
+                      data: topSlugs.map((s) => s.totalQuantity),
+                      color: "#00B377",
+                    },
+                  ]}
                   height={300}
-                  margin={{bottom:4}}
+                  margin={{ bottom: 4 }}
                 />
               )}
             </div>
@@ -308,10 +396,22 @@ const AdminDashboard = () => {
               </span>
               {revenue && (
                 <LineChart
-                  xAxis={[{ data: Array.from({ length: 15 }, (_, i) => i + 1) }]}
+                  xAxis={[
+                    { data: Array.from({ length: 15 }, (_, i) => i + 1) },
+                  ]}
                   series={[
-                    { data: revenue.dailyRevenue, label: "Daily", color: "#00FFD9", curve: "natural" },
-                    { data: revenue.weeklyRevenue, label: "Weekly", color: "#FF0569", curve: "natural" },
+                    {
+                      data: revenue.dailyRevenue,
+                      label: "Daily",
+                      color: "#00FFD9",
+                      curve: "natural",
+                    },
+                    {
+                      data: revenue.weeklyRevenue,
+                      label: "Weekly",
+                      color: "#FF0569",
+                      curve: "natural",
+                    },
                   ]}
                   height={300}
                 />
@@ -321,10 +421,10 @@ const AdminDashboard = () => {
 
           {/* Section 3: Badi screen par flex-row, mobile par flex-col */}
           <div className="flex flex-col gap-6 lg:flex-row">
-             {/* Map Integration */}
-             <div className="h-96 w-full rounded-3xl border border-gray-700 lg:w-2/3">
-               <IndiaLeafletMap data={allState} />
-             </div>
+            {/* Map Integration */}
+            <div className="h-96 w-full rounded-3xl border border-gray-700 lg:w-2/3">
+              <IndiaLeafletMap data={allState} />
+            </div>
             <div className="relative h-96 w-full rounded-3xl border border-gray-700 lg:w-1/3">
               <h1 className="absolute -top-4 right-6 bg-black px-2 text-lg font-semibold">
                 State With Most Sells
@@ -332,11 +432,18 @@ const AdminDashboard = () => {
               {topStates.length > 0 && (
                 <BarChart
                   layout="horizontal"
-                  yAxis={[{ 
-                    scaleType: "band", 
-                    data: topStates.map((s) => s.state),
-                  }]}
-                  series={[{ data: topStates.map((s) => s.orderCount), color: "#0DBDB4" }]}
+                  yAxis={[
+                    {
+                      scaleType: "band",
+                      data: topStates.map((s) => s.state),
+                    },
+                  ]}
+                  series={[
+                    {
+                      data: topStates.map((s) => s.orderCount),
+                      color: "#0DBDB4",
+                    },
+                  ]}
                 />
               )}
             </div>
@@ -348,4 +455,3 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
-
