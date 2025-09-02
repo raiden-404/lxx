@@ -3,7 +3,6 @@ import UserLayout from "../Layouts/UserLayout";
 import HomePage from "../customer/pages/homepage/HomePage";
 import ProductPage from "../customer/pages/ProductPage/ProductPage";
 import CartPage from "../customer/pages/CartPage/CartPage";
-import ProductListPage from "../customer/pages/ProductPage/ProductListPage";
 import CategoryPage from "../customer/pages/CategoryPage/CategoryPage";
 import LoginPage from "../customer/pages/LoginPage/LoginPage";
 import AdminLayout from "../Layouts/AdminLayout";
@@ -26,6 +25,7 @@ import RemoveProducts from "../admin/pages/ProductPage/AdminProductHandle/Remove
 import RemoveBanners from "../admin/pages/ProductPage/AdminProductHandle/Remove/RemoveBanners";
 import RemoveNavbar from "../admin/pages/ProductPage/AdminProductHandle/Remove/RemoveNavbar";
 import RemoveCategoryGrid from "../admin/pages/ProductPage/AdminProductHandle/Remove/RemoveCategoryGrid";
+import ProductList from "../customer/components/Product/ProductList";
 
 const Router = createBrowserRouter([
   {
@@ -45,8 +45,8 @@ const Router = createBrowserRouter([
         element: <ProductPage />,
       },
       {
-        path: "/category/:category/:categoryId",
-        element: <ProductListPage />,
+        path: "/search/:search",
+        element: <ProductList />,
       },
       {
         path: "/cart",

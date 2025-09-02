@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useSelector } from "react-redux";
 import ProductCard from "../Product/ProductCard";
-import { BellRing, Circle, CircleAlert, CircleArrowDown, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 const InfinitePaging = ({ title, sort, size }) => {
   // 1. State Management
