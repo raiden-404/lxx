@@ -9,6 +9,7 @@ import {
   removeItemFromWishlist,
   addItemInWishlist,
 } from "../../../features/wishlist/wishlistSlice";
+import { Check } from "lucide-react";
 
 const ProductCard = ({product, inCartQuantity, wishlist, ref}) => {
   const {
@@ -81,7 +82,7 @@ const ProductCard = ({product, inCartQuantity, wishlist, ref}) => {
         <div className="h-56 w-full">
             {/* Image is already responsive with w-full and h-full */}
             <img
-              className="mx-auto w-full h-full rounded-t-lg object-cover"
+              className="mx-auto w-full h-full rounded-t-lg object-contain"
               src={imageUrl}
               alt={title}
             />
@@ -222,11 +223,11 @@ const ProductCard = ({product, inCartQuantity, wishlist, ref}) => {
                   handleItemAtFirst();
                 }}
                 type="button"
-                className="hidden min-[340px]:inline-flex items-center rounded-lg bg-pink-700 px-5 py-2.5 text-sm font-medium text-white
+                className="text-nowrap inline-flex items-center rounded-lg bg-pink-700 px-3 py-2.5 text-sm font-medium text-white
                 hover:bg-pink-800 focus:outline-none focus:ring-4 focus:ring-pink-300"
               >
                 <svg
-                  className="-ms-2 me-2 h-5 w-5"
+                  className="-ms-1 h-5 w-5"
                   aria-hidden="true"
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"
@@ -242,25 +243,28 @@ const ProductCard = ({product, inCartQuantity, wishlist, ref}) => {
                     d="M4 4h1.5L8 16m0 0h8m-8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm8 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm.75-3H7.5M11 7H6.312M17 4v6m-3-3h6"
                   />
                 </svg>
+                <span className="hidden xs:block">
                 Add to cart
+                </span>
               </button>
             ) : (
               <div
-                className="flex items-center rounded-lg overflow-hidden"
+                className="flex items-center rounded-xl overflow-hidden"
                 onClick={(e) => e.preventDefault()}
               >
                 <button
                   onClick={() => handleItemRemove()}
-                  className="bg-black hover:bg-gray-800 px-3 py-2 text-white font-bold"
+                  className="hidden xs:block bg-black hover:bg-gray-800 px-3 py-2 text-white font-bold"
                 >
                   -
                 </button>
-                <span className="px-3 py-2 bg-white text-black">
-                  {inCartQuantity}
+                <span className="px-3 border-2 m-1 xs:border-none rounded-lg border-pink-700 py-2 bg-white text-black">
+                  <span className="hidden xs:block">{inCartQuantity}</span>
+                  <span onClick={() => handleItemRemove()} className=" xs:hidden bottom-0 left-2"><Check stroke="#FC198F" strokeWidth={4} /></span>
                 </span>
                 <button
                   onClick={() => handleItemAdd()}
-                  className="bg-black hover:bg-gray-800 px-3 py-2 text-white font-bold"
+                  className="hidden xs:block bg-black hover:bg-gray-800 px-3 py-2 text-white font-bold"
                 >
                   +
                 </button>
