@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import ProductFilter from "./ProductFilter";
 import { useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { BaggageClaim, MonitorOff, ShoppingBag } from "lucide-react";
+import { BaggageClaim, Loader2, MonitorOff, ShoppingBag } from "lucide-react";
 
 const ProductList = () => {
   const { search } = useParams();
@@ -254,10 +254,11 @@ const ProductList = () => {
           {showFilter ? <ProductFilter setShowFilter={setShowFilter} /> : <></>}
           <div class="w-full text-center">
             <button
+              disabled={!hasMore || loading}
               type="button"
-              class="rounded-lg border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-pink-700 focus:z-10 focus:outline-none focus:ring-4 focus:ring-gray-100 -:border-gray-600 -:bg-gray-800 -:text-gray-400 -:hover:bg-gray-700 -:hover:text-white -:focus:ring-gray-700"
+              class="rounded-lg disabled:cursor-not-allowed border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-pink-700 focus:z-10 focus:outline-none focus:ring-4 focus:ring-gray-100 -:border-gray-600 -:bg-gray-800 -:text-gray-400 -:hover:bg-gray-700 -:hover:text-white -:focus:ring-gray-700"
             >
-              Show more
+              {hasMore ? <>{loading ? <div className="flex items-center gap-2"><Loader2 size={20} className="animate-spin" /> Loading...</div> : <>Show More</> }</> : "That's all !!!"}
             </button>
           </div>
         </div>
