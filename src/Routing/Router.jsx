@@ -26,6 +26,7 @@ import RemoveBanners from "../admin/pages/ProductPage/AdminProductHandle/Remove/
 import RemoveNavbar from "../admin/pages/ProductPage/AdminProductHandle/Remove/RemoveNavbar";
 import RemoveCategoryGrid from "../admin/pages/ProductPage/AdminProductHandle/Remove/RemoveCategoryGrid";
 import ProductList from "../customer/components/Product/ProductList";
+import CustomerList from "../admin/pages/CustomerPage/CustomerList";
 
 const Router = createBrowserRouter([
   {
@@ -141,6 +142,10 @@ const Router = createBrowserRouter([
       {
         path: "/admin/products/remove-grid",
         element: <RemoveCategoryGrid />,
+      },
+      {
+        path: "/admin/customers",
+        element: <CustomerList />
       }
     ],
   },
