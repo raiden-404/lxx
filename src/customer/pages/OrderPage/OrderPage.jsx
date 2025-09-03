@@ -1,6 +1,14 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import Cookies from "js-cookie";
-import { useNavigate, useParams} from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import {
+  CircleCheckBig,
+  CircleCheckBigIcon,
+  Image,
+  ImagePlus,
+  Loader2,
+  Pen,
+} from "lucide-react";
 // For icons, you would typically install lucide-react: npm install lucide-react
 // In this self-contained example, we'll use inline SVGs for key icons.
 
@@ -148,8 +156,18 @@ const ArrowLeft = ({ className }) => (
 
 // --- Child Components ---
 
-const OrderItem = ({ item, onWriteReview }) => {
+const OrderItem = ({
+  item,
+  onWriteReview,
+  orderStatus,
+  ratings,
+}) => {
   const [hoverRating, setHoverRating] = useState(0);
+  const [thisRating, setThisRating] = useState(0);
+
+  useEffect(() => {
+    setThisRating(ratings[item.productId])
+  },[ratings, item]);
 
   return (
     <div className="bg-white rounded-xl shadow-sm overflow-hidden">
@@ -179,28 +197,53 @@ const OrderItem = ({ item, onWriteReview }) => {
           </div>
         </div>
       </div>
-      <div className="bg-gray-50 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between">
-        <h4 className="font-semibold text-gray-700 mb-2 sm:mb-0">
-          Rate this product
-        </h4>
-        <div
-          className="flex items-center space-x-1"
-          onMouseLeave={() => setHoverRating(0)}
-        >
-          {[1, 2, 3, 4, 5].map((star) => (
-            <button
-              key={star}
-              onMouseEnter={() => setHoverRating(star)}
-              onClick={() => onWriteReview(item, star)}
-              className={`transition-colors text-gray-300 hover:text-yellow-400 ${
-                hoverRating >= star ? "text-yellow-400" : ""
-              }`}
+      {orderStatus == "DELIVERED" &&
+        (thisRating > 0 ? (
+          <div className="bg-gray-50 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <span className="font-semibold text-green-700 flex items-center gap-2">
+              Product Rated
+              <CircleCheckBigIcon size={20} strokeWidth={3} />
+            </span>
+            <div className="flex ">
+              <span
+              className={`flex items-center gap-2 ${
+                thisRating > 2 ? "bg-green-700" : "bg-orange-700"
+              } px-2 py-1 font-semibold rounded-lg text-white`}
             >
-              <Star className="w-7 h-7" filled={hoverRating >= star} />
+              <Star className={`w-4 h-4`} filled={true} />
+              {thisRating}
+            </span>
+            <button
+              onClick={() => setThisRating(0)}
+             className="text-sm ml-4 top-0 text-red-700 font-semibold">
+              EDIT
             </button>
-          ))}
-        </div>
-      </div>
+            </div>
+          </div>
+        ) : (
+          <div className="bg-gray-50 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <span className="font-semibold flex gap-2 text-gray-700 mb-2 sm:mb-0">
+              Rate this product
+            </span>
+            <div
+              className="flex items-center space-x-1"
+              onMouseLeave={() => setHoverRating(0)}
+            >
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                  key={star}
+                  onMouseEnter={() => setHoverRating(star)}
+                  onClick={() => onWriteReview(item, star)}
+                  className={`transition-colors text-gray-300 hover:text-yellow-400 ${
+                    hoverRating >= star ? "text-yellow-400" : ""
+                  }`}
+                >
+                  <Star className="w-7 h-7" filled={hoverRating >= star} />
+                </button>
+              ))}
+            </div>
+          </div>
+        ))}
     </div>
   );
 };
@@ -242,7 +285,9 @@ const OrderTracker = ({ tracking, status }) => {
                     step.completed ? "text-green-600" : "text-gray-500"
                   }`}
                 >
-                  {step.status === "NONDELIVERED" ? "OUT FOR DELIVERY" : step.status}
+                  {step.status === "NONDELIVERED"
+                    ? "OUT FOR DELIVERY"
+                    : step.status}
                 </p>
                 <p className="mt-1 text-xs text-center text-gray-400">
                   {step.date}
@@ -263,10 +308,44 @@ const OrderTracker = ({ tracking, status }) => {
   );
 };
 
-const ReviewModal = ({ isOpen, onClose, item, initialRating }) => {
+const ReviewModal = ({ isOpen, onClose, item, initialRating, setRatings }) => {
+  const navigate = useNavigate();
   const [rating, setRating] = useState(0);
   const [reviewText, setReviewText] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  // Image upload
+
+  // State to hold the actual image File objects
+  const [images, setImages] = useState([]);
+
+  // State to hold the preview URLs for the selected images
+  const [imagePreviews, setImagePreviews] = useState([]);
+
+  // Yeh function preview se image hatane ke liye hai
+  const removeImage = (indexToRemove) => {
+    // File object ko state se hatayein
+    setImages(images.filter((_, index) => index !== indexToRemove));
+    // Preview URL ko state se hatayein
+    setImagePreviews(
+      imagePreviews.filter((_, index) => index !== indexToRemove)
+    );
+  };
+
+  // Yeh function tab chalta hai jab user file select karta hai
+  const handleImageChange = (event) => {
+    const files = Array.from(event.target.files);
+
+    if (files.length > 0) {
+      // Nayi select ki gayi files ko purani files ke saath jod dein
+      setImages((prevImages) => [...prevImages, ...files]);
+
+      // Nayi files ke liye preview URLs banayein
+      const newPreviews = files.map((file) => URL.createObjectURL(file));
+      setImagePreviews((prevPreviews) => [...prevPreviews, ...newPreviews]);
+    }
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -278,16 +357,66 @@ const ReviewModal = ({ isOpen, onClose, item, initialRating }) => {
 
   if (!isOpen || !item) return null;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log({ itemId: item.productId, rating, reviewText });
+    setLoading(true);
+
+    //Get jwt
+    const jwtToken = Cookies.get("jwtToken");
+    if (!jwtToken) navigate("/login");
+
+    //Prepare review data
+    const reviewData = {
+      productId: item.productId,
+      review: reviewText,
+      rating: rating,
+    };
+
+    //Create Form data to send file string and multipart files
+    const formData = new FormData();
+
+    formData.append("reviewData", JSON.stringify(reviewData));
+
+    //Append images if exists
+    if (images.length > 0) {
+      images.forEach((image) => {
+        if (image) {
+          console.log(image);
+          formData.append("images", image);
+        }
+      });
+    }
+
+    //Api call
+    const response = await fetch(
+      `${import.meta.env.VITE_API_URL}/user/set-review`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${jwtToken}`,
+        },
+        body: formData,
+      }
+    );
+
+    if (!response.ok) {
+      setLoading(false);
+      throw new Error("Failed to set review");
+    }
+
     setIsSubmitted(true);
+    //Change rating in UI
+    setRatings(prev => ({...prev, [item.productId] : rating}));
+
     setTimeout(() => onClose(), 2000);
+    setImages([]);
+    setImagePreviews([]);
+    setLoading(false);
   };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-md transform transition-all">
+      <div className="bg-white overflow-scroll max-h-[100vh] rounded-xl shadow-2xl w-full max-w-md transform transition-all">
         <div className="p-6 relative">
           <button
             onClick={onClose}
@@ -302,7 +431,7 @@ const ReviewModal = ({ isOpen, onClose, item, initialRating }) => {
                 Thank You!
               </h2>
               <p className="text-gray-600">
-                Your review for "{item.name}" has been submitted.
+                Your review for "{item.productName}" has been submitted.
               </p>
             </div>
           ) : (
@@ -310,7 +439,6 @@ const ReviewModal = ({ isOpen, onClose, item, initialRating }) => {
               <h2 className="text-2xl font-bold text-gray-800 mb-1">
                 Reviewing "{item.productName}"
               </h2>
-              <p className="text-sm text-gray-500 mb-4">{item.description}</p>
               <form onSubmit={handleSubmit}>
                 <div className="mb-6">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -347,16 +475,59 @@ const ReviewModal = ({ isOpen, onClose, item, initialRating }) => {
                     rows="4"
                     value={reviewText}
                     onChange={(e) => setReviewText(e.target.value)}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                    className="w-full p-3 border border-gray-300 rounded-lg transition"
                     placeholder="Tell us about your experience..."
                   ></textarea>
                 </div>
+
+                {/* Images upload */}
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Upload Images (Optional)
+                  </label>
+                  {/* Image Previews */}
+                  <div className="flex flex-wrap gap-4 mb-4">
+                    {imagePreviews.map((previewUrl, index) => (
+                      <div key={index} className="relative w-24 h-24">
+                        <img
+                          src={previewUrl}
+                          alt={`Review preview ${index + 1}`}
+                          className="w-full h-full object-cover rounded-lg"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeImage(index)}
+                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold"
+                        >
+                          &times;
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Custom Upload Button */}
+                  <label
+                    htmlFor="image-upload"
+                    className="cursor-pointer flex  w-fit gap-2 bg-white text-gray-700 border border-gray-300 items-center font-semibold py-2 px-4 rounded-lg hover:bg-gray-50 transition"
+                  >
+                    Select Images <ImagePlus size={20} />
+                  </label>
+                  <input
+                    id="image-upload"
+                    type="file"
+                    multiple // Ek se zyada image select karne ke liye
+                    accept="image/*" // Sirf image files allow karein
+                    className="hidden" // Asli input ko chhipa dein
+                    onChange={handleImageChange}
+                  />
+                </div>
+
                 <button
                   type="submit"
                   className="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400"
                   disabled={rating === 0 || reviewText.length < 10}
                 >
-                  Submit Review
+                  {loading ? <Loader2 className="animate-spin inline-flex" /> : "Submit Review"}
                 </button>
               </form>
             </>
@@ -377,6 +548,7 @@ const OrderPage = () => {
   const helpRef = useRef(null);
   const { orderId } = useParams();
   const navigate = useNavigate();
+  const [ratings, setRatings] = useState({});
 
   const handleOpenReviewModal = (item, rating) => {
     setItemToReview(item);
@@ -404,7 +576,9 @@ const OrderPage = () => {
     const jwtToken = Cookies.get("jwtToken");
     if (jwtToken) {
       try {
-        const fullUri = `${import.meta.env.VITE_API_URL}/user/get-order?id=${orderId}`;
+        const fullUri = `${
+          import.meta.env.VITE_API_URL
+        }/user/get-order?id=${orderId}`;
         const response = await fetch(fullUri, {
           method: "GET",
           headers: {
@@ -418,11 +592,43 @@ const OrderPage = () => {
 
         const result = await response.json();
         setOrder(result);
+        //Call method to fetch related rating for that items if order status is DELIVERED
+        if (result?.orderStatus == "DELIVERED") {
+          fetchRatings(result);
+        }
       } catch (error) {
         console.log("Failed to fetched order details : ", error);
       }
     }
   }, [orderId]);
+
+  const fetchRatings = async (result) => {
+    const jwtToken = Cookies.get("jwtToken");
+    if (!jwtToken) {
+      navigate("/login");
+    }
+
+    const productIds = await result?.items?.map((item) => item.productId);
+    //API call to get ratings
+    const response = await fetch(
+      `${import.meta.env.VITE_API_URL}/user/get-ratings`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${jwtToken}`,
+        },
+        body: JSON.stringify(productIds),
+      }
+    );
+
+    if (!response.ok) {
+      console.log(productIds);
+      throw new Error("Failed to fetch ratings");
+    }
+
+    setRatings(await response.json());
+  };
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -455,7 +661,7 @@ const OrderPage = () => {
 
   useEffect(() => {
     console.log(order);
-  },[order]);
+  }, [order]);
 
   const helpOptions = [
     { label: "Request Refund", action: handleRequestRefund },
@@ -468,160 +674,171 @@ const OrderPage = () => {
 
   return (
     <div className="bg-gray-50 min-h-screen font-sans p-4 sm:p-6 lg:p-8">
-      {order === null ? <>Empty  cart</> : 
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-8">
-          <button
-            href="#"
-            onClick={() => navigate("/my-orders")}
-            className="inline-flex items-center gap-2 text-sm font-medium text-gray-600 bg-white py-2 px-4 rounded-lg border border-gray-200 shadow-sm hover:bg-gray-50 transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to My Orders
-          </button>
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-4">
-            <h1 className="text-3xl font-extrabold text-gray-900">
-              Order #{order.orderId}
-            </h1>
-            <div className="flex items-center space-x-4 mt-2 sm:mt-0">
-              <span className="text-sm text-gray-500">
-                Placed on {order.orderedAt}
-              </span>
-              <span
-                className={`px-3 py-1 text-xs font-bold rounded-full ${giveProperStatusColour(order.orderStatus)}`}
-              >
-                {order.orderStatus === "NONDELIVERED" ? "OUT FOR DELIVERY" : order.orderStatus}
-              </span>
+      {order === null ? (
+        <div className="w-full flex justify-center">
+          <span className="flex gap-2 bg-gray-300 p-2 rounded-lg"><Loader2 className="animate-spin" />{"Loading..."}</span>
+        </div>
+      ) : (
+        <div className="max-w-7xl mx-auto">
+          <div className="mb-8">
+            <button
+              href="#"
+              onClick={() => navigate("/my-orders")}
+              className="inline-flex items-center gap-2 text-sm font-medium text-gray-600 bg-white py-2 px-4 rounded-lg border border-gray-200 shadow-sm hover:bg-gray-50 transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back to My Orders
+            </button>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-4">
+              <h1 className="text-3xl font-extrabold text-gray-900">
+                Order #{order.orderId}
+              </h1>
+              <div className="flex items-center space-x-4 mt-2 sm:mt-0">
+                <span className="text-sm text-gray-500">
+                  Placed on {order.orderedAt}
+                </span>
+                <span
+                  className={`px-3 py-1 text-xs font-bold rounded-full ${giveProperStatusColour(
+                    order.orderStatus
+                  )}`}
+                >
+                  {order.orderStatus === "NONDELIVERED"
+                    ? "OUT FOR DELIVERY"
+                    : order.orderStatus}
+                </span>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-6">
-            {order.items.map((item) => (
-              <OrderItem
-                key={item.productId}
-                item={item}
-                onWriteReview={handleOpenReviewModal}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2 space-y-6">
+              {order.items.map((item) => (
+                <OrderItem
+                  key={item.productId}
+                  item={item}
+                  onWriteReview={handleOpenReviewModal}
+                  orderStatus={order.orderStatus}
+                  ratings={ratings}
+                />
+              ))}
+              <OrderTracker
+                tracking={order.tracking}
+                status={order.orderStatus}
               />
-            ))}
-            <OrderTracker
-              tracking={order.tracking}
-              status={order.orderStatus}
-            />
-          </div>
+            </div>
 
-          <div className="lg:col-span-1 space-y-8">
-            <div className="p-6 bg-white rounded-xl shadow-sm">
-              <h2 className="text-xl font-bold text-gray-800 mb-4">
-                Order Summary
-              </h2>
-              <div className="space-y-3 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Subtotal</span>
-                  <span className="font-medium text-gray-800">
-                    ₹
-                    {(
-                      order.summary.total -
-                      order.summary.tax -
-                      order.summary.shipping
-                    ).toFixed(2)}
-                  </span>
+            <div className="lg:col-span-1 space-y-8">
+              <div className="p-6 bg-white rounded-xl shadow-sm">
+                <h2 className="text-xl font-bold text-gray-800 mb-4">
+                  Order Summary
+                </h2>
+                <div className="space-y-3 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Subtotal</span>
+                    <span className="font-medium text-gray-800">
+                      ₹
+                      {(
+                        order.summary.total -
+                        order.summary.tax -
+                        order.summary.shipping
+                      ).toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Shipping</span>
+                    <span className="font-medium text-gray-800">
+                      ₹{order.summary.shipping.toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Tax</span>
+                    <span className="font-medium text-gray-800">
+                      ₹{order.summary.tax.toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="border-t border-gray-200 my-3"></div>
+                  <div className="flex justify-between text-base">
+                    <span className="font-bold text-gray-900">Total</span>
+                    <span className="font-bold text-gray-900">
+                      ₹{order.summary.total.toFixed(2)}
+                    </span>
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Shipping</span>
-                  <span className="font-medium text-gray-800">
-                    ₹{order.summary.shipping.toFixed(2)}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Tax</span>
-                  <span className="font-medium text-gray-800">
-                    ₹{order.summary.tax.toFixed(2)}
-                  </span>
-                </div>
-                <div className="border-t border-gray-200 my-3"></div>
-                <div className="flex justify-between text-base">
-                  <span className="font-bold text-gray-900">Total</span>
-                  <span className="font-bold text-gray-900">
-                    ₹{order.summary.total.toFixed(2)}
-                  </span>
+              </div>
+              <div className="p-6 bg-white rounded-xl shadow-sm">
+                <h2 className="text-xl font-bold text-gray-800 mb-4">
+                  Shipping Details
+                </h2>
+                <div className="text-sm text-gray-600 space-y-1">
+                  <p className="font-semibold text-gray-800">
+                    {order.shippingAddress.name}
+                  </p>
+                  <p>{order.shippingAddress.address}</p>
+                  <p>{order.shippingAddress.city}</p>
                 </div>
               </div>
             </div>
-            <div className="p-6 bg-white rounded-xl shadow-sm">
-              <h2 className="text-xl font-bold text-gray-800 mb-4">
-                Shipping Details
-              </h2>
-              <div className="text-sm text-gray-600 space-y-1">
-                <p className="font-semibold text-gray-800">
-                  {order.shippingAddress.name}
-                </p>
-                <p>{order.shippingAddress.address}</p>
-                <p>{order.shippingAddress.city}</p>
-              </div>
-            </div>
           </div>
-        </div>
 
-        <div
-          ref={helpRef}
-          className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 z-40 flex flex-col items-center"
-        >
-          <div className="flex flex-col items-center space-y-2 mb-2">
-            {helpOptions.map((option, index) => (
-              <button
-                key={option.label}
-                onClick={option.action}
-                className={`bg-white text-gray-700 font-medium px-4 py-2 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 ease-in-out transform ${
-                  isHelpOpen
-                    ? "opacity-100 translate-y-0"
-                    : "opacity-0 translate-y-4 pointer-events-none"
-                }`}
-                style={{
-                  transitionDelay: isHelpOpen ? `${index * 50}ms` : "0ms",
-                }}
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
-          <button
-            onClick={() => setHelpOpen(!isHelpOpen)}
-            className="bg-blue-600 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg hover:bg-blue-700 transition-all transform hover:scale-105"
-            aria-label="Help"
+          <div
+            ref={helpRef}
+            className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 z-40 flex flex-col items-center"
           >
-            <div className="relative w-7 h-7 flex items-center justify-center">
-              <div
-                className={`transition-all duration-300 ease-in-out absolute ${
-                  isHelpOpen
-                    ? "opacity-0 rotate-45 scale-50"
-                    : "opacity-100 rotate-0 scale-100"
-                }`}
-              >
-                <HelpCircle className="w-7 h-7" />
-              </div>
-              <div
-                className={`transition-all duration-300 ease-in-out absolute ${
-                  isHelpOpen
-                    ? "opacity-100 rotate-0 scale-100"
-                    : "opacity-0 -rotate-45 scale-50"
-                }`}
-              >
-                <X className="w-7 h-7" />
-              </div>
+            <div className="flex flex-col items-center space-y-2 mb-2">
+              {helpOptions.map((option, index) => (
+                <button
+                  key={option.label}
+                  onClick={option.action}
+                  className={`bg-white text-gray-700 font-medium px-4 py-2 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 ease-in-out transform ${
+                    isHelpOpen
+                      ? "opacity-100 translate-y-0"
+                      : "opacity-0 translate-y-4 pointer-events-none"
+                  }`}
+                  style={{
+                    transitionDelay: isHelpOpen ? `${index * 50}ms` : "0ms",
+                  }}
+                >
+                  {option.label}
+                </button>
+              ))}
             </div>
-          </button>
-        </div>
+            <button
+              onClick={() => setHelpOpen(!isHelpOpen)}
+              className="bg-blue-600 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg hover:bg-blue-700 transition-all transform hover:scale-105"
+              aria-label="Help"
+            >
+              <div className="relative w-7 h-7 flex items-center justify-center">
+                <div
+                  className={`transition-all duration-300 ease-in-out absolute ${
+                    isHelpOpen
+                      ? "opacity-0 rotate-45 scale-50"
+                      : "opacity-100 rotate-0 scale-100"
+                  }`}
+                >
+                  <HelpCircle className="w-7 h-7" />
+                </div>
+                <div
+                  className={`transition-all duration-300 ease-in-out absolute ${
+                    isHelpOpen
+                      ? "opacity-100 rotate-0 scale-100"
+                      : "opacity-0 -rotate-45 scale-50"
+                  }`}
+                >
+                  <X className="w-7 h-7" />
+                </div>
+              </div>
+            </button>
+          </div>
 
-        <ReviewModal
-          isOpen={isReviewModalOpen}
-          onClose={handleCloseReviewModal}
-          item={itemToReview}
-          initialRating={initialRating}
-        />
-      </div>
-}
+          <ReviewModal
+            isOpen={isReviewModalOpen}
+            onClose={handleCloseReviewModal}
+            item={itemToReview}
+            initialRating={initialRating}
+            setRatings={setRatings}
+          />
+        </div>
+      )}
     </div>
   );
 };

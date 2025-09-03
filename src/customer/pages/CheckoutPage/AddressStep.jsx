@@ -203,7 +203,7 @@ const AddressForm = ({ setIsAddNewAddress, savedAddress, loadAddress, setLoadAdd
       const data = await response.json();
       const fetchedAddress = await data.address;
       //Setting values to variables
-      setCity(fetchedAddress.city);
+      setCity(fetchedAddress.city || fetchedAddress.county);
       setZip(fetchedAddress.postcode);
       setState(fetchedAddress.state);
       setStreet(fetchedAddress.county);

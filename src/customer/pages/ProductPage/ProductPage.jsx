@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Markdown from "react-markdown";
 import ProductCard from "../../components/Product/ProductCard";
@@ -11,25 +11,9 @@ import {
 } from "../../../features/cart/cartSlice";
 import { ProductPageShimmer } from "../../../shimmers/users/Shimmers";
 import { Loader2 } from "lucide-react";
-
-// --- Icon Components (Self-contained SVGs) ---
-const Star = ({ className, fill = "none", ...props }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill={fill}
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-    {...props}
-  >
-    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-  </svg>
-);
+import ReviewBox from "./ReviewBox";
+import ReviewCard from "./ReviewCard";
+import { StarRating } from "./ReviewReusables";
 
 const ShoppingCart = ({ className }) => (
   <svg
@@ -69,77 +53,20 @@ const Upload = ({ className }) => (
   </svg>
 );
 
-const reviews = [
-  {
-    id: 1,
-    author: "Jane Doe",
-    rating: 5,
-    text: "Absolutely love these headphones! The sound quality is crisp and clear.",
-    date: "2024-07-15",
-  },
-  {
-    id: 2,
-    author: "John Smith",
-    rating: 4,
-    text: "Great value for the price. Comfortable to wear for long periods.",
-    date: "2024-07-10",
-  },
-  {
-    id: 3,
-    author: "Emily Johnson",
-    rating: 5,
-    text: "Best headphones I've ever owned. Highly recommended!",
-    date: "2024-07-05",
-  },
-];
-
-// --- Reusable Components ---
-const StarRating = ({ rating }) => {
-  const fullStars = Math.floor(rating);
-  const halfStar = rating % 1 !== 0;
-  const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
-
-  return (
-    <div className="flex items-center">
-      {[...Array(fullStars)].map((_, i) => (
-        <Star
-          key={`full-${i}`}
-          className="w-5 h-5 text-yellow-400"
-          fill="currentColor"
-        />
-      ))}
-      {halfStar && (
-        <Star
-          key="half"
-          className="w-5 h-5 text-yellow-400"
-          style={{ clipPath: "polygon(0 0, 50% 0, 50% 100%, 0 100%)" }}
-          fill="currentColor"
-        />
-      )}
-      {[...Array(emptyStars)].map((_, i) => (
-        <Star
-          key={`empty-${i}`}
-          className="w-5 h-5 text-gray-300"
-          fill="currentColor"
-        />
-      ))}
-    </div>
-  );
-};
-
 const ProductImageGallery = ({ images }) => {
-  const [mainImage, setMainImage] = useState((images.find(image => image.featured === true)).imageUrl);
-  const fileInputRef = useRef(null);
+  const [mainImage, setMainImage] = useState(
+    images.find((image) => image.featured === true).imageUrl
+  );
+  // const fileInputRef = useRef(null);
 
-
-  const handleImageUpload = (event) => {
-    const file = event.target.files[0];
-    if (file && file.type.startsWith("image/")) {
-      const reader = new FileReader();
-      reader.onload = (e) => setMainImage(e.target.result);
-      reader.readAsDataURL(file);
-    }
-  };
+  // const handleImageUpload = (event) => {
+  //   const file = event.target.files[0];
+  //   if (file && file.type.startsWith("image/")) {
+  //     const reader = new FileReader();
+  //     reader.onload = (e) => setMainImage(e.target.result);
+  //     reader.readAsDataURL(file);
+  //   }
+  // };
 
   return (
     <div className="w-full lg:w-1/2">
@@ -173,7 +100,8 @@ const ProductImageGallery = ({ images }) => {
           />
         ))}
       </div>
-      <div className="mt-4">
+      {/* Future reference for taking image from users */}
+      {/* <div className="mt-4">
         <input
           type="file"
           accept="image/*"
@@ -188,36 +116,16 @@ const ProductImageGallery = ({ images }) => {
           <Upload className="w-5 h-5" />
           <span>Upload Your Image</span>
         </button>
-      </div>
+      </div> */}
     </div>
   );
 };
 
-const ReviewCard = ({ review }) => (
-  <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-    <div className="flex items-start mb-3">
-      <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center mr-4 flex-shrink-0">
-        <span className="text-lg font-bold text-gray-600">
-          {review.author.charAt(0)}
-        </span>
-      </div>
-      <div className="flex-grow">
-        <h4 className="font-semibold text-gray-800">{review.author}</h4>
-        <StarRating rating={review.rating} />
-      </div>
-      <span className="text-sm text-gray-500 ml-4 flex-shrink-0">
-        {review.date}
-      </span>
-    </div>
-    <p className="text-gray-600 leading-relaxed">{review.text}</p>
-  </div>
-);
 
 // --- Main Page Component ---
 export default function ProductPage() {
   //Product id from url
   const { id } = useParams();
-  const [rating, setRating] = useState(0);
   const [product, setProduct] = useState(null);
   const [relatedProducts, setRelatedProducts] = useState(null);
   const [quantity, setQuantity] = useState(0);
@@ -226,6 +134,8 @@ export default function ProductPage() {
   const cart = useSelector((state) => state.cart.items);
   const wishlist = useSelector((state) => state.wishlist.items);
   const [loadBuyNow, setLoadBuyNow] = useState(false);
+  const [reviews, setReviews] = useState([]);
+  const [reviewBoxOpen, setReviewBoxOpen] = useState(false);
 
   // 2. For performance, convert arrays to faster lookup structures
   const cartMap = new Map(
@@ -236,7 +146,6 @@ export default function ProductPage() {
 
   //Function to check that this product exists in cart or not
 
-  
   //Check product in cart and set the quantity
   const checkProductInCart = useCallback(() => {
     if (cart !== null) {
@@ -249,7 +158,7 @@ export default function ProductPage() {
     } else {
       setQuantity(0);
     }
-  },[cart,id]);
+  }, [cart, id]);
 
   //Handle cart operation
   const handleAddItemAtStart = () => {
@@ -284,22 +193,27 @@ export default function ProductPage() {
   const handleBuyNow = async () => {
     setLoadBuyNow(true);
     const jwtToken = Cookies.get("jwtToken");
-    if(!jwtToken)navigate("/login");
-    
-    const item = [{
-      productId: product.id,
-      quantity: 1
-    }];
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/user/update-checkout`,{
-      method:"POST",
-      headers: {
-        "Content-Type" : "application/json",
-        Authorization: `Bearer ${jwtToken}`,
-      },
-      body: JSON.stringify(item),
-    });
+    if (!jwtToken) navigate("/login");
 
-    if(!response.ok) {
+    const item = [
+      {
+        productId: product.id,
+        quantity: 1,
+      },
+    ];
+    const response = await fetch(
+      `${import.meta.env.VITE_API_URL}/user/update-checkout`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${jwtToken}`,
+        },
+        body: JSON.stringify(item),
+      }
+    );
+
+    if (!response.ok) {
       throw new Error("Failed to update checkout");
     }
     setLoadBuyNow(false);
@@ -332,14 +246,12 @@ export default function ProductPage() {
     const result = await response.json();
 
     setProduct(result);
-  },[id]);
-
+  }, [id]);
 
   useEffect(() => {
     fetchProduct();
     checkProductInCart();
   }, [fetchProduct, checkProductInCart]);
- 
 
   //Function to fetch Related Products
   const fetchRelatedProduct = async () => {
@@ -362,6 +274,23 @@ export default function ProductPage() {
     }
     setRelatedProducts(result);
   };
+
+  const fetchReviews = useCallback(async () => {
+    const response = await fetch(
+      `${
+        import.meta.env.VITE_API_URL
+      }/public/get-reviews?productId=${id}&page=0&size=3&sort=rating,desc`
+    );
+    if (!response.ok) {
+      throw new Error("Failed to fetch reviews");
+    }
+    const data = await response.json();
+    setReviews(data.content);
+  }, [id]);
+
+  useEffect(() => {
+    fetchReviews();
+  }, [fetchReviews]);
 
   return (
     <div className="bg-gray-50 font-sans">
@@ -424,9 +353,12 @@ export default function ProductPage() {
                 <button
                   onClick={handleBuyNow}
                   className="w-full px-6 py-3 bg-gray-800 text-white font-semibold rounded-lg shadow-md hover:bg-gray-900 transition-transform transform hover:scale-105"
-                >{loadBuyNow ? <Loader2 className="animate-spin inline-flex"/> :
-                  "Buy Now"
-                }
+                >
+                  {loadBuyNow ? (
+                    <Loader2 className="animate-spin inline-flex" />
+                  ) : (
+                    "Buy Now"
+                  )}
                 </button>
               </div>
               {/* Description */}
@@ -447,64 +379,22 @@ export default function ProductPage() {
               <></>
             ) : (
               <div>
-                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 sm:mb-8 border-b pb-4">
-                  Customer Reviews
-                </h2>
+                <span className="flex justify-between items-end pe-4 sm:mb-8 mb-6 border-b pb-4">
+                  <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 ">
+                    Customer Reviews
+                  </h1>
+                  <button onClick={() => setReviewBoxOpen(true)} className="text-pink-600 font-semibold px-2 py-1 hover:bg-pink-400/20 rounded-lg">
+                    View All
+                  </button>
+                </span>
 
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mb-8">
                   {reviews.map((review) => (
-                    <ReviewCard key={review.id} review={review} />
+                    <ReviewCard key={review.reviewId} review={review} />
                   ))}
                 </div>
               </div>
             )}
-            <div className="bg-white p-6 sm:p-8 rounded-lg shadow-sm border border-gray-100">
-              <h3 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-4">
-                Write a review
-              </h3>
-              <form>
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Your Rating
-                  </label>
-                  <div className="flex">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`w-7 h-7 cursor-pointer transition-colors ${
-                          i < rating
-                            ? "text-yellow-400"
-                            : "text-gray-300 hover:text-yellow-300"
-                        }`}
-                        onClick={() => setRating(i + 1)}
-                        fill="currentColor"
-                      />
-                    ))}
-                  </div>
-                </div>
-                <div className="mb-4">
-                  <label
-                    htmlFor="review"
-                    className="block text-sm font-medium text-gray-700 mb-2"
-                  >
-                    Your Review
-                  </label>
-                  <textarea
-                    id="review"
-                    name="review"
-                    rows="4"
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500"
-                    placeholder="Share your thoughts..."
-                  ></textarea>
-                </div>
-                <button
-                  type="submit"
-                  className="px-6 py-3 bg-pink-600 text-white font-semibold rounded-lg hover:bg-pink-700 transition-colors"
-                >
-                  Submit Review
-                </button>
-              </form>
-            </div>
           </section>
           {relatedProducts == null ? (
             <></>
@@ -527,6 +417,10 @@ export default function ProductPage() {
           )}
         </div>
       )}
+      {
+        reviewBoxOpen &&
+        <ReviewBox productId={id} setReviewBoxOpen={setReviewBoxOpen} />
+      }
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import { formatDistanceToNow } from 'date-fns';
 import { useEffect, useState } from 'react';
 
-const TimeAgo = ({isoDateString}) => {
+const TimeAgo = ({isoDateString, size}) => {
 
     const calculateTimeAgo = () => {
         if(isoDateString) {
@@ -27,7 +27,7 @@ const TimeAgo = ({isoDateString}) => {
 },[isoDateString]);
 
   return (
-    <span className='text-gray-400/70 text-sm'>{timeAgo}</span>
+    <span className={`text-gray-400/70 text-${size ? "[11]" : "sm" }`}>{size ? timeAgo.replace("about", "") : timeAgo}</span>
   )
 }
 

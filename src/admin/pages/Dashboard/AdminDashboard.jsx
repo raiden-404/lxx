@@ -10,7 +10,7 @@
 import { PieChart, LineChart, BarChart } from "@mui/x-charts";
 import { ThemeProvider, createTheme, useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
 // --- Leaflet libraries for the dynamic map ---
@@ -18,13 +18,16 @@ import { MapContainer, TileLayer, GeoJSON, Circle } from "react-leaflet";
 import "leaflet/dist/leaflet.css"; // Leaflet ki default styling
 import { scaleLinear } from "d3-scale";
 import {
-  Box,
-  CircleAlert,
   CircleDot,
+  Loader,
+  Loader2,
   ShoppingBag,
   Star,
   User,
 } from "lucide-react";
+import TimeAgo from "../../components/Notification/TimeAgo";
+import { Client } from "@stomp/stompjs";
+import SockJS from "sockjs-client";
 
 // Dark theme ki definition
 const darkTheme = createTheme({
@@ -161,6 +164,121 @@ const AdminDashboard = () => {
   const [revenue, setRevenue] = useState(null);
   const [orders, setOrders] = useState([0, 0, 0]);
   const [allState, setAllStates] = useState([]);
+  
+  //Reviews
+  const [reviews, setReviews] = useState([]);
+  const [reviewPage, setReviewPage] = useState(0);
+  const [hasMoreReviews, setHasMoreReviews] = useState(true);
+  const scrollContainerRef = useRef(null);
+
+  //Scroll event listener
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+
+    //This fn run when user scroll
+    const handleScroll = () => {
+      if(container && container.scrollTop == 0 && hasMoreReviews && !loading) {
+        setReviewPage((prev) => prev+1);
+      }
+    };
+
+    if(container) {
+      container.addEventListener("scroll", handleScroll);
+    }
+
+    //Cleanup function, component hate to listener v hta de
+    return () => {
+      if(container) {
+        container.removeEventListener("scroll", handleScroll);
+      }
+    };
+  },[setReviewPage, hasMoreReviews, loading]);
+
+  //Fetch reviews based on page
+  const fetchReviews = useCallback(async () => {
+    if(!hasMoreReviews) {
+      return;
+    }
+
+    const jwtToken = Cookies.get("jwtToken");
+    if(!jwtToken) {
+      navigate('/login');
+    }
+    
+    //Make api call
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/admin/get-reviews-admin?page=${reviewPage}&size=15&sort=createdAt,desc`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${jwtToken}`,
+      },
+    });
+
+    if(!response.ok) {
+      throw new Error("Failed loading reviews");
+    }
+
+    const data = await response.json();
+    setReviews(prev => [...prev, ...data.content]);
+    setHasMoreReviews(!data.last);
+  },[reviewPage, navigate]);
+
+  useEffect(() => {
+    fetchReviews();
+  },[fetchReviews]);
+
+
+  //Send Handshake request and subcribe to review channel
+  useEffect(() => {
+    const jwtToken = Cookies.get("jwtToken");
+    if(!jwtToken) {
+      navigate('/login');
+    }
+
+    //Stomp client ka instance bnaye
+    const client = new Client({
+      //SockJS use krke connection bnaye
+      webSocketFactory: () => SockJS(`${import.meta.env.VITE_API_URL}/ws`),
+
+      //JWT Token ko header ke connect kre
+      connectHeaders: {
+        Authorization: `Bearer ${jwtToken}`,
+      },
+
+      //Connection success hone pe
+      onConnect: () => {
+        console.log("Success connect from review");
+
+        //reviews ko subscribe krle
+        client.subscribe("/topic/reviews", (message) => {
+          const receiveReview = JSON.parse(message.body);
+
+          console.log("new Notification received: ", receiveReview);
+          setReviews((prev) => [receiveReview, ...prev]);
+        });
+      },
+
+      //Jab connection fail hoja
+      onStompError: (frame) => {
+        console.log("Failed to connect", frame.headers["message"]);
+      },
+    });
+
+    //client ko activate krle
+    client.activate();
+
+    //Cleanup function - component unmount hone pe connection band krde - to prevent memory leak
+    return () => {
+      if(client) {
+        client.deactivate();
+        console.log("Disconnectd");
+      }
+    };
+  },[navigate]);
+
+
+  useEffect(() => {
+    console.log("REviews : ", reviews)
+  })
 
   // API calls ke liye ek behtar, reusable function
   const fetchApiData = useCallback(
@@ -242,6 +360,8 @@ const AdminDashboard = () => {
         <div className="flex flex-col gap-12">
           {/* Section 1: Badi screen par flex-row, mobile par flex-col */}
           <div className="flex w-full flex-col gap-6 lg:flex-row">
+
+            {/* Review Container */}
             <div className="h-96 py-4 px-2 xs:px-4 w-full rounded-3xl relative border border-gray-700 lg:w-2/3">
               <h1 className=" absolute right-8 -top-4 text-lg font-semibold px-2 bg-black">
                 Rating & Reviews
@@ -250,31 +370,32 @@ const AdminDashboard = () => {
                 LIVE
                 <CircleDot size={14} fill="red" stroke="red" />
               </span>
+
               {/* Live reviews */}
-              <div className=" h-full flex flex-col-reverse overflow-y-scroll gap-3 rounded-lg w-full">
+              <div ref={scrollContainerRef} className=" h-full flex flex-col-reverse overflow-y-scroll gap-3 rounded-lg w-full">
                 {/* List for map*/}
-                {[1, 2, 3, 4, 5, 6, 78, 8].map(() => (
-                  <div className="h-[18%] py-1 items-center sm:px-2 px-1 border rounded-lg border-gray-400/40 flex">
+                { reviews.length > 0 && reviews.map((review) => (
+                  <div key={review.reviewId} className="h-[18%] py-1 items-center sm:px-2 px-1 border rounded-lg border-gray-400/40 flex">
                     {/* Image, name and time container */}
                     <div className="flex flex-row min-w-fit h-full items-center ">
                     {/* Image */}
                     <img
                       className="sm:h-[90%] h-[55%] rounded-full aspect-square"
-                      src="https://imgs.search.brave.com/O0Ivivs2MuYw9uwjjD_dXLAPLtA3gbOhSWYbSHdGo5A/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly93YWxs/cGFwZXJzLmNvbS9p/bWFnZXMvaGQvYWVz/dGhldGljLWFuaW1l/LXByb2ZpbGUtcGlj/dHVyZXMtYmhkOXAw/bW45bWFidWZjbS5q/cGc"
-                      alt=""
+                      src={review.profilePicture}
+                      alt={review.userName}
                     />
-                    <div className="h-full sm:ps-3 ps-1 flex flex-col justify-center text-nowrap sm:px-2">
+                    <div className="h-full sm:ps-3 ps-2 flex flex-col justify-center text-nowrap sm:px-2">
                       <span className="flex max-w-[10ch] sm:max-w-[16ch] truncate gap-1 text-[11px] sm:text-[12px] text-gray-500 font-semibold">
                         <User size={14} stroke="gray" className="hidden sm:block" />
-                        {"User Default"}
+                        {review.userName}
                       </span>
                       <span className="text-gray-500 max-w-[10ch] sm:max-w-[16ch] text-[11px] sm:text-[12px] font-semibold">
-                        {"2 Mint ago"}
+                        <TimeAgo isoDateString={review.createdAt} size={8} />
                       </span>
                       <span
-                          className={`flex sm:hidden bg-green-600 h-fit w-fit px-1 text-[12px] gap-1 items-center rounded-lg font-semibold`}
+                          className={`flex sm:hidden ${review.rating > 3 ? "bg-green-600" : "bg-red-600"} h-fit w-fit px-1 text-[12px] gap-1 items-center rounded-sm font-semibold`}
                         >
-                          {4} <Star size={10} fill="white" />
+                          {review.rating} <Star size={10} fill="white" />
                         </span>
                     </div>
                     </div>
@@ -282,23 +403,24 @@ const AdminDashboard = () => {
                     <div className="sm:ps-4 ps-2 flex flex-col">
                       <span className="flex items-center gap-2 hover:underline font-semibold sm:text-sm text-[12px] text-gray-200">
                         <ShoppingBag size={12} />{" "}<span className="line-clamp-1">
-                        {"Iphone 12 pro max black color"}</span>
+                        {review.productName}</span>
                       </span>
                       <span className="flex gap-2 ">
                         <span
-                          className={`hidden sm:flex bg-green-600 h-fit  px-1 text-[12px] gap-1 items-center rounded-lg font-semibold`}
+                          className={`hidden sm:flex ${review.rating > 3 ? "bg-green-600" : "bg-red-600"} h-fit  px-1 text-[12px] gap-1 items-center rounded-lg font-semibold`}
                         >
-                          {4} <Star size={10} fill="white" />
+                          {review.rating} <Star size={10} fill="white" />
                         </span>{" "}
                         <p className="text-gray-400 sm:text-[12px] text-[11px] font-semibold line-clamp-2">
-                          {
-                            "Wow this product is good and creative. Better paper quality but little issue with glitering. image colour is also much accurate. Overall i love this product too much.Better paper quality but little issue with glitering. image colour is also much accurate. Overall i love this product too much.Better paper quality but little issue with glitering. image colour is also much accurate. Overall i love this product too much."
-                          }
+                          {review.comment}
                         </p>
                       </span>
                     </div>
                   </div>
                 ))}
+                {
+                  <span className="h-24 w-full flex justify-center">{!hasMoreReviews ? "That's all" : <span className="flex gap-2 items-center w-full justify-center"><Loader2 className="animate-spin" />Loading</span> }</span>
+                }
               </div>
             </div>
             <div className="grid w-full grid-rows-2 gap-5 lg:w-1/3">

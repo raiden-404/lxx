@@ -69,8 +69,12 @@ const ShoppingCart = ({ className }) => (
 // --- Reusable Components ---
 const CartItem = ({ item, onItemAdd, onItemRemove, onItemDelete }) => {
   return (
-    <div className="flex items-center justify-between py-6 border-b border-gray-200">
+    // MAIN CONTAINER: Mobile par stack hoga (flex-col), desktop par row (sm:flex-row)
+    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 py-6 border-b border-gray-200">
+      
+      {/* LEFT SIDE: Image aur Product ki jaankari */}
       <div className="flex items-center gap-4">
+        {/* Image */}
         <div className="w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0 bg-gray-100 rounded-md">
           <img
             src={item.productImage}
@@ -78,42 +82,59 @@ const CartItem = ({ item, onItemAdd, onItemRemove, onItemDelete }) => {
             className="w-full h-full object-cover rounded-md"
           />
         </div>
+        
+        {/* Product ka text */}
         <div>
-          <h3 className="font-semibold text-gray-800 text-base sm:text-lg">
+          <h3 className="font-semibold text-gray-800 text-base sm:text-lg line-clamp-2">
             {item.productName}
           </h3>
           <p className="text-sm text-gray-500">Brand: Lx Brand</p>
-          <p className="sm:hidden text-lg font-bold text-gray-900 mt-1">
+          
+          {/* Price, sirf mobile par dikhega */}
+          <p className="sm:hidden text-lg font-bold text-gray-900 mt-2">
             ₹{item.productSellPrice.toFixed(2)}
           </p>
         </div>
       </div>
-      <div className="flex items-center gap-4 sm:gap-6">
+
+      {/* RIGHT SIDE: Price (desktop), Quantity controls, aur Delete button */}
+      {/* Mobile par, yeh group dayein (right) kone mein align ho jayega */}
+      <div className="flex items-center gap-4 sm:gap-6 self-end sm:self-center">
+        
+        {/* Price, sirf desktop par dikhega */}
         <div className="hidden sm:block text-lg font-bold text-gray-900">
           ₹{item.productMrp.toFixed(2)}
         </div>
+        
+        {/* Quantity buttons */}
         <div className="flex items-center border border-gray-300 rounded-lg">
           <button
             onClick={() => onItemRemove(item.productId, 1)}
-            className="px-3 py-1 text-gray-600 hover:bg-gray-100 rounded-l-lg"
+            className="px-3 py-1 text-gray-600 hover:bg-gray-100 rounded-l-lg font-semibold"
           >
             -
           </button>
-          <span className="px-4 py-1 font-semibold text-sm">
+          <span className="px-4 py-1 font-semibold text-sm w-12 text-center">
             {item.quantity}
           </span>
           <button
             onClick={() => onItemAdd(item.productId, 1)}
-            className="px-3 py-1 text-gray-600 hover:bg-gray-100 rounded-r-lg"
+            className="px-3 py-1 text-gray-600 hover:bg-gray-100 rounded-r-lg font-semibold"
           >
             +
           </button>
         </div>
+        
+        {/* Delete button */}
         <button
           onClick={() => onItemDelete(item.productId)}
           className="text-gray-500 hover:text-red-600 transition-colors"
         >
-          <Trash2 className="w-5 h-5" />
+          {/* Maine yahan ek SVG icon use kiya hai, aap apne 'Trash2' component se badal sakte hain */}
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 6h18" />
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+          </svg>
         </button>
       </div>
     </div>
