@@ -1,5 +1,5 @@
-import { Circle, Loader, Loader2, LoaderPinwheel, Lock } from "lucide-react";
-import React, { useState } from "react";
+import {  Loader2, Lock } from "lucide-react";
+import { useState } from "react";
 
 // SVG Icon Component for UPI
 const UpiIcon = () => (

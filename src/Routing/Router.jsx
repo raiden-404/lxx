@@ -58,10 +58,6 @@ const Router = createBrowserRouter([
         element: <LoginPage />,
       },
       {
-        path: "/login-success",
-        element: <CartPage />,
-      },
-      {
         path: "/verify/redirect",
         element: <Jwt />,
       },

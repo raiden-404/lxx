@@ -1,5 +1,3 @@
-import React from "react";
-
 const HomeCard = ({ cardData }) => {
   const { title, description, image } = cardData;
 

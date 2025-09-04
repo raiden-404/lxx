@@ -32,7 +32,6 @@ import {
   LogIn,
   LogOut,
   Package,
-  UserRoundPen,
 } from "lucide-react";
 
 // Options after navigation
@@ -218,7 +217,13 @@ const Navbar = () => {
             <div className="space-y-6 border-t border-gray-200 px-4 py-6">
               {/* Profile */}
               {user === null ? (
-                <div onClick={() => {setMobileMenuOpen(false);navigate('/login')}} className="flex items-center gap-2">
+                <div
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    navigate("/login");
+                  }}
+                  className="flex items-center gap-2"
+                >
                   <LogIn size={18} />
                   <a
                     href="#"
@@ -229,12 +234,22 @@ const Navbar = () => {
                 </div>
               ) : (
                 <div className="flex gap-2 items-center">
-                  <img className="h-8 aspect-square rounded-full" src={user.picture} alt={user.fullName} />
+                  <img
+                    className="h-8 aspect-square rounded-full"
+                    src={user.picture}
+                    alt={user.fullName}
+                  />
                   <h1 className="text-md font-semibold">{user.fullName}</h1>
                 </div>
               )}
               {/* Wishlist */}
-              <div onClick={() => {setMobileMenuOpen(false);navigate("/wishlist")}} className="flex items-center gap-2">
+              <div
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  navigate("/wishlist");
+                }}
+                className="flex items-center gap-2"
+              >
                 <Heart size={18} color="red" />
                 <a
                   href="#"
@@ -245,7 +260,13 @@ const Navbar = () => {
                 <p className="font-semibold">({wishlist.length || 0})</p>
               </div>
               {/* My orders */}
-              <div onClick={() => {setMobileMenuOpen(false); navigate('/my-orders')}} className="flex items-center gap-2">
+              <div
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  navigate("/my-orders");
+                }}
+                className="flex items-center gap-2"
+              >
                 <Package size={18} />
                 <a
                   href="#"
@@ -255,29 +276,23 @@ const Navbar = () => {
                 </a>
               </div>
               {/* Logout */}
-              <div onClick={() => {setMobileMenuOpen(false); navigate('/logout')}} className="flex items-center gap-2">
-                <LogOut size={18} />
-                <a
-                  href="#"
-                  className="-m-2 block p-2 font-medium text-gray-900"
+              {user && (
+                <div
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    navigate("/logout");
+                  }}
+                  className="flex items-center gap-2"
                 >
-                  Logout
-                </a>
-              </div>
-            </div>
-
-            <div className="border-t border-gray-200 px-4 py-6">
-              <Link to={"/admin"} className="-m-2 flex items-center p-2">
-                <img
-                  alt=""
-                  src="https://static-assets-web.flixcart.com/batman-returns/batman-returns/p/images/Store-9eeae2.svg"
-                  className="block h-auto w-5 shrink-0"
-                />
-                <span className="ml-3 block text-base font-medium text-gray-900">
-                  Become a Seller
-                </span>
-                <span className="sr-only">, change currency</span>
-              </Link>
+                  <LogOut size={18} />
+                  <a
+                    href="#"
+                    className="-m-2 block p-2 font-medium text-gray-900"
+                  >
+                    Logout
+                  </a>
+                </div>
+              )}
             </div>
           </DialogPanel>
         </div>
@@ -447,10 +462,10 @@ const Navbar = () => {
                       <Link to="/login">Login</Link>
                     ) : (
                       <div
-                        onMouseEnter={() => setProfileList(true)}
-                        onMouseLeave={() => setProfileList(false)}
+                      className="cursor-pointer"
+                        onClick={() => setProfileList(!profileList)}
                       >
-                        <div className="flex relative max-w-64 items-center rounded-3xl p-1 gap-2 hover:border-2 border-2 border-white hover:border-gray-300 hover:bg-gray-100">
+                        <div className="flex relative max-w-64 items-center rounded-xl p-1 gap-2 ">
                           <div className="overflow-hidden h-7 w-7 rounded-full">
                             <img
                               src={user.picture}
@@ -465,7 +480,7 @@ const Navbar = () => {
                         {profileList && (
                           <div
                             id="profile-list"
-                            className="border-2 border-gray-300 top-10 absolute overflow-hidden max-w-64 bg-white rounded-2xl w-[95%]"
+                            className=" top-10 absolute overflow-hidden max-w-64 bg-white rounded-xl w-[95%]"
                           >
                             <ul className="flex flex-col justify-center">
                               <Link to="/my-orders">
@@ -494,25 +509,9 @@ const Navbar = () => {
                   </div>
                   <span className="h-6 w-px bg-gray-200" />
                 </div>
-                {/* Seller Option */}
-                <div className="hidden lg:ml-8 lg:flex">
-                  <Link
-                    to="/admin"
-                    onClick={() => setShowSearch(false)}
-                    className="flex items-center text-gray-700 hover:text-gray-800"
-                  >
-                    <img
-                      alt=""
-                      src="https://static-assets-web.flixcart.com/batman-returns/batman-returns/p/images/Store-9eeae2.svg"
-                      className="block h-auto w-5 shrink-0"
-                    />
-                    <span className="ml-3 block text-sm font-medium">
-                      Become a Seller
-                    </span>
-                  </Link>
-                </div>
+                
                 {/* Search option */}
-                <div className="flex lg:ml-6">
+                <div className="flex cursor-pointer lg:ml-6">
                   <a
                     onClick={() => setShowSearch(!showSearch)}
                     className="p-2 text-gray-400 hover:text-gray-500"

@@ -1,5 +1,4 @@
 import CarouselHome from "../../components/carousel/CarouselHome";
-import HorizontalProductCarousel from "../../components/carousel/productCarousel/HorizontalProductCarousel";
 import HomeCategoryGrid from "../../components/categories/HomeCategoryGrid";
 import InfinitePaging from "../../components/Paging/InfinitePaging";
 

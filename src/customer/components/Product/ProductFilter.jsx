@@ -1,5 +1,5 @@
 // src/components/ProductFilter.jsx
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 const ProductFilter = ({ setShowFilter }) => {
   const [activeTab, setActiveTab] = useState('brand');

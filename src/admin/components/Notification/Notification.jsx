@@ -51,6 +51,10 @@ const Notification = ({setUnreadCount, notifications, setNotifications, setNotif
 
   },[page,size,navigate,setNotifications]);
 
+  useEffect(() => {
+      console.log("Notifications ",notifications)
+
+  })
 
   //Used to mark specific notification as read and open order page of the notification
   const handleNotificationClick = async (notificationId, orderId, read) => {

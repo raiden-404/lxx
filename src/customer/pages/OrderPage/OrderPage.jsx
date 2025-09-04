@@ -2,12 +2,9 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import Cookies from "js-cookie";
 import { useNavigate, useParams } from "react-router-dom";
 import {
-  CircleCheckBig,
   CircleCheckBigIcon,
-  Image,
   ImagePlus,
   Loader2,
-  Pen,
 } from "lucide-react";
 // For icons, you would typically install lucide-react: npm install lucide-react
 // In this self-contained example, we'll use inline SVGs for key icons.

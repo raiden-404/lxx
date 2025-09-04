@@ -147,7 +147,7 @@ const IndiaLeafletMap = ({ data }) => {
 // Data load hote samay dikhaane ke liye ek chhota component
 const LoadingSpinner = () => (
   <div className="flex h-screen w-full items-center justify-center bg-black text-white">
-    <p>Dashboard ka data load ho raha hai...</p>
+    <span className="flex items-center gap-2"><Loader2 className="animate-spin" /> Loading Admin Dashboard...</span>
   </div>
 );
 
@@ -170,6 +170,10 @@ const AdminDashboard = () => {
   const [reviewPage, setReviewPage] = useState(0);
   const [hasMoreReviews, setHasMoreReviews] = useState(true);
   const scrollContainerRef = useRef(null);
+
+  useEffect(() => {
+    console.log("reviews: ",reviews );
+  })
 
   //Scroll event listener
   useEffect(() => {
@@ -223,8 +227,14 @@ const AdminDashboard = () => {
   },[reviewPage, navigate]);
 
   useEffect(() => {
+    if(reviewPage > 0) {
     fetchReviews();
-  },[fetchReviews]);
+    }
+  },[reviewPage]);
+
+  useEffect(() => {
+    fetchReviews();
+  },[]);
 
 
   //Send Handshake request and subcribe to review channel

@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import ProductFilter from "./ProductFilter";
 import { useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { BaggageClaim, Loader2, MonitorOff, ShoppingBag } from "lucide-react";
+import { Loader2, MonitorOff } from "lucide-react";
 
 const ProductList = () => {
   const { search } = useParams();

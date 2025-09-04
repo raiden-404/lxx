@@ -1,4 +1,4 @@
-import { Search, X } from "lucide-react";
+import { Search } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 

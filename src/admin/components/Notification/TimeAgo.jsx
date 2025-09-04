@@ -18,7 +18,7 @@ const TimeAgo = ({isoDateString, size}) => {
         //set interval to recalculate time
         const interval = setInterval(() => {
         setTimeAgo(calculateTimeAgo());
-    }, 30000);
+    }, 20000);
 
     //Cleanup function to prevent memory leak
     return () => {

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import ImagePreview from "./ImagePreview";
-import { Star, StarRating } from "./ReviewReusables";
+import { StarRating } from "./ReviewReusables";
 
 const ReviewCard = ({ review }) => {
   const [imagePrev, setImagePrev] = useState(false);

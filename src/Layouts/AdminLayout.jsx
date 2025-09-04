@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Outlet, Link, useNavigate } from "react-router-dom";
 import Notification from "../admin/components/Notification/Notification";
 import Cookies from "js-cookie";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
-import { preconnect } from "react-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { updateUser } from "../features/user/userSlice";
 
 // --- SVG Icon Components ---
 // Using inline SVGs for icons to avoid external dependencies and ensure they load quickly.
@@ -310,152 +311,175 @@ const Header = ({ setSidebarOpen }) => {
   const navigate = useNavigate();
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
-    const [notifications, setNotifications] = useState([]);
+  const [notifications, setNotifications] = useState([]);
+  const user = useSelector((state) => state.user.items);
 
+  //Stomp client rhega yha, na pta kya hai ye
+  const [stompClient, setStompClient] = useState(null);
 
-    //Stomp client rhega yha, na pta kya hai ye
-      const [stompClient, setStompClient] = useState(null);
-    
-      //Used to get live notifications
-      //Send handshake request and subscribing to notification channel
-      useEffect(() => {
-        const jwtToken = Cookies.get("jwtToken");
-        if (!jwtToken) {
-          navigate("/login");return;
-        }
-    
-        //Stomp client ka instence bnaye
-        const client = new Client({
-          //SockJS ka use karke connection bnaye
-          webSocketFactory: () => new SockJS(`${import.meta.env.VITE_API_URL}/ws`),
-    
-          //JWT Token ko header me connect kare
-          connectHeaders: {
-            Authorization: `Bearer ${jwtToken}`,
-          },
-    
-          //Connection success hone pe
-          onConnect: () => {
-            console.log("Web Socket Connected Successfully!");
-    
-            //Notification ko subscribe krlo
-            client.subscribe("/topic/notifications", (message) => {
-              const receiveNotification = JSON.parse(message.body);
-              console.log("new notification received: ", receiveNotification);
-    
-              //notification array ke suru me add krde
-              setUnreadCount(prevCount => prevCount + 1);
-              setNotifications((prev) => [receiveNotification, ...prev]);
-            });
-          },
-    
-          //Jab connection fail hoja
-          onStompError: (frame) => {
-            console.log("Broker reported error: ", frame.headers["message"]);
-            console.log("Additional details : ", frame.body);
-          },
+  //Used to get live notifications
+  //Send handshake request and subscribing to notification channel
+  useEffect(() => {
+    const jwtToken = Cookies.get("jwtToken");
+    if (!jwtToken) {
+      navigate("/login");
+      return;
+    }
+
+    //Stomp client ka instence bnaye
+    const client = new Client({
+      //SockJS ka use karke connection bnaye
+      webSocketFactory: () => new SockJS(`${import.meta.env.VITE_API_URL}/ws`),
+
+      //JWT Token ko header me connect kare
+      connectHeaders: {
+        Authorization: `Bearer ${jwtToken}`,
+      },
+
+      //Connection success hone pe
+      onConnect: () => {
+        console.log("Web Socket Connected Successfully!");
+
+        //Notification ko subscribe krlo
+        client.subscribe("/topic/notifications", (message) => {
+          const receiveNotification = JSON.parse(message.body);
+          console.log("new notification received: ", receiveNotification);
+
+          //notification array ke suru me add krde
+          setUnreadCount((prevCount) => prevCount + 1);
+          setNotifications((prev) => [receiveNotification, ...prev]);
         });
-    
-        //CLient ko activate karle
-        client.activate();
-     
-        //Client ke instance ko state me save krle
-        setStompClient(client);
-    
-        //Cleanup function - jb commponent unmount hoga tb connection band krde memmory leak se bachne ke liye
-        return () => {
-          if (client) {
-            client.deactivate();
-            console.log("WebSocket Disconnected!");
-          }
-        };
-      }, [navigate]);
-    
+      },
 
+      //Jab connection fail hoja
+      onStompError: (frame) => {
+        console.log("Broker reported error: ", frame.headers["message"]);
+        console.log("Additional details : ", frame.body);
+      },
+    });
+
+    //CLient ko activate karle
+    client.activate();
+
+    //Client ke instance ko state me save krle
+    setStompClient(client);
+
+    //Cleanup function - jb commponent unmount hoga tb connection band krde memmory leak se bachne ke liye
+    return () => {
+      if (client) {
+        client.deactivate();
+        console.log("WebSocket Disconnected!");
+      }
+    };
+  }, [navigate]);
 
   useEffect(() => {
     const fetchUnreadNotificationCount = async () => {
       const jwtToken = Cookies.get("jwtToken");
-      if(!jwtToken) {
+      if (!jwtToken) {
         navigate("/login");
       }
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/admin/get-count-nonread-notifications`,{
-        headers: {
-          Authorization : `Bearer ${jwtToken}`,
-        },
-      });
-      if(!response.ok) {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/admin/get-count-nonread-notifications`,
+        {
+          headers: {
+            Authorization: `Bearer ${jwtToken}`,
+          },
+        }
+      );
+      if (!response.ok) {
         throw new Error("Error fetching unread notifications count");
       }
       setUnreadCount(await response.json());
-    }
+    };
     fetchUnreadNotificationCount();
-  },[navigate]);
-  
+  }, [navigate]);
 
   return (
     <>
-    <div className="h-20 sticky top-0 z-30 bg-black flex-shrink-0 ">
-      <header className="h-full px-4 md:px-10 flex items-center justify-between">
-        <button
-          onClick={() => setSidebarOpen(true)}
-          className="lg:hidden text-gray-400 hover:text-white"
-        >
-          <MenuIcon />
-        </button>
-        <div onClick={() => navigate("/")} className=" p-4 cursor-pointer">Laxmi Customize</div>
-
-        <div className="flex items-center space-x-8">
-          
-          {/* Notification */}
-          <div className="relative">
-            {/* Icon */}
-            <button className="relative text-gray-400 hover:text-white transition-colors duration-200"
-             onClick={() => {setNotificationOpen(!notificationOpen)}}>
-            <BellIcon />
-            <span className="absolute -top-1 -right-1 flex h-4 w-4">
-              {
-                unreadCount <= 0 ? <></> :<> 
-              <span className="animate-ping-slow absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-4 w-4 bg-pink-500 text-white text-xs items-center justify-center">
-                  {unreadCount}
-              </span></>
-              }
-            </span>
+      <div className="h-20 sticky top-0 z-30 bg-black flex-shrink-0 ">
+        <header className="h-full px-4 md:px-10 flex items-center justify-between">
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="lg:hidden text-gray-400 hover:text-white"
+          >
+            <MenuIcon />
           </button>
-          {/* Notification box */}
-          {
-            notificationOpen && 
-            <div className="absolute bg-black p-2 border border-gray-600/80 md:w-96 w-[80vw] h-[70vh] overflow-hidden md:end-[-15px] end-[-45px] rounded-lg top-10">
-            <Notification setUnreadCount={setUnreadCount} notifications={notifications} setNotifications={setNotifications} setNotificationOpen={setNotificationOpen} />
+          <div
+            onClick={() => navigate("/admin")}
+            className=" p-4 font-semibold text-lg cursor-pointer"
+          >
+            Laxmi Customize
           </div>
-          }
-          </div>
-          <div className="relative">
-            <button className="flex items-center space-x-3">
-              <img
-                src="https://placehold.co/40x40/ec4899/ffffff?text=A"
-                alt="Admin"
-                className="h-10 w-10 rounded-full border-2 border-pink-500 object-cover"
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src =
-                    "https://placehold.co/40x40/cccccc/ffffff?text=A";
+
+          <div className="flex items-center space-x-8">
+            {/* Notification */}
+            <div className="relative">
+              {/* Icon */}
+              <button
+                className="relative text-gray-400 hover:text-white transition-colors duration-200"
+                onClick={() => {
+                  setNotificationOpen(!notificationOpen);
                 }}
-              />
-              <div className="hidden md:block text-left">
-                <span className="font-semibold text-gray-200">Admin</span>
-                <p className="text-xs text-gray-400">Super Admin</p>
+              >
+                <BellIcon />
+                <span className="absolute -top-1 -right-1 flex h-4 w-4">
+                  {unreadCount <= 0 ? (
+                    <></>
+                  ) : (
+                    <>
+                      <span className="animate-ping-slow absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-4 w-4 bg-pink-500 text-white text-xs items-center justify-center">
+                        {unreadCount}
+                      </span>
+                    </>
+                  )}
+                </span>
+              </button>
+              {/* Notification box */}
+              {notificationOpen && (
+                <div className="absolute bg-black p-2 border border-gray-600/80 md:w-96 w-[80vw] h-[70vh] overflow-hidden md:end-[-15px] end-[-45px] rounded-lg top-10">
+                  <Notification
+                    setUnreadCount={setUnreadCount}
+                    notifications={notifications}
+                    setNotifications={setNotifications}
+                    setNotificationOpen={setNotificationOpen}
+                  />
+                </div>
+              )}
+            </div>
+            {user && (
+              <div className="relative">
+                <button className="flex items-center space-x-3">
+                  <img
+                    src={user.picture}
+                    alt="Admin"
+                    className="h-10 w-10 rounded-full border-2 border-gray-600 object-cover"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src =
+                        "https://placehold.co/40x40/cccccc/ffffff?text=A";
+                    }}
+                  />
+                  <div className="hidden md:block text-left">
+                    <span className="font-semibold text-gray-200">
+                      {user.fullName}
+                    </span>
+                    <p className="text-xs text-gray-400">Admin</p>
+                  </div>
+                </button>
               </div>
-            </button>
+            )}
           </div>
-        </div>
-      </header>
-      <div className="w-[98%] mx-auto h-[1px] bg-gray-900"></div>
-    </div>
-    {
-      notificationOpen && <div onClick={() => setNotificationOpen(false)} className="bg-slate-900/50 fixed top-0 left-0 h-[100vh] w-[100vw] z-20"></div>
-    }
+        </header>
+        <div className="w-[98%] mx-auto h-[1px] bg-gray-900"></div>
+      </div>
+      {notificationOpen && (
+        <div
+          onClick={() => setNotificationOpen(false)}
+          className="bg-slate-900/50 fixed top-0 left-0 h-[100vh] w-[100vw] z-20"
+        ></div>
+      )}
     </>
   );
 };
@@ -464,6 +488,34 @@ const Header = ({ setSidebarOpen }) => {
 const AdminLayout = () => {
   const [activeItem, setActiveItem] = useState("dashboard");
   const [isSidebarOpen, setSidebarOpen] = useState(false);
+
+  const dispatch = useDispatch();
+
+  //Fetching User Profile Data and store in Redux Store
+  const fetchUser = useCallback(async () => {
+    const jwtToken = Cookies.get("jwtToken");
+    if (jwtToken) {
+      try {
+        const apiUri = `${import.meta.env.VITE_API_URL}/profile/get-user-data`;
+        const response = await fetch(apiUri, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${jwtToken}`,
+          },
+        });
+
+        const result = await response.json();
+        dispatch(updateUser(result));
+      } catch (error) {
+        console.log("Invalid Login - Login Again", error);
+      }
+    }
+  },[dispatch]);
+
+  useEffect(() => {
+    fetchUser();
+  },[fetchUser]);
+
 
   return (
     <>
