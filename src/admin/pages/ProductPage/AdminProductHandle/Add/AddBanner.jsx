@@ -138,7 +138,7 @@ const AddBanner = () => {
 
     try {
       // Replace with your actual API endpoint
-      const response = await fetch('http://localhost:8080/admin/set-banner', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/admin/set-banner`, {
         method: 'POST',
         headers: {
             Authorization: `Bearer ${jwtToken}`,
