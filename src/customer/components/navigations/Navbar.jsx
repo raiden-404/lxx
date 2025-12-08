@@ -319,7 +319,7 @@ const Navbar = () => {
                 <Link to="/" onClick={() => setShowSearch(false)}>
                   <img
                     alt=""
-                    src="https://storage.googleapis.com/lx_images/frontend_statics/image/lx-logo.png"
+                    src="https://res.cloudinary.com/djiseih2h/image/upload/v1765182994/Gemini_Generated_Image_13oei713oei713oe-Photoroom_twcayk.png"
                     className="h-8 w-auto scale-[180%]"
                   />
                 </Link>
