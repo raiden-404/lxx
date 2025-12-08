@@ -315,12 +315,12 @@ const Navbar = () => {
               </button>
 
               {/* Logo */}
-              <div className="ml-4 flex lg:ml-0 lg:mr-4">
+              <div className="ml-5 flex lg:ml-2 lg:mr-6">
                 <Link to="/" onClick={() => setShowSearch(false)}>
                   <img
                     alt=""
                     src="https://res.cloudinary.com/djiseih2h/image/upload/v1765182994/Gemini_Generated_Image_13oei713oei713oe-Photoroom_twcayk.png"
-                    className="h-8 w-auto scale-[180%]"
+                    className="h-8 w-auto md:scale-[100%]"
                   />
                 </Link>
               </div>
