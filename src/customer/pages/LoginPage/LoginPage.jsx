@@ -286,7 +286,7 @@ const LoginPage = () => {
             className="w-full bg-cover aspect-[6:8] bg-center bg-no-repeat"
             style={{
               backgroundImage:
-                "url(https://storage.googleapis.com/lx_images/frontend_statics/image/lx_bck.png)",
+                "url(https://res.cloudinary.com/djiseih2h/image/upload/v1765183990/Gemini_Generated_Image_p9el73p9el73p9el_n9qfjg.png)",
             }}
           ></div>
         </div>
