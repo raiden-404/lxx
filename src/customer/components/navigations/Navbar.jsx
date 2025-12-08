@@ -302,7 +302,7 @@ const Navbar = () => {
       <header className="bg-white relative">
         <nav
           aria-label="Top"
-          className="mx-auto px-2 sm:px-4 lg:px-5"
+          className="mx-auto px-4 sm:px-6 lg:px-6"
         >
           <div>
             <div className="flex h-16 items-center">
@@ -315,7 +315,7 @@ const Navbar = () => {
               </button>
 
               {/* Logo */}
-              <div className="ml-4 flex lg:ml-2">
+              <div className="ml-4 flex lg:ml-6 mr-6">
                 <Link to="/" onClick={() => setShowSearch(false)}>
                   <img
                     alt=""
