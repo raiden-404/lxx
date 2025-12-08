@@ -302,7 +302,7 @@ const Navbar = () => {
       <header className="bg-white relative">
         <nav
           aria-label="Top"
-          className="mx-auto max-w-7xl px-2 sm:px-4 lg:px-5"
+          className="mx-auto px-2 sm:px-4 lg:px-5"
         >
           <div>
             <div className="flex h-16 items-center">
